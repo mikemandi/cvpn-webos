@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#080b12">
+  <meta name="color-scheme" content="dark">
+  <title>CVPN webOS</title>
+  <link rel="icon" href="/cvpn-icon.png?v=rc42">
+  <link rel="stylesheet" href="/style.css?v=rc48">
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <div class="brand" aria-label="CVPN webOS Private Network">
+        <div class="logo-tile"><img src="/cvpn-icon.png?v=rc42" alt="" width="40" height="40"></div>
+        <div class="brand-labels">
+          <div class="brand-row"><span class="brand-main">CVPN</span><span class="brand-device">webOS</span></div>
+          <div class="brand-caption">PRIVATE NETWORK</div>
+        </div>
+      </div>
+      <button id="settings-trigger" class="icon-btn" title="Настройки и диагностика" aria-label="Настройки и диагностика" disabled hidden><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="m19 13 1 1-2 3-1.5-.5a7 7 0 0 1-2 1l-.5 1.5h-4L9.5 17a7 7 0 0 1-2-1L6 17l-2-3 1-1a8 8 0 0 1 0-2l-1-1 2-3 1.5.5a7 7 0 0 1 2-1L10 5h4l.5 1.5a7 7 0 0 1 2 1L18 7l2 3-1 1a8 8 0 0 1 0 2Z"/></svg></button>
+    </header>
+
+    <main>
+      <section id="login" class="login-view" aria-label="Авторизация">
+        <div class="login-hero"><div class="eyebrow">ПОДКЛЮЧЕНИЕ К ТЕЛЕВИЗОРУ</div>
+        <h1>Введите код<br>с экрана телевизора</h1>
+        <p class="muted">Откройте CVPN webOS на телевизоре LG и введите шестизначный код. После входа устройство запомнится автоматически.</p></div>
+        <form id="login-form" class="login-form">
+          <label for="pairing-code">Код доступа с телевизора</label>
+          <div class="otp-wrap">
+            <input id="pairing-code" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" autocomplete="one-time-code" aria-label="Шестизначный код доступа" required>
+            <div class="otp-cells" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span></div>
+          </div>
+          <button id="pair-button" class="primary" type="submit">Подключиться <span aria-hidden="true">→</span></button>
+          <p id="pairing-progress" class="muted" aria-live="polite"></p>
+          <p id="login-error" class="field-error" role="alert"></p>
+        </form>
+        <p class="login-footnote">⌁ Код действителен ограниченное время. Доступ разрешён только в домашней сети.</p>
+        <div class="promo-container login-promo"><div class="promo-top"><img src="/cvpn-brand.png?v=rc42" alt="" width="44" height="44"><span class="promo-kicker">ОФИЦИАЛЬНЫЙ VPN · CVPN</span></div><h2>Ещё нет VPN?</h2><p>CVPN: Нидерланды, Германия, США и 3 дня пробного периода. При наличии данных подписки приложение покажет срок действия, позволит обновить серверы и проверить их задержку.</p><a class="promo-link" href="https://cvpn.su" target="_blank" rel="noopener noreferrer">Перейти на cvpn.su <span aria-hidden="true">↗</span></a></div>
+      </section>
+
+      <div id="dashboard" hidden>
+        <div class="view-heading"><div><div class="eyebrow">CVPN webOS · МОЙ ТЕЛЕВИЗОР</div><h1>Управление VPN</h1></div><span id="panel-health" class="online-mini">Проверка…</span></div>
+        <div id="tab-home" class="panel-tab" data-tab="home">
+
+        <section id="status-card" class="status-card" aria-live="polite">
+          <div class="status-eyebrow"><span class="pulse-marker"></span> СОЕДИНЕНИЕ</div>
+          <div class="status-top">
+            <div id="status-glyph" class="status-glyph" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3v8M6.3 6.9a9 9 0 1 0 11.4 0"/></svg></div>
+            <div class="status-copy"><div id="connection-state" class="state-title">VPN отключён</div><div id="connection-detail" class="state-subtitle">Выберите сервер для подключения</div><div id="connection-step" class="connection-step" hidden><span class="step-dots" aria-hidden="true"><i></i><i></i><i></i></span><span id="connection-step-text">Подготавливаем соединение</span></div></div>
+          </div>
+          <div class="status-bottom">
+            <div id="active-server" class="active-server" hidden><span id="active-server-dot" class="small-dot"></span><span id="active-server-name"></span></div>
+            <button id="disconnect" class="secondary small" disabled hidden>Отключить</button>
+            <button id="retry" class="secondary small" hidden>Повторить</button>
+          </div>
+          <div id="trial-hint" class="trial-bar" hidden>
+            <span id="trial-label">Подтвердите соединение</span>
+            <button id="confirm" class="confirm-button">Подтвердить</button>
+          </div>
+        </section>
+
+        <section class="config-section" aria-label="Конфигурации">
+          <div class="section-heading"><div><h2>Серверы</h2><p>Нажмите на сервер для подключения</p></div><button id="add-toggle" class="add-circle" title="Добавить конфигурацию" aria-label="Добавить конфигурацию" disabled>＋</button></div>
+          <div id="profiles" class="group-list"><div class="loading-row">Загружаем конфигурации…</div></div>
+          <div id="home-empty-promo" class="promo-container" hidden><div class="promo-top"><img src="/cvpn-brand.png?v=rc42" alt="" width="44" height="44"><span class="promo-kicker">CVPN · PRIVATE NETWORK</span></div><h2>Начните с CVPN</h2><p>Добавьте подписку CVPN: узнавайте срок действия, обновляйте список серверов и проверяйте задержку. Дополнительный режим обхода DPI исследуется и пока недоступен.</p><a class="promo-link" href="https://cvpn.su" target="_blank" rel="noopener noreferrer">Открыть cvpn.su <span aria-hidden="true">↗</span></a></div>
+        </section>
+        </div>
+        <section id="tab-subscriptions" class="panel-tab" data-tab="subscriptions" hidden>
+          <div class="section-intro"><div class="eyebrow">ВАШИ КОНФИГУРАЦИИ</div><h2>Подписки</h2><p>Управляйте доступом, обновляйте ссылки и добавляйте свои серверы.</p></div>
+          <button id="subs-add" class="primary full-width subs-add" type="button">＋ Добавить конфигурацию</button>
+          <div id="subscription-list" class="subscription-list"></div>
+          <div id="subs-promo" class="promo-container" hidden><div class="promo-top"><img src="/cvpn-brand.png?v=rc42" alt="" width="44" height="44"><span class="promo-kicker">РЕКОМЕНДУЕМЫЙ СЕРВИС</span></div><h2>CVPN для вашего LG</h2><p>CVPN: серверы Нидерландов, Германии и США, сведения о подписке, обновление серверов и проверка задержки. Дополнительный режим обхода DPI пока исследуется.</p><a href="https://cvpn.su" class="promo-link" target="_blank" rel="noopener noreferrer">Открыть cvpn.su <span aria-hidden="true">↗</span></a></div>
+        </section>
+        <section id="tab-settings" class="panel-tab" data-tab="settings" hidden>
+          <div class="section-intro"><div class="eyebrow">УПРАВЛЕНИЕ</div><h2>Настройки</h2><p>Управление телевизором, доступом и диагностикой.</p></div>
+          <div class="settings-stack">
+            <section class="settings-pane" aria-label="Телевизор">
+              <div class="settings-pane-head"><span class="settings-pane-icon" aria-hidden="true">▣</span><div><h3>Мой телевизор</h3><p>Текущее устройство LG webOS</p></div><span id="settings-link-badge" class="settings-connected">Локальная сеть</span></div>
+              <div class="settings-address"><span class="settings-address-label">Адрес панели</span><strong id="settings-panel-address">—</strong></div>
+              <div class="settings-buttons"><button id="settings-copy-address" type="button" class="settings-mini-action">Скопировать адрес</button><button id="refresh" type="button" class="settings-mini-action">Обновить состояние</button></div>
+              <p class="settings-caption">Телефон и телевизор должны находиться в одной домашней сети.</p>
+            </section>
+            <section class="settings-pane" aria-label="Устройства и доступ">
+              <div class="settings-pane-head"><span class="settings-pane-icon" aria-hidden="true">♙</span><div><h3>Устройства и доступ</h3><p>Кто может управлять вашим телевизором</p></div></div>
+              <button id="devices-toggle" type="button" class="settings-row settings-toggle" aria-expanded="false"><span class="settings-row-label"><strong>Подключённые устройства</strong><small>Посмотреть и отозвать доступ</small></span><span class="settings-chevron"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></span></button>
+              <div id="devices-panel" class="devices-panel settings-devices" hidden><div class="details-top"><span>Устройства с доступом</span><button id="devices-refresh" class="text-button">Обновить</button></div><div id="devices-list" class="devices-list"></div><small>При отзыве доступа браузер больше не сможет управлять телевизором.</small></div>
+              <button id="logout" type="button" class="settings-row settings-logout"><span class="settings-row-label"><strong>Выйти из панели</strong><small>Потребуется новый код с телевизора</small></span><span class="settings-chevron"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></span></button>
+            </section>
+            <section class="settings-pane" aria-label="Интерфейс">
+              <div class="settings-pane-head"><span class="settings-pane-icon" aria-hidden="true">◉</span><div><h3>Интерфейс</h3><p>Настройки только для этого браузера</p></div></div>
+              <div class="settings-row settings-language-row"><label class="settings-row-label" for="settings-language"><strong>Язык интерфейса</strong><small>Автоматически или вручную для панели и TV QR</small></label><select id="settings-language" class="settings-language-select" aria-label="Язык интерфейса"><option value="auto">Автоматически</option><option value="ru">Русский</option><option value="en">English</option></select></div>
+              <label class="settings-row settings-switch-row" for="settings-reduce-motion"><span class="settings-row-label"><strong>Уменьшить анимации</strong><small>Более спокойные переходы и индикаторы</small></span><input id="settings-reduce-motion" type="checkbox" class="settings-switch" /></label>
+            </section>
+            <section class="settings-pane" aria-label="Диагностика">
+              <button id="details-toggle" class="settings-pane-head settings-accordion" type="button" aria-expanded="false" disabled><span class="settings-pane-icon" aria-hidden="true">⌁</span><span class="settings-heading"><strong>Диагностика</strong><small>VPN, DNS, маршруты и события</small></span><span class="settings-chevron"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></span></button>
+              <div id="details-content" class="details-content settings-diagnostics" hidden>
+                <div class="details-top"><span>Состояние VPN</span><button id="diagnostics-update" type="button" class="text-button">Обновить</button></div>
+                <dl class="system-info"><div><dt>Движок</dt><dd id="engine-version">—</dd></div><div><dt>Режим</dt><dd>Системный IPv4 · TUN</dd></div><div><dt>DNS</dt><dd id="dns-status">—</dd></div><div><dt>Соединение</dt><dd id="session-mode">—</dd></div></dl>
+                <button id="network-toggle" class="settings-row settings-subtoggle" type="button" aria-expanded="false"><span class="settings-row-label"><strong>Маршруты и DNS</strong><small>Расширенные сетевые сведения</small></span><span class="settings-chevron"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></span></button>
+                <pre id="network-info" class="diagnostic-pre" hidden>Информация не загружена.</pre>
+                <div class="details-top logs-top"><span>События подключения</span><button id="logs-refresh" class="text-button">Обновить</button></div>
+                <pre id="logs" class="diagnostic-pre">Журнал ещё не загружен.</pre>
+                <p class="security-note">Для поддержки не отправляйте необработанные журналы с токенами или UUID.</p>
+              </div>
+            </section>
+            <section class="settings-pane recovery-pane" aria-label="Если VPN не работает">
+              <button id="help-toggle" type="button" class="settings-pane-head settings-accordion" aria-expanded="false"><span class="settings-pane-icon" aria-hidden="true">✚</span><span class="settings-heading"><strong>Если VPN не работает</strong><small>Проверка подключения и безопасные действия</small></span><span class="settings-chevron"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></span></button>
+              <div id="help-content" class="recovery-content" hidden>
+                <div class="recovery-steps">
+                  <div class="recovery-step"><span class="recovery-step-number">01</span><div><strong>Перезапустите проблемное приложение</strong><p>Если YouTube или другое приложение перестало загружать видео после подключения VPN, полностью закройте его и откройте снова.</p></div></div>
+                  <div class="recovery-step"><span class="recovery-step-number">02</span><div><strong>Выберите другой сервер</strong><p>У некоторых серверов доступность и скорость могут отличаться. Переключите локацию на главной странице.</p></div></div>
+                  <div class="recovery-step"><span class="recovery-step-number">03</span><div><strong>Восстановите обычную сеть</strong><p>Если VPN отключается с ошибкой или интернет не работает, выполните безопасное восстановление. Оно отключит VPN, но не затронет настройки Ethernet и роутера.</p></div></div>
+                  <div class="recovery-step"><span class="recovery-step-number">04</span><div><strong>Перезагрузите телевизор</strong><p>Если панель недоступна или восстановление не помогло, выполните полноценный перезапуск телевизора. VPN автоматически не включится.</p></div></div>
+                  <div class="recovery-step"><span class="recovery-step-number">05</span><div><strong>Проверьте IPv6 и DNS</strong><p>В настройках сети LG проверьте, что IPv6 отключён: текущий CVPN защищает только IPv4. Если сайты всё ещё не открываются, при выключенном VPN попробуйте DNS 8.8.8.8 либо 1.1.1.1. Перед ручной настройкой сохраните прежние IP, маску и шлюз; если не помогло — верните исходные параметры.</p></div></div>
+                </div>
+                <div class="recovery-actions">
+                  <div class="recovery-readout" id="recovery-readout" aria-live="polite">Нажмите «Проверить сеть», чтобы узнать, требуется ли восстановление.</div>
+                  <div class="settings-buttons recovery-buttons"><button id="recovery-check" type="button" class="settings-mini-action">Проверить сеть</button><button id="recovery-restore" type="button" class="settings-mini-action recovery-restore" disabled>Восстановить обычную сеть</button></div>
+                  <p class="settings-caption">Восстановление доступно только для подтверждённой сессии CVPN. При повреждённых данных приложение не будет менять маршруты автоматически.</p>
+                </div>
+              </div>
+            </section>
+            <section class="settings-pane" aria-label="Поддержка">
+              <div class="settings-pane-head"><span class="settings-pane-icon" aria-hidden="true">?</span><div><h3>Поддержка и ссылки</h3><p>Официальные ресурсы CVPN</p></div></div>
+              <a class="settings-row settings-link" href="https://cvpn.su" target="_blank" rel="noopener noreferrer"><span class="settings-row-label"><strong>Сайт CVPN</strong><small>cvpn.su</small></span><span class="settings-chevron"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></span></a>
+              <a class="settings-row settings-link" href="https://t.me/official_cvpn_bot" target="_blank" rel="noopener noreferrer"><span class="settings-row-label"><strong>Telegram-бот CVPN</strong><small>Подписка и поддержка</small></span><span class="settings-chevron"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></span></a>
+            </section>
+            <p class="settings-fineprint">CVPN webOS · Локальная панель · VPN включается только вручную</p>
+          </div>
+        </section>
+        <nav class="bottom-nav" aria-label="Основная навигация">
+          <button type="button" id="nav-home" class="nav-item active" aria-current="page" data-go="home"><span class="nav-icon" aria-hidden="true">⌂</span><span>Главная</span></button>
+          <button type="button" id="nav-subscriptions" class="nav-item" data-go="subscriptions"><span class="nav-icon" aria-hidden="true">▤</span><span>Подписки</span></button>
+          <button type="button" id="nav-settings" class="nav-item" data-go="settings"><span class="nav-icon" aria-hidden="true">⚙</span><span>Настройки</span></button>
+        </nav>
+        <div id="notice" class="toast" role="status" aria-live="polite" hidden></div>
+      </div>
+    </main>
+    <footer>CVPN webOS <span>·</span> PRIVATE NETWORK</footer>
+  </div>
+
+  <div id="modal-overlay" class="modal-overlay" hidden>
+    <div id="modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <div class="modal-handle" aria-hidden="true"></div>
+      <div class="modal-head"><div><div class="eyebrow" id="modal-eyebrow">CVPN webOS</div><h2 id="modal-title">Добавить конфигурацию</h2></div><button id="modal-close" type="button" class="icon-btn modal-x" aria-label="Закрыть">×</button></div>
+      <div id="import-view" class="modal-page">
+        <p class="modal-description">Вставьте ссылку подписки, VLESS или JSON. Название сервиса определится автоматически.</p>
+        <form id="import-form">
+          <label for="import-content">Ссылка или конфигурация</label>
+          <div class="paste-field"><textarea id="import-content" rows="4" spellcheck="false" autocomplete="off" placeholder="https://… / vless://… / JSON" required></textarea><button id="paste-button" class="paste-button" type="button">Вставить</button></div>
+          <div class="detected" id="detected-type">Тип определится автоматически</div>
+          <button id="import-submit" class="primary full-width" type="submit">Добавить конфигурацию <span>→</span></button>
+          <div class="import-message" id="import-message" aria-live="polite"></div>
+        </form>
+        <p class="modal-note">Конфигурации и токены хранятся только на телевизоре. Не отправляйте ссылки третьим лицам.</p>
+      </div>
+      <div id="group-view" class="modal-page" hidden>
+        <div id="group-summary" class="summary-block"></div>
+        <div class="menu-actions">
+          <button id="group-refresh" class="action-row">Обновить подписку <span>↻</span></button>
+          <button id="group-rename" class="action-row">Переименовать <span>✎</span></button>
+          <button id="group-info" class="action-row">Информация <span>ⓘ</span></button>
+          <button id="group-delete" class="action-row dangerous">Удалить подписку <span>⌫</span></button>
+        </div>
+      </div>
+      <div id="rename-view" class="modal-page" hidden>
+        <form id="rename-form"><label for="rename-input">Название группы</label><input id="rename-input" maxlength="60" required><button class="primary full-width" type="submit">Сохранить</button></form>
+      </div>
+      <div id="delete-view" class="modal-page" hidden><p class="modal-description">Удалить группу и все связанные серверы? Это действие нельзя отменить.</p><div class="confirm-actions"><button id="cancel-delete" class="secondary">Отмена</button><button id="confirm-delete" class="danger-button">Удалить</button></div></div>
+      <div id="info-view" class="modal-page" hidden><dl id="info-list" class="info-list"></dl></div>
+    </div>
+  </div>
+  <script src="/i18n.js?v=rc48"></script>
+  <script src="/app.js?v=rc48"></script>
+</body>
+</html>

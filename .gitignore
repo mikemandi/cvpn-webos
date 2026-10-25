@@ -1,0 +1,28 @@
+# Build output: GitHub Releases ships these, not Git history.
+/dist/
+/build/
+*.ipk
+*.tar.gz
+*.zip
+*.manifest.json
+# Device-only secrets and personal subscriptions. NEVER COMMIT.
+**/secrets/
+**/access.key
+**/sessions.json
+**/profiles.json
+**/client.json
+**/server-ip.txt
+**/original-client.json
+**/original-server-ip.txt
+**/private/
+**/state/
+**/backups/
+**/staging/
+.env
+*.pem
+*.key
+# Developer tools
+.vscode/
+.idea/
+__pycache__/
+*.pyc

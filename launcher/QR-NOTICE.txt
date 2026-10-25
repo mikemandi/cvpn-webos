@@ -1,0 +1,3 @@
+QRCode for JavaScript by Kazuhiko Arase (MIT license).
+Adapted Node implementation distributed as qrcode-terminal 0.12.0 (Apache License 2.0).
+Sources included in qr-bundle.js; see QR-THIRD-PARTY-LICENSE.txt.

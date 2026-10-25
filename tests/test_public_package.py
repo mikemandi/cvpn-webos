@@ -1,0 +1,57 @@
+"""Public artifact integrity/safety tests. Runs without modifying LG or network."""
+import hashlib
+import io
+import json
+import pathlib
+import re
+import subprocess
+import tarfile
+import unittest
+import zipfile
+
+ROOT = pathlib.Path(__file__).resolve().parents[1]
+IPK = ROOT / 'dist/su.cvpn.webos_2.0.4_all.ipk'
+
+class PublicPackageTests(unittest.TestCase):
+    def test_launcher_manifest(self):
+        d = json.loads((ROOT / 'launcher/appinfo.json').read_text())
+        self.assertEqual(d['id'], 'su.cvpn.webos')
+        self.assertEqual(d['version'], '2.0.4')
+        for f in [d['main'],d['icon'],d['largeIcon']]:
+            self.assertTrue((ROOT / 'launcher' / f).is_file())
+
+    def test_ipk_payload_has_launcher_but_no_root_secrets(self):
+        self.assertTrue(IPK.is_file())
+        control = subprocess.check_output(['ar','p',str(IPK),'control.tar.gz'])
+        data = subprocess.check_output(['ar','p',str(IPK),'data.tar.gz'])
+        with tarfile.open(fileobj=io.BytesIO(control),mode='r:gz') as t:
+            c = t.extractfile(next(m for m in t.getmembers() if m.name.endswith('/control') or m.name=='./control')).read().decode()
+            self.assertIn('Package: su.cvpn.webos',c)
+        with tarfile.open(fileobj=io.BytesIO(data),mode='r:gz') as t:
+            paths=[m.name for m in t.getmembers()]
+            self.assertTrue(any(n.endswith('/su.cvpn.webos/appinfo.json') for n in paths))
+            self.assertFalse(any('access.key' in n or '/secrets/' in n or 'client.json' in n or 'xray' in n for n in paths))
+
+    def test_root_bundle(self):
+        z=ROOT/'dist/cvpn-webos-root-2.0.0.zip'
+        self.assertTrue(z.is_file())
+        with zipfile.ZipFile(z) as t:
+            self.assertIsNone(t.testzip())
+            names=t.namelist()
+            self.assertIn('dist/cvpn-webos-panel-armv7',names)
+            self.assertNotIn('bin/xray',names)
+            self.assertFalse(any('access.key' in n or 'profiles.json' in n for n in names))
+
+    def test_no_original_personal_ip_in_launcher(self):
+        self.assertFalse((ROOT/'launcher/runtime.js').exists())
+        for file in (ROOT/'launcher').glob('*.js'):
+            self.assertNotIn('192.168.0.2',file.read_text())
+
+    def test_boot_hook_target_and_no_auto_vpn(self):
+        installer=(ROOT/'scripts/install-root.sh').read_text()
+        self.assertIn('/var/lib/webosbrew/init.d/90-cvpn-webos',installer)
+        self.assertIn('existing_install_use_legacy_upgrade',installer)
+        self.assertIn('VPN_AUTOSTART=NO',installer)
+        self.assertNotIn('curl -k',installer)
+
+if __name__ == '__main__': unittest.main()

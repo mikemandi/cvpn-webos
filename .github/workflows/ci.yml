@@ -1,0 +1,32 @@
+name: Verify build
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v6
+        with:
+          go-version: '1.27.3'
+          cache-dependency-path: server/go.mod
+      - name: Build backend and IPK
+        run: bash scripts/build-release.sh
+      - name: Offline tests
+        run: bash tests/run_offline.sh
+      - name: IPK inspection
+        run: |
+          dpkg-deb --info dist/su.cvpn.webos_2.0.4_all.ipk
+          dpkg-deb --contents dist/su.cvpn.webos_2.0.4_all.ipk | grep /usr/palm/applications/su.cvpn.webos/appinfo.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cvpn-webos-preview
+          path: |
+            dist/*.ipk
+            dist/*.zip
+          if-no-files-found: error

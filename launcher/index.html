@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CVPN webOS</title>
+<style>
+html, body { margin:0; width:100%; height:100%; overflow:hidden; background:transparent!important; color:#f3f7ff; font-family:Arial,Helvetica,sans-serif; }
+[hidden] { display:none!important; }
+/* With uiRevision:2, this overlay covers the full webOS compositor viewport. */
+#qr-screen { position:fixed; top:0; right:0; bottom:0; left:0; display:flex; align-items:center; justify-content:center; background:rgba(4,8,16,.54); }
+.panel { box-sizing:border-box; width:600px; max-width:calc(100% - 48px); max-height:calc(100% - 48px); overflow:auto; padding:30px 36px 28px; border-radius:20px; background:#111A29; border:1px solid #35465E; text-align:center; box-shadow:0 18px 54px rgba(0,0,0,.34); }
+h1 { font-size:32px; line-height:1.2; margin:0 0 8px; font-weight:700; }
+h1 span { color:#97B9FF; font-weight:400; }
+.subtitle { color:#9FAFCA; font-size:16px; letter-spacing:2.2px; margin:0 0 20px; }
+p { font-size:20px; line-height:1.35; color:#AFBFDA; margin:12px 0; }
+#qr-canvas { display:block; box-sizing:content-box; width:300px; height:300px; max-width:calc(100% - 32px); border:10px solid #FFF; border-radius:12px; margin:20px auto 18px; background:#FFF; image-rendering:pixelated; }
+#qr-address { font-size:22px; line-height:1.35; color:#E2EDFF; font-weight:600; overflow-wrap:anywhere; margin-top:16px; }
+#qr-code { color:#FFF; font-size:27px; letter-spacing:3px; font-weight:700; white-space:nowrap; }
+#qr-hint { font-size:17px; color:#A6B5CE; }
+button { display:inline-block; box-sizing:border-box; min-width:168px; min-height:52px; padding:12px 27px; margin-top:16px; border:1px solid #A5C3FF; border-radius:11px; background:#92B5FF; color:#0C1930; cursor:pointer; font:700 20px Arial,Helvetica,sans-serif; }
+button:focus { outline:2px solid #8DB5FF; outline-offset:3px; box-shadow:0 0 0 6px rgba(141,181,255,.13); }
+button:active { background:#B3CCFF; }
+@media (max-height:760px) { .panel{padding:20px 30px;} .subtitle{margin-bottom:8px;} #qr-canvas{width:255px;height:255px;margin:12px auto;} p{margin:8px 0;} }
+</style>
+</head>
+<body>
+<div id="qr-screen" hidden>
+ <main class="panel">
+  <h1>CVPN <span>webOS</span></h1>
+  <div class="subtitle">PRIVATE NETWORK</div>
+  <p>Наведите камеру телефона на QR-код</p>
+  <canvas id="qr-canvas" width="512" height="512" aria-label="QR-код для подключения смартфона"></canvas>
+  <div id="qr-address"></div>
+  <p>Код подключения: <strong id="qr-code">—</strong></p>
+  <p id="qr-hint">Действует 3 минуты · Только домашняя сеть</p>
+  <button id="close-qr" type="button">Закрыть</button>
+ </main>
+</div>
+<script src="qr-bundle.js"></script>
+<script>
+(function(){
+ "use strict";
+ var didNormalLaunch=false, qrMode=false, closeTimer=0, expiryTimer=0;
+ var qrScreen=document.getElementById('qr-screen');
+ function parseParams(raw){try{return typeof raw==='string'?JSON.parse(raw):(raw||{});}catch(e){return {};}}
+ function platformParams(){var p={};try{if(window.webOSSystem && window.webOSSystem.launchParams){p=parseParams(window.webOSSystem.launchParams());}}catch(e){}try{if(!p.mode && window.PalmSystem && window.PalmSystem.launchParams){p=parseParams(window.PalmSystem.launchParams);}}catch(e){}return p;}
+ function shut(){try{window.close();}catch(e){}}
+ function showNormal(){if(didNormalLaunch)return;didNormalLaunch=true;qrMode=false;clearInterval(expiryTimer);qrScreen.hidden=true;
+  var pixel=new Image();pixel.src='http://127.0.0.1:8765/tv/notify?nonce='+Date.now();
+  // Close whether the TV's old browser accepts or rejects the image. Some
+  // builds spuriously fire onerror after the backend has already queued Alert.
+  clearTimeout(closeTimer);closeTimer=setTimeout(shut,1400);
+ }
+ function renderCode(data){if(!qrMode)return;
+  var hint=document.getElementById('qr-hint'),canvas=document.getElementById('qr-canvas');
+  if(!data || !data.ok){canvas.hidden=true;document.getElementById('qr-code').textContent='—';hint.textContent='Код истёк. Запустите CVPN webOS ещё раз.';return;}
+  canvas.hidden=false; document.getElementById('qr-code').textContent=data.code.substring(0,3)+' '+data.code.substring(3);
+  clearInterval(expiryTimer);
+  if (data.expires) {
+    var expiresAt=Date.parse(data.expires);
+    var updateCountdown=function(){var remaining=Math.ceil((expiresAt-Date.now())/1000);
+      if(remaining<=0){clearInterval(expiryTimer);canvas.hidden=true;document.getElementById('qr-code').textContent='—';hint.textContent='Код истёк. Запустите CVPN webOS ещё раз.';return;}
+      hint.textContent='Код действителен: '+Math.floor(remaining/60)+':'+('0'+(remaining%60)).slice(-2)+' · Только домашняя сеть';};
+    updateCountdown();expiryTimer=setInterval(updateCountdown,1000);
+  }
+
+  document.getElementById('qr-address').textContent=data.address;
+  try{var q=new window.CVPNQRCode.QRCode(0,window.CVPNQRCode.Level.M);q.addData(data.pairURL);q.make();var n=q.getModuleCount();var c=canvas.getContext('2d');c.fillStyle='#ffffff';c.fillRect(0,0,512,512);var unit=512/(n+8);c.fillStyle='#111111';for(var y=0;y<n;y++)for(var x=0;x<n;x++)if(q.isDark(y,x)){c.fillRect(Math.floor((x+4)*unit),Math.floor((y+4)*unit),Math.ceil(unit),Math.ceil(unit));}}
+  catch(e){canvas.hidden=true;hint.textContent='Не удалось отобразить QR. Используйте адрес и PIN.';}
+ }
+ window.cvpnQRInfo=renderCode;
+ function showQR(){qrMode=true;didNormalLaunch=false;clearTimeout(closeTimer);qrScreen.hidden=false;document.getElementById('qr-hint').textContent='Действует 3 минуты · Только домашняя сеть';document.getElementById('qr-address').textContent='';document.getElementById('qr-code').textContent='—';var s=document.createElement('script');s.src='http://127.0.0.1:8765/tv/qr-data.js?nonce='+Date.now();s.onerror=function(){document.getElementById('qr-hint').textContent='Панель недоступна. Проверьте службу CVPN.';};document.head.appendChild(s);document.getElementById('close-qr').focus();}
+ function handle(params){if(params && params.mode==='qr')showQR();else showNormal();}
+ document.getElementById('close-qr').onclick=shut;
+ document.addEventListener('keydown',function(e){if(qrMode && (e.keyCode===461||e.keyCode===27)){e.preventDefault();shut();}});
+ document.addEventListener('webOSLaunch',function(e){handle((e && e.detail && e.detail.mode)?e.detail:platformParams());});
+ document.addEventListener('webOSRelaunch',function(e){handle((e && e.detail && e.detail.mode)?e.detail:platformParams());});
+ setTimeout(function(){if(!didNormalLaunch&&!qrMode)handle(platformParams());},250);
+}());
+</script>
+</body>
+</html>

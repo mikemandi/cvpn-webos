@@ -1,0 +1,37 @@
+name: Publish verified release artifacts
+on:
+  push:
+    tags:
+      - 'v*'
+permissions:
+  contents: write
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v6
+        with:
+          go-version: '1.27.3'
+          cache-dependency-path: server/go.mod
+      - name: Build
+        run: bash scripts/build-release.sh
+      - name: Test
+        run: bash tests/run_offline.sh
+      - name: Generate Homebrew metadata
+        env:
+          TARGET_REPOSITORY: ${{ github.repository }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          python3 scripts/make-manifest.py --repository "$TARGET_REPOSITORY" --tag "$RELEASE_TAG"
+          python3 scripts/make-homebrew-entry.py --repository "$TARGET_REPOSITORY"
+          (cd dist && sha256sum *.ipk *.zip *.manifest.json > SHA256SUMS)
+      - name: Publish release (manual reviewer approval still required for Homebrew index)
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/*.ipk
+            dist/*.zip
+            dist/*.manifest.json
+            dist/SHA256SUMS
+          generate_release_notes: true

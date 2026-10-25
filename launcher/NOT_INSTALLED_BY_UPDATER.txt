@@ -1,0 +1,2 @@
+Launcher source preserved from the earlier project (appinfo.json version 2.0.3).
+The RC5 -> Stable updater does NOT overwrite or install the IPK.

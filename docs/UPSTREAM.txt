@@ -1,0 +1,2 @@
+Backend+UI: RC4.9; Engine: 0.1.3; recovery: RC4.9.1; launcher: RC4.2 + RC4.3 UI/QR.
+The source archive also includes personal keys; NO keys have been copied into this package.
