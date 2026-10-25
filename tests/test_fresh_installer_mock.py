@@ -28,6 +28,9 @@ class FreshInstallerMock(unittest.TestCase):
         self.script.write_text(src)
         self.bindir=d/'bin';self.bindir.mkdir()
         commands={
+         # Emulate root only inside the isolated test process.
+         # The production installer retains its real `id -u` requirement.
+         'id':'#!/bin/sh\nif [ "$#" -eq 1 ] && [ "$1" = "-u" ]; then printf "0\\n"; else exec /usr/bin/id "$@"; fi\n',
          'uname':'#!/bin/sh\nif [ "$1" = -m ]; then echo armv7l; else /usr/bin/uname "$@"; fi\n',
          'ip':'#!/bin/sh\ncase "$*" in\n "link show dev cvpn0") exit 1;;\n "-4 route show 0.0.0.0/1"|"-4 route show 128.0.0.0/1") exit 0;;\n *) exit 1;;\nesac\n',
          'curl':'#!/bin/sh\necho \'{"version":"2.0.0"}\'\n'
@@ -51,6 +54,16 @@ class FreshInstallerMock(unittest.TestCase):
 
     def act(self,mode):
         return subprocess.run(['/bin/sh',str(self.script),mode],env=self.env,text=True,capture_output=True,timeout=20)
+
+    def test_rejects_non_root_in_production(self):
+        # Explicitly verify the real installer still enforces root privileges.
+        fake_id=self.bindir/'id'
+        fake_id.write_text('#!/bin/sh\nif [ "$1" = "-u" ]; then echo 1000; else exec /usr/bin/id "$@"; fi\n')
+        fake_id.chmod(0o755)
+        res=self.act('check')
+        self.assertNotEqual(res.returncode,0)
+        self.assertIn('REFUSED=root_required',res.stderr)
+        self.assertFalse(self.base.exists())
 
     def test_check_does_not_create_user_store(self):
         res=self.act('check')
