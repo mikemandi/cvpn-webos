@@ -4,7 +4,7 @@ import argparse,hashlib,json,pathlib,re
 p=argparse.ArgumentParser()
 p.add_argument('--repository',required=True,help='GitHub owner/repository')
 p.add_argument('--tag',default='v2.0.0')
-p.add_argument('--ipk',default='dist/su.cvpn.webos_2.1.0_all.ipk')
+p.add_argument('--ipk',default='dist/su.cvpn.webos_2.1.1_all.ipk')
 p.add_argument('--out',default='dist/su.cvpn.webos.manifest.json')
 a=p.parse_args()
 if not re.fullmatch(r'[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+',a.repository):p.error('repository must be owner/repo')
