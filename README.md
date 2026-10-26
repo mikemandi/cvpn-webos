@@ -50,7 +50,7 @@ CVPN webOS contains **two separately installed components**:
 
 **This is Homebrew software, NOT an application for the regular LG Content Store.**
 
-- Rooted LG television running a supported Linux ARMv7 environment (`uname -m` reports `armv7l`).
+- Rooted LG television with ARMv7 32-bit userspace. Both `armv7l` kernels and compatible `aarch64` kernels reporting `getconf LONG_BIT=32` are accepted by the bootstrap; runtime compatibility still requires device testing.
 - Installed Homebrew Channel startup integration (`/var/lib/webosbrew/startup.sh`).
 - Root SSH access, available `ip`, `curl`, `sha256sum`, `od` and TUN support.
 - **Compatible Xray-core ARMv7 binary** preinstalled under `/media/developer/cvpn-webos/bin/xray`, or provided explicitly during the first installation.
