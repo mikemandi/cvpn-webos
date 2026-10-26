@@ -1,0 +1,21 @@
+{
+  "log": {"loglevel": "warning"},
+  "inbounds": [
+    {
+      "tag": "cvpn-tun",
+      "protocol": "tun",
+      "settings": {
+        "name": "cvpn0",
+        "mtu": 1500,
+        "autoOutboundsInterface": "eth0"
+      }
+    }
+  ],
+  "outbounds": [
+    {
+      "tag": "cvpn-proxy",
+      "protocol": "vless",
+      "settings": {"vnext": []}
+    }
+  ]
+}
