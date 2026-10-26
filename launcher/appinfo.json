@@ -6,7 +6,7 @@
   "icon": "icon.png",
   "largeIcon": "largeicon.png",
   "iconColor": "#10234D",
-  "version": "2.0.4",
+  "version": "2.1.0",
   "vendor": "CVPN",
   "appDescription": "CVPN Connect · VPN для LG webOS (root required)",
   "resolution": "1920x1080",
