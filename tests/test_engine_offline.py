@@ -74,110 +74,90 @@ class EngineOffline(unittest.TestCase):
             self.assertIn('"autoOutboundsInterface":"wlan0"', runtime.read_text())
             self.assertEqual(runtime.stat().st_mode & 0o777, 0o600)
 
-    def test_dns_probe_detects_timeout_syntax(self):
-        self.assertIn('timeout 1 /bin/sh', fn_source('detect_timeout_style'))
-        self.assertIn('timeout -t 1 /bin/sh', fn_source('detect_timeout_style'))
-        self.assertIn('timeout 6 nslookup', fn_source('timed_nslookup'))
-        self.assertIn('timeout -t 6 nslookup', fn_source('timed_nslookup'))
-        self.assertIn('if timed_nslookup >', fn_source('probe'))
-        # Fail closed before the route or DNS setup if neither format works.
-        self.assertLess(ENGINE.index('detect_timeout_style || fail'),
-                        ENGINE.index('    lock\n', ENGINE.index('start_now() {')))
+    def test_probe_does_not_depend_on_busybox_nslookup(self):
+        probe = fn_source('probe')
+        self.assertNotIn('nslookup ', probe)
+        self.assertNotIn('timed_nslookup', ENGINE)
+        self.assertNotIn('detect_timeout_style', ENGINE)
+        self.assertIn('https://example.com/', probe)
+        self.assertIn('--noproxy', probe)
+        self.assertNotIn('--resolve', probe)
+        self.assertIn('echo FAILED > "$STATE/probe.dns"', probe)
 
     def test_tls_probes_never_disable_certificate_validation(self):
         self.assertNotIn('curl -4 -k', ENGINE)
         self.assertNotIn('--insecure', ENGINE)
-        self.assertIn('https://example.com/', fn_source('probe'))
+        self.assertNotIn(' -k ', ENGINE)
         self.assertIn('IPv6 default route exists', ENGINE)
 
-    def run_probe_mock(self, fixed_ok=False, fallback_ok=True, dns_ok=True, youtube_ok=True, timeout_style='positional'):
-        """Fake all network traffic and both historical webOS timeout conventions."""
+    def run_probe_mock(self, https_ok=True, youtube_ok=True):
+        """Entire probe is isolated from real DNS, TUN, and the network."""
         with tempfile.TemporaryDirectory() as tmp:
-            state=pathlib.Path(tmp) / 'state'
+            state = pathlib.Path(tmp) / 'state'
             state.mkdir()
-            fake=pathlib.Path(tmp) / 'bin'
+            fake = pathlib.Path(tmp) / 'bin'
             fake.mkdir()
-            for name, script in {
-                'curl': ('#!/bin/sh\n'
-                         'case "$*" in\n'
-                         '  *one.one.one.one*) [ "$FIXED_OK" = yes ] && exit 0; '
-                         'echo "curl: (60) SSL certificate problem" >&2; exit 60;;\n'
-                         '  *https://example.com/*) [ "$FALLBACK_OK" = yes ] && exit 0; exit 60;;\n'
-                         '  *https://www.youtube.com/*) [ "$YOUTUBE_OK" = yes ] && exit 0; exit 22;;\n'
-                         '  *) exit 22;;\n'
-                         'esac\n'),
-                'timeout': ('#!/bin/sh\n'
-                            'if [ "$TIMEOUT_VARIANT" = unsupported ]; then exit 127; fi\n'
-                            'if [ "$TIMEOUT_VARIANT" = legacy ]; then\n'
-                            '  [ "$1" = -t ] || exit 127\n'
-                            '  shift\n'
-                            'else\n'
-                            '  [ "$1" != -t ] || exit 127\n'
-                            'fi\n'
-                            'case "$2" in\n'
-                            '  /bin/sh) exit 0;;\n'
-                            '  nslookup) [ "$DNS_OK" = yes ]; exit $?;;\n'
-                            '  *) exit 127;;\n'
-                            'esac\n'),
-                'sleep':'#!/bin/sh\nexit 0\n',
-            }.items():
-                p=fake/name
-                p.write_text(script)
-                p.chmod(0o700)
-            env=dict(os.environ,
-                     PATH=str(fake)+os.pathsep+os.environ.get('PATH','/usr/bin:/bin'),
-                     STATE=str(state), TEST_URL='https://www.youtube.com/',
-                     FIXED_OK='yes' if fixed_ok else 'no',
-                     FALLBACK_OK='yes' if fallback_ok else 'no',
-                     DNS_OK='yes' if dns_ok else 'no',
-                     YOUTUBE_OK='yes' if youtube_ok else 'no',
-                     TIMEOUT_VARIANT=timeout_style)
-            shell=("say() { printf '%s\\n' \"$1\"; }\n" +
-                   fn_source('detect_timeout_style') + '\n' +
-                   fn_source('timed_nslookup') + '\n' +
-                   fn_source('probe') +
-                   '\nif ! detect_timeout_style; then echo UNSUPPORTED_TIMEOUT; exit 127; fi\nprobe\n')
-            r=subprocess.run(['/bin/sh','-c',shell],env=env,text=True,capture_output=True,timeout=10)
-            states={name:(state/name).read_text().strip() if (state/name).exists() else None
-                    for name in ('probe.general','probe.dns','probe.youtube')}
-            return r, states
+            curl = fake / 'curl'
+            curl.write_text(
+                '#!/bin/sh\n'
+                'printf "curl %s\\n" "$*" >> "$CALL_LOG"\n'
+                'case "$*" in\n'
+                '  *https://example.com/*)\n'
+                '    [ "$HTTPS_OK" = yes ] && exit 0\n'
+                '    echo "curl: (6) Could not resolve host: example.com" >&2\n'
+                '    exit 6;;\n'
+                '  *https://www.youtube.com/*)\n'
+                '    [ "$YOUTUBE_OK" = yes ] && exit 0\n'
+                '    echo "curl: (28) Operation timed out" >&2\n'
+                '    exit 28;;\n'
+                '  *) exit 88;;\n'
+                'esac\n')
+            curl.chmod(0o700)
+            # Emulate an uncooperative BusyBox nslookup; probe must never call it.
+            ns = fake / 'nslookup'
+            ns.write_text('#!/bin/sh\necho BAD_NSLOOKUP >> "$CALL_LOG"\nexit 143\n')
+            ns.chmod(0o700)
+            sl = fake / 'sleep'
+            sl.write_text('#!/bin/sh\nexit 0\n')
+            sl.chmod(0o700)
+            call_log = pathlib.Path(tmp) / 'calls'
+            env = dict(os.environ, PATH=str(fake)+os.pathsep+os.environ.get('PATH','/usr/bin:/bin'),
+                       STATE=str(state), TEST_URL='https://www.youtube.com/favicon.ico',
+                       CALL_LOG=str(call_log), HTTPS_OK='yes' if https_ok else 'no',
+                       YOUTUBE_OK='yes' if youtube_ok else 'no')
+            command = ("say() { printf '%s\\n' \"$1\"; }\n" + fn_source('probe') + '\nprobe\n')
+            result = subprocess.run(['/bin/sh', '-c', command], env=env,
+                                    text=True, capture_output=True, timeout=10)
+            states = {name:(state/name).read_text().strip() if (state/name).exists() else None
+                      for name in ('probe.general','probe.dns','probe.youtube')}
+            return result, states, call_log.read_text() if call_log.exists() else ''
 
-    def test_cloudflare_ca_failure_uses_verified_https_fallback(self):
-        r, states=self.run_probe_mock(fixed_ok=False, fallback_ok=True)
-        self.assertEqual(r.returncode,0,r.stderr+'\n'+r.stdout)
-        self.assertIn('FIXED_IP_HTTPS=UNAVAILABLE',r.stdout)
-        self.assertIn('GENERAL_HTTPS=OK',r.stdout)
-        self.assertEqual(states['probe.general'],'OK')
-        self.assertEqual(states['probe.dns'],'OK')
+    def test_verified_https_proves_dns_and_general_internet(self):
+        r, states, calls = self.run_probe_mock()
+        self.assertEqual(r.returncode, 0, r.stderr+'\n'+r.stdout)
+        self.assertEqual(states['probe.general'], 'OK')
+        self.assertEqual(states['probe.dns'], 'OK')
+        self.assertEqual(states['probe.youtube'], 'OK')
+        self.assertIn('GENERAL_HTTPS=OK', r.stdout)
+        self.assertIn('https://example.com/', calls)
+        self.assertNotIn('BAD_NSLOOKUP', calls)
 
-    def test_old_webos_timeout_t_syntax(self):
-        r, states=self.run_probe_mock(fixed_ok=False, fallback_ok=True, timeout_style='legacy')
-        self.assertEqual(r.returncode,0,r.stderr+'\n'+r.stdout)
-        self.assertEqual(states['probe.dns'],'OK')
-        self.assertEqual(states['probe.general'],'OK')
+    def test_unavailable_dns_or_verified_https_must_abort(self):
+        r, states, calls = self.run_probe_mock(https_ok=False)
+        self.assertNotEqual(r.returncode, 0)
+        self.assertEqual(states['probe.general'], 'FAILED')
+        self.assertEqual(states['probe.dns'], 'FAILED')
+        self.assertIsNone(states['probe.youtube'])
+        self.assertIn('GENERAL_HTTPS=FAILED', r.stdout)
+        self.assertNotIn('https://www.youtube.com/', calls)
 
-    def test_unsupported_timeout_must_refuse(self):
-        r, states=self.run_probe_mock(timeout_style='unsupported')
-        self.assertNotEqual(r.returncode,0)
-        self.assertIn('UNSUPPORTED_TIMEOUT',r.stdout)
-        self.assertIsNone(states['probe.dns'])
-
-    def test_cloudflare_ca_failure_and_fallback_failure_must_refuse(self):
-        r, states=self.run_probe_mock(fixed_ok=False, fallback_ok=False)
-        self.assertNotEqual(r.returncode,0)
-        self.assertIn('GENERAL_HTTPS=FAILED',r.stdout)
-        self.assertEqual(states['probe.general'],'FAILED')
-
-    def test_dns_failure_cannot_be_bypassed_by_fallback(self):
-        r, states=self.run_probe_mock(fixed_ok=False, fallback_ok=True, dns_ok=False)
-        self.assertNotEqual(r.returncode,0)
-        self.assertEqual(states['probe.dns'],'FAILED')
-
-    def test_youtube_unavailable_does_not_fail_verified_fallback(self):
-        r, states=self.run_probe_mock(fixed_ok=False, fallback_ok=True, youtube_ok=False)
-        self.assertEqual(r.returncode,0,r.stderr+'\n'+r.stdout)
-        self.assertEqual(states['probe.youtube'],'UNAVAILABLE')
-        self.assertEqual(states['probe.general'],'OK')
+    def test_youtube_unavailable_does_not_fail_general_internet(self):
+        r, states, calls = self.run_probe_mock(youtube_ok=False)
+        self.assertEqual(r.returncode, 0, r.stderr+'\n'+r.stdout)
+        self.assertEqual(states['probe.general'], 'OK')
+        self.assertEqual(states['probe.dns'], 'OK')
+        self.assertEqual(states['probe.youtube'], 'UNAVAILABLE')
+        self.assertIn('YOUTUBE_HTTPS=UNAVAILABLE', r.stdout)
 
     def test_release_contains_no_private_payloads(self):
         for forbidden in ('private/access.key', 'config/client.json', 'config/server-ip.txt',
