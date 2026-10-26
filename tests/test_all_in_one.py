@@ -127,9 +127,9 @@ class AllInOneInstaller(unittest.TestCase):
         self.assertFalse((self.base/'state/lock').exists())
 
     def test_engine_lock_pid_is_numeric(self):
-        # Engine needs a numeric PID to distinguish in-progress updates.
-        self.assertIn('printf \'%s\\n\' "$" > "$BASE/state/lock/pid"', SOURCE)
-        self.assertNotIn('printf \'%s\\n\' "$" > "$BASE/state/lock/pid"', SOURCE)
+        # Engine requires a numeric shell PID (not a literal dollar sign).
+        self.assertIn("printf '%s\\n' \"$$\" > \"$BASE/state/lock/pid\"", SOURCE)
+        self.assertNotIn("printf '%s\\n' \"$\" > \"$BASE/state/lock/pid\"", SOURCE)
 
     def test_root_required(self):
         (self.fakebin/'id').write_text('#!/bin/sh\necho 1000\n')
