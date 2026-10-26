@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate YAML for pull request to webosbrew/apps-repo; screenshots are illustrative."""
+"""Generate YAML for pull request to webosbrew/apps-repo; screenshots are deliberately omitted until verified."""
 import argparse,pathlib,re
 p=argparse.ArgumentParser()
 p.add_argument('--repository',required=True,help='GitHub owner/repository')
@@ -24,13 +24,7 @@ description: |
   do not expose the local HTTP control panel to untrusted networks.
 
   Installation and device requirements: https://github.com/{a.repository}#installation
-screenshots:
-  - url: {raw}/assets/ru-dashboard.png
-    caption: Historical design preview — server management
-  - url: {raw}/assets/ru-settings.png
-    caption: Historical design preview — settings
-  - url: {raw}/assets/tv-qr.png
-    caption: Historical design preview — pairing QR on LG TV
+# Add real, sanitized screenshots before submission; previews are not representative.
 '''
 output=r/a.output
 output.parent.mkdir(parents=True,exist_ok=True)
