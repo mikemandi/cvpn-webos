@@ -4,6 +4,7 @@ import io
 import json
 import pathlib
 import re
+import shutil
 import subprocess
 import tarfile
 import unittest
@@ -36,6 +37,14 @@ class PublicPackageTests(unittest.TestCase):
             self.assertTrue(any(n.endswith('/payload/SHA256SUMS') for n in paths))
             self.assertTrue(any(n.endswith('/payload/XRAY-LICENSE.txt') for n in paths))
             self.assertTrue(any(n.endswith('/payload/install.sh') for n in paths))
+
+    def test_launcher_inline_javascript_syntax(self):
+        if shutil.which('node') is None:
+            self.skipTest('NodeJS unavailable')
+        html=(ROOT/'launcher/index.html').read_text()
+        inline=html.split('<script>')[1].split('</script>')[0]
+        result=subprocess.run(['node','--check'],input=inline,text=True,capture_output=True,timeout=10)
+        self.assertEqual(result.returncode,0,result.stderr)
 
     def test_all_in_one_replaces_legacy_root_bundle(self):
         self.assertFalse((ROOT/'dist/cvpn-webos-root-2.0.0.zip').exists(),
