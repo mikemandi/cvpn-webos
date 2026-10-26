@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Run from the repository root on Linux or macOS, rooted ARMv7 TV only.
+# Run from the repository root on Linux or macOS, rooted TV with ARMv7 userspace only.
 set -euo pipefail
 if [[ $# -lt 2 || $# -gt 3 ]]; then echo 'Usage: bash scripts/setup.sh TV_IP check|install|doctor [LOCAL_XRAY_ARMV7_BINARY]'; exit 2; fi
 TV="$1"; MODE="$2"; XRAY="${3:-}"
