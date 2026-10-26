@@ -74,14 +74,24 @@ class EngineOffline(unittest.TestCase):
             self.assertIn('"autoOutboundsInterface":"wlan0"', runtime.read_text())
             self.assertEqual(runtime.stat().st_mode & 0o777, 0o600)
 
-    def test_dns_probe_uses_portable_timeout(self):
-        # BusyBox 1.31 on webOS 22 accepts 'timeout SECS COMMAND' but not '-t'.
-        self.assertIn('timeout 6 nslookup www.youtube.com', fn_source('probe'))
-        self.assertNotIn('timeout -t ', ENGINE)
-        self.assertIn('echo FAILED > "$STATE/probe.dns"', fn_source('probe'))
+    def test_dns_probe_detects_timeout_syntax(self):
+        self.assertIn('timeout 1 /bin/sh', fn_source('detect_timeout_style'))
+        self.assertIn('timeout -t 1 /bin/sh', fn_source('detect_timeout_style'))
+        self.assertIn('timeout 6 nslookup', fn_source('timed_nslookup'))
+        self.assertIn('timeout -t 6 nslookup', fn_source('timed_nslookup'))
+        self.assertIn('if timed_nslookup >', fn_source('probe'))
+        # Fail closed before the route or DNS setup if neither format works.
+        self.assertLess(ENGINE.index('detect_timeout_style || fail'),
+                        ENGINE.index('    lock\n', ENGINE.index('start_now() {')))
 
-    def run_probe_mock(self, fixed_ok=False, fallback_ok=True, dns_ok=True, youtube_ok=True):
-        """Mock every network command; simulate LG's Cloudflare curl (60) failure."""
+    def test_tls_probes_never_disable_certificate_validation(self):
+        self.assertNotIn('curl -4 -k', ENGINE)
+        self.assertNotIn('--insecure', ENGINE)
+        self.assertIn('https://example.com/', fn_source('probe'))
+        self.assertIn('IPv6 default route exists', ENGINE)
+
+    def run_probe_mock(self, fixed_ok=False, fallback_ok=True, dns_ok=True, youtube_ok=True, timeout_style='positional'):
+        """Fake all network traffic and both historical webOS timeout conventions."""
         with tempfile.TemporaryDirectory() as tmp:
             state=pathlib.Path(tmp) / 'state'
             state.mkdir()
@@ -96,7 +106,19 @@ class EngineOffline(unittest.TestCase):
                          '  *https://www.youtube.com/*) [ "$YOUTUBE_OK" = yes ] && exit 0; exit 22;;\n'
                          '  *) exit 22;;\n'
                          'esac\n'),
-                'timeout':'#!/bin/sh\n[ "$DNS_OK" = yes ]\n',
+                'timeout': ('#!/bin/sh\n'
+                            'if [ "$TIMEOUT_VARIANT" = unsupported ]; then exit 127; fi\n'
+                            'if [ "$TIMEOUT_VARIANT" = legacy ]; then\n'
+                            '  [ "$1" = -t ] || exit 127\n'
+                            '  shift\n'
+                            'else\n'
+                            '  [ "$1" != -t ] || exit 127\n'
+                            'fi\n'
+                            'case "$2" in\n'
+                            '  /bin/sh) exit 0;;\n'
+                            '  nslookup) [ "$DNS_OK" = yes ]; exit $?;;\n'
+                            '  *) exit 127;;\n'
+                            'esac\n'),
                 'sleep':'#!/bin/sh\nexit 0\n',
             }.items():
                 p=fake/name
@@ -108,8 +130,13 @@ class EngineOffline(unittest.TestCase):
                      FIXED_OK='yes' if fixed_ok else 'no',
                      FALLBACK_OK='yes' if fallback_ok else 'no',
                      DNS_OK='yes' if dns_ok else 'no',
-                     YOUTUBE_OK='yes' if youtube_ok else 'no')
-            shell=("say() { printf '%s\\n' \"$1\"; }\n" + fn_source('probe') + '\nprobe\n')
+                     YOUTUBE_OK='yes' if youtube_ok else 'no',
+                     TIMEOUT_VARIANT=timeout_style)
+            shell=("say() { printf '%s\\n' \"$1\"; }\n" +
+                   fn_source('detect_timeout_style') + '\n' +
+                   fn_source('timed_nslookup') + '\n' +
+                   fn_source('probe') +
+                   '\nif ! detect_timeout_style; then echo UNSUPPORTED_TIMEOUT; exit 127; fi\nprobe\n')
             r=subprocess.run(['/bin/sh','-c',shell],env=env,text=True,capture_output=True,timeout=10)
             states={name:(state/name).read_text().strip() if (state/name).exists() else None
                     for name in ('probe.general','probe.dns','probe.youtube')}
@@ -122,6 +149,18 @@ class EngineOffline(unittest.TestCase):
         self.assertIn('GENERAL_HTTPS=OK',r.stdout)
         self.assertEqual(states['probe.general'],'OK')
         self.assertEqual(states['probe.dns'],'OK')
+
+    def test_old_webos_timeout_t_syntax(self):
+        r, states=self.run_probe_mock(fixed_ok=False, fallback_ok=True, timeout_style='legacy')
+        self.assertEqual(r.returncode,0,r.stderr+'\n'+r.stdout)
+        self.assertEqual(states['probe.dns'],'OK')
+        self.assertEqual(states['probe.general'],'OK')
+
+    def test_unsupported_timeout_must_refuse(self):
+        r, states=self.run_probe_mock(timeout_style='unsupported')
+        self.assertNotEqual(r.returncode,0)
+        self.assertIn('UNSUPPORTED_TIMEOUT',r.stdout)
+        self.assertIsNone(states['probe.dns'])
 
     def test_cloudflare_ca_failure_and_fallback_failure_must_refuse(self):
         r, states=self.run_probe_mock(fixed_ok=False, fallback_ok=False)
@@ -139,12 +178,6 @@ class EngineOffline(unittest.TestCase):
         self.assertEqual(r.returncode,0,r.stderr+'\n'+r.stdout)
         self.assertEqual(states['probe.youtube'],'UNAVAILABLE')
         self.assertEqual(states['probe.general'],'OK')
-
-    def test_tls_probes_never_disable_certificate_validation(self):
-        self.assertNotIn('curl -4 -k', ENGINE)
-        self.assertNotIn('--insecure', ENGINE)
-        self.assertIn('https://example.com/', fn_source('probe'))
-        self.assertIn('IPv6 default route exists', ENGINE)
 
     def test_release_contains_no_private_payloads(self):
         for forbidden in ('private/access.key', 'config/client.json', 'config/server-ip.txt',
