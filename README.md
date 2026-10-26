@@ -16,9 +16,9 @@ A privacy-focused VPN control experience for **rooted LG webOS TVs**. Pair your 
 
 ---
 
-## All-in-One 2.1.0 (test branch — not yet verified on LG)
+## All-in-One 2.1.1 SSL compatibility hotfix (testing on new LG)
  
-The **2.1.0 IPK itself contains** the TV launcher, ARMv7 Go backend, Xray-core 26.10.21, VPN Engine and recovery scripts. Xray is downloaded **only in the GitHub Actions build**, with a fixed upstream SHA-256, not by the user or the TV.
+The **2.1.1 test IPK itself contains** the TV launcher, ARMv7 Go backend, Xray-core 26.10.21, VPN Engine and recovery scripts. Xray is downloaded **only in the GitHub Actions build**, with a fixed upstream SHA-256, not by the user or the TV.
 
 **End-user workflow:** root LG TV → install Homebrew Channel → install CVPN webOS IPK → open app → wait for automatic initialization → scan TV QR code → import a VLESS configuration/HTTPS subscription → connect. No SSH, PowerShell, manual Xray or root zip is required.
 
@@ -35,7 +35,7 @@ CVPN webOS contains **two separately installed components**:
 | **TV Launcher (IPK)** | 2.0.4 | Opens the pairing QR code on the television and notifies the control panel. |
 | **Root backend + VPN Engine** | 2.0.0 / 0.1.4 | Manages local profiles, subscriptions, Xray and the network TUN. |
 
-**For the existing 2.0.2 release**, the IPK is still launcher-only. **The new 2.1.0 branch** embeds the backend and Xray and installs them at first launch on a supported rooted TV. There is no remote account syncing: each television stores its own subscriptions locally.
+**For the existing 2.0.2 release**, the IPK is still launcher-only. **The new 2.1.x feature branch** embeds the backend and Xray and installs them at first launch on a supported rooted TV. There is no remote account syncing: each television stores its own subscriptions locally.
 
 ## Interface
 
@@ -164,6 +164,10 @@ To repair an **existing clean install** without disturbing Xray or VPN routes,
 use `scripts/repair-first-import.ps1` with `-Action check`, then `-Action install`,
 together with the **recompiled ARMv7 backend**. Keep the initial backup for rollback.
 The original v2.0.1 GitHub Release does not include this fix. Wait for a verified newer tagged release before deploying the combined package.
+
+## CA compatibility fix — 2.1.1 test build
+
+On a third fresh rooted ARMv7 LG, the built-in Xray and backend installed, but VPN startup did not pass the fixed-IP HTTPS check because its preinstalled curl CA bundle could not validate Cloudflare's certificate chain (`curl: (60)`), even without VPN. HTTPS to `https://example.com/` passed with certificate validation enabled. The Engine now tries independently verified HTTPS over the configured VPN routes after successful DNS if the fixed-IP Cloudflare endpoint fails. DNS failures and failure of both HTTPS checks continue to abort and safely restore the network. Never use `curl -k` as a workaround. This update is marked 2.1.1 to distinguish it from the older 2.1.0 IPK already installed on the test TV. It requires real-LG verification before any stable release.
 
 ## Release validation
 
