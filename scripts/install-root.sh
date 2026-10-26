@@ -1,5 +1,5 @@
 #!/bin/sh
-# Fresh ROOT-only bootstrap on rooted LG ARMv7, never an updater.
+# Fresh ROOT-only bootstrap for ARMv7 userspace on rooted LG TVs, never an updater.
 # Expected /tmp/cvpn-root-setup/: panel, engine, worker, boot-hook, start-panel,
 # stop-panel, payload.sha256; xray optional only if preinstalled in BASE/bin/xray.
 set -eu
@@ -28,7 +28,22 @@ idle() {
 }
 preflight() {
   [ "$(id -u)" = 0 ] || refuse root_required
-  [ "$(uname -m)" = armv7l ] || refuse armv7l_required
+  # uname describes the kernel, not necessarily the userspace ABI. Some webOS 7
+  # TVs run 32-bit ARM userspace on an aarch64 kernel and can execute ARMv7 ELF.
+  # Do not accept native 64-bit userspace blindly.
+  kernel_arch=$(uname -m) || refuse kernel_arch_unavailable
+  case "$kernel_arch" in
+    armv7l)
+      echo TARGET_ABI=armv7
+      ;;
+    aarch64)
+      command -v getconf >/dev/null 2>&1 || refuse userspace_bit_width_unknown
+      userspace_bits=$(getconf LONG_BIT 2>/dev/null) || refuse userspace_bit_width_unknown
+      [ "$userspace_bits" = 32 ] || refuse armv7_userspace_required
+      echo TARGET_ABI=armv7_on_aarch64_kernel
+      ;;
+    *) refuse "unsupported_kernel_arch:$kernel_arch" ;;
+  esac
   for c in sh ip curl awk od tr sha256sum readlink; do
     command -v "$c" >/dev/null 2>&1 || refuse "missing_tool:$c"
   done
