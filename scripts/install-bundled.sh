@@ -82,7 +82,7 @@ restore_on_exit() {
             esac
             if [ -s "$backup/$item" ]; then cp -p "$backup/$item" "$dst" || true;
             else rm -f "$dst" || true; fi
-            rm -f "$dst.next.$" 2>/dev/null || true
+            rm -f "$dst".next.* 2>/dev/null || true
         done
         if [ -s "$backup/old-hook" ]; then
             ln -sfn "$(cat "$backup/old-hook")" "$HOOK" || true
@@ -160,9 +160,9 @@ install() {
     if ! sh "$WEB/start-panel.sh" || ! panel_health; then
         refuse panel_start_failed_original_restored
     fi
-    printf '%s\n' "$(manifest_hash)" > "$STAMP.next.$$"
-    chmod 600 "$STAMP.next.$$"
-    mv -f "$STAMP.next.$" "$STAMP"
+    printf '%s\n' "$(manifest_hash)" > "$STAMP.next"
+    chmod 600 "$STAMP.next"
+    mv -f "$STAMP.next" "$STAMP"
     RESTORE_ON_EXIT=0
     echo BUNDLE_INSTALLED=YES
     echo BUNDLE_READY=YES
