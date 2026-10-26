@@ -22,6 +22,13 @@ button { display:inline-block; box-sizing:border-box; min-width:168px; min-heigh
 button:focus { outline:2px solid #8DB5FF; outline-offset:3px; box-shadow:0 0 0 6px rgba(141,181,255,.13); }
 button:active { background:#B3CCFF; }
 @media (max-height:760px) { .panel{padding:20px 30px;} .subtitle{margin-bottom:8px;} #qr-canvas{width:255px;height:255px;margin:12px auto;} p{margin:8px 0;} }
+
+/* First-launch installer. Root, backend and Xray are installed locally from IPK. */
+#setup-screen {position:fixed;top:0;right:0;bottom:0;left:0;display:flex;align-items:center;justify-content:center;background:rgba(4,8,16,.93)}
+#setup-screen .panel {border-color:#2B435F;max-width:640px}
+#setup-status {min-height:55px;overflow-wrap:anywhere}
+#setup-retry {margin-top:20px}
+#setup-retry:disabled {opacity:.48;cursor:default}
 </style>
 </head>
 <body>
@@ -37,6 +44,15 @@ button:active { background:#B3CCFF; }
   <button id="close-qr" type="button">Закрыть</button>
  </main>
 </div>
+<div id="setup-screen" hidden>
+ <main class="panel" role="status" aria-live="polite">
+  <h1>CVPN <span>webOS</span></h1>
+  <div class="subtitle">PRIVATE NETWORK</div>
+  <p id="setup-status">Проверяем компоненты приложения…</p>
+  <p id="setup-hint" style="font-size:16px">Для работы необходимы root и Homebrew Channel. Backend и Xray уже включены в приложение.</p>
+  <button id="setup-retry" type="button" hidden>Повторить</button>
+ </main>
+</div>
 <script src="qr-bundle.js"></script>
 <script>
 (function(){
@@ -46,11 +62,70 @@ button:active { background:#B3CCFF; }
  function parseParams(raw){try{return typeof raw==='string'?JSON.parse(raw):(raw||{});}catch(e){return {};}}
  function platformParams(){var p={};try{if(window.webOSSystem && window.webOSSystem.launchParams){p=parseParams(window.webOSSystem.launchParams());}}catch(e){}try{if(!p.mode && window.PalmSystem && window.PalmSystem.launchParams){p=parseParams(window.PalmSystem.launchParams);}}catch(e){}return p;}
  function shut(){try{window.close();}catch(e){}}
- function showNormal(){if(didNormalLaunch)return;didNormalLaunch=true;qrMode=false;clearInterval(expiryTimer);qrScreen.hidden=true;
-  var pixel=new Image();pixel.src='http://127.0.0.1:8765/tv/notify?nonce='+Date.now();
-  // Close whether the TV's old browser accepts or rejects the image. Some
-  // builds spuriously fire onerror after the backend has already queued Alert.
-  clearTimeout(closeTimer);closeTimer=setTimeout(shut,1400);
+ var installing=false;
+ var setupScreen=document.getElementById('setup-screen');
+ var setupStatus=document.getElementById('setup-status');
+ var setupRetry=document.getElementById('setup-retry');
+ function setupMessage(message,retry){
+   setupScreen.hidden=false;qrScreen.hidden=true;setupStatus.textContent=message;
+   setupRetry.hidden=!retry;setupRetry.disabled=!retry;
+   if(retry)setupRetry.focus();
+ }
+ // Only fixed commands into the already-installed package. Never pass a URL,
+ // config, TV IP, app text, or any other untrusted input to root execution.
+ function invokeInstaller(mode,done){
+   var command='/bin/sh /media/developer/apps/usr/palm/applications/su.cvpn.webos/payload/install.sh '+mode;
+   var finished=false;
+   function complete(ok,data){if(finished)return;finished=true;done(ok,data||{});}
+   try{
+     if(window.PalmServiceBridge){
+       var bridge=new window.PalmServiceBridge();
+       bridge.onservicecallback=function(raw){
+         var data=parseParams(raw);
+         complete(data.returnValue!==false&&!data.error,data);
+       };
+       bridge.call('luna://org.webosbrew.hbchannel.service/exec',JSON.stringify({command:command}));
+       return;
+     }
+     if(window.webOS&&webOS.service&&webOS.service.request){
+       webOS.service.request('luna://org.webosbrew.hbchannel.service',{
+         method:'exec',parameters:{command:command},subscribe:false,
+         onSuccess:function(data){complete(data.returnValue!==false&&!data.error,data);},
+         onFailure:function(data){complete(false,data);}
+       });
+       return;
+     }
+     complete(false,{error:'Не удалось обратиться к root-службе Homebrew Channel.'});
+   }catch(e){complete(false,{error:'Ошибка запуска root-службы Homebrew.'});}
+ }
+ function installerFailure(data){
+   var msg=(data&&data.stderrString)||(data&&data.error)||'Не удалось подготовить компоненты.';
+   var found=String(msg).match(/REFUSED=[a-zA-Z0-9_:.\\-]+/);
+   return found?('Установка остановлена: '+found[0]):'Не удалось установить VPN-компоненты. Проверьте root и Homebrew Channel.';
+ }
+ function panelReady(){
+   installing=false;setupScreen.hidden=true;didNormalLaunch=true;
+   var pixel=new Image();pixel.src='http://127.0.0.1:8765/tv/notify?nonce='+Date.now();
+   clearTimeout(closeTimer);closeTimer=setTimeout(shut,1400);
+ }
+ function showNormal(){
+   if(didNormalLaunch||installing)return;
+   installing=true;qrMode=false;clearInterval(expiryTimer);
+   setupMessage('Проверяем CVPN Backend и Xray…',false);
+   invokeInstaller('status',function(ok,data){
+     if(!ok){installing=false;setupMessage(installerFailure(data),true);return;}
+     if(String(data.stdoutString||'').indexOf('BUNDLE_READY=YES')!==-1){panelReady();return;}
+     if(String(data.stdoutString||'').indexOf('UPGRADE_BLOCKED=VPN_RUNNING')!==-1){
+       installing=false;setupMessage('Для обновления выключите VPN в CVPN Connect, затем нажмите «Повторить».',true);return;
+     }
+     setupMessage('Устанавливаем встроенные компоненты VPN…',false);
+     invokeInstaller('install',function(installOK,info){
+       if(!installOK||String(info.stdoutString||'').indexOf('BUNDLE_READY=YES')===-1){
+         installing=false;setupMessage(installerFailure(info),true);return;
+       }
+       panelReady();
+     });
+   });
  }
  function renderCode(data){if(!qrMode)return;
   var hint=document.getElementById('qr-hint'),canvas=document.getElementById('qr-canvas');
@@ -70,9 +145,10 @@ button:active { background:#B3CCFF; }
   catch(e){canvas.hidden=true;hint.textContent='Не удалось отобразить QR. Используйте адрес и PIN.';}
  }
  window.cvpnQRInfo=renderCode;
- function showQR(){qrMode=true;didNormalLaunch=false;clearTimeout(closeTimer);qrScreen.hidden=false;document.getElementById('qr-hint').textContent='Действует 3 минуты · Только домашняя сеть';document.getElementById('qr-address').textContent='';document.getElementById('qr-code').textContent='—';var s=document.createElement('script');s.src='http://127.0.0.1:8765/tv/qr-data.js?nonce='+Date.now();s.onerror=function(){document.getElementById('qr-hint').textContent='Панель недоступна. Проверьте службу CVPN.';};document.head.appendChild(s);document.getElementById('close-qr').focus();}
+ function showQR(){qrMode=true;didNormalLaunch=false;installing=false;setupScreen.hidden=true;clearTimeout(closeTimer);qrScreen.hidden=false;document.getElementById('qr-hint').textContent='Действует 3 минуты · Только домашняя сеть';document.getElementById('qr-address').textContent='';document.getElementById('qr-code').textContent='—';var s=document.createElement('script');s.src='http://127.0.0.1:8765/tv/qr-data.js?nonce='+Date.now();s.onerror=function(){document.getElementById('qr-hint').textContent='Панель недоступна. Проверьте службу CVPN.';};document.head.appendChild(s);document.getElementById('close-qr').focus();}
  function handle(params){if(params && params.mode==='qr')showQR();else showNormal();}
  document.getElementById('close-qr').onclick=shut;
+ setupRetry.onclick=function(){if(!installing)showNormal();};
  document.addEventListener('keydown',function(e){if(qrMode && (e.keyCode===461||e.keyCode===27)){e.preventDefault();shut();}});
  document.addEventListener('webOSLaunch',function(e){handle((e && e.detail && e.detail.mode)?e.detail:platformParams());});
  document.addEventListener('webOSRelaunch',function(e){handle((e && e.detail && e.detail.mode)?e.detail:platformParams());});
