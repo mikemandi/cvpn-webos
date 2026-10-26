@@ -79,8 +79,16 @@ install() {
             *) refuse foreign_boot_hook ;;
         esac
     fi
-    mkdir -p "$BASE/bin" "$BASE/config" "$BASE/state" "$WEB/bin" "$WEB/secrets" "$WEB/state" "$WEB/recovery" /var/lib/webosbrew/init.d
-    chmod 700 "$BASE/config" "$BASE/state" "$WEB/secrets" "$WEB/state"
+    mkdir -p "$BASE/state"
+    chmod 700 "$BASE/state"
+    # Share the Engine lock to avoid changing binaries during a concurrent VPN start.
+    mkdir "$BASE/state/lock" 2>/dev/null || refuse engine_busy
+    printf '%s\n' "$" > "$BASE/state/lock/pid"
+    trap 'rm -f "$BASE/state/lock/pid"; rmdir "$BASE/state/lock" 2>/dev/null || true' 0
+    [ ! -e "$BASE/state/active" ] || refuse vpn_running_disconnect_first
+    if ip link show dev cvpn0 >/dev/null 2>&1; then refuse vpn_tun_present; fi
+    mkdir -p "$BASE/bin" "$BASE/config" "$WEB/bin" "$WEB/secrets" "$WEB/state" "$WEB/recovery" /var/lib/webosbrew/init.d
+    chmod 700 "$BASE/config" "$WEB/secrets" "$WEB/state"
     backup="$WEB/state/backup-allinone-$(date -u +%Y%m%d%H%M%S)-$$"
     mkdir -m 700 "$backup"
     [ ! -L "$HOOK" ] || readlink "$HOOK" > "$backup/old-hook"
