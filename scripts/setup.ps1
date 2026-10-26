@@ -1,4 +1,4 @@
-# PowerShell 5.1+ / Windows 11 — new rooted ARMv7 TV only. Run in repo directory.
+# PowerShell 5.1+ / Windows 11 — new rooted TV with ARMv7 userspace (armv7l or compatible aarch64 kernel) only. Run in repo directory.
 param(
   [Parameter(Mandatory=$true)][ValidatePattern('^[A-Za-z0-9][A-Za-z0-9.-]*$')][string]$TV,
   [ValidateSet('check','install','doctor')][string]$Action='check',
