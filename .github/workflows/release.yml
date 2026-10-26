@@ -25,13 +25,12 @@ jobs:
         run: |
           python3 scripts/make-manifest.py --repository "$TARGET_REPOSITORY" --tag "$RELEASE_TAG"
           python3 scripts/make-homebrew-entry.py --repository "$TARGET_REPOSITORY"
-          (cd dist && sha256sum *.ipk *.zip *.manifest.json > SHA256SUMS)
+          (cd dist && sha256sum *.ipk *.manifest.json > SHA256SUMS)
       - name: Publish release (manual reviewer approval still required for Homebrew index)
         uses: softprops/action-gh-release@v2
         with:
           files: |
             dist/*.ipk
-            dist/*.zip
             dist/*.manifest.json
             dist/SHA256SUMS
           generate_release_notes: true
