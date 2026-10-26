@@ -16,6 +16,16 @@ A privacy-focused VPN control experience for **rooted LG webOS TVs**. Pair your 
 
 ---
 
+## All-in-One 2.1.0 (test branch — not yet verified on LG)
+ 
+The **2.1.0 IPK itself contains** the TV launcher, ARMv7 Go backend, Xray-core 26.10.21, VPN Engine and recovery scripts. Xray is downloaded **only in the GitHub Actions build**, with a fixed upstream SHA-256, not by the user or the TV.
+
+**End-user workflow:** root LG TV → install Homebrew Channel → install CVPN webOS IPK → open app → wait for automatic initialization → scan TV QR code → import a VLESS configuration/HTTPS subscription → connect. No SSH, PowerShell, manual Xray or root zip is required.
+
+The TV app uses the Homebrew Channel root execution service with **fixed commands** to run its own bundled installer. Installer checks root, ARMv7 userspace, TUN, file hashes and an idle VPN. User profiles, secrets, access key and configs are retained across in-place upgrades. The VPN is never connected automatically. The existing 90-second trial and network recovery remain in the Engine.
+
+**Important:** This is a development branch, not a published Homebrew entry. Root service access, initial setup, background lifecycle and uninstall behavior must still be tested on a real LG before release. Removing the IPK disables the app-owned boot hook (a dangling symlink), but persistent user profiles/runtime files may remain and require an explicit owner-controlled cleanup. This limitation must be solved or documented before publication.
+
 ## Overview
 
 CVPN webOS contains **two separately installed components**:
@@ -25,7 +35,7 @@ CVPN webOS contains **two separately installed components**:
 | **TV Launcher (IPK)** | 2.0.4 | Opens the pairing QR code on the television and notifies the control panel. |
 | **Root backend + VPN Engine** | 2.0.0 / 0.1.4 | Manages local profiles, subscriptions, Xray and the network TUN. |
 
-**Installing the IPK alone does not establish a VPN.** A supported rooted TV and the separate root setup are required. There is no remote account syncing: each television stores its own subscriptions locally.
+**For the existing 2.0.2 release**, the IPK is still launcher-only. **The new 2.1.0 branch** embeds the backend and Xray and installs them at first launch on a supported rooted TV. There is no remote account syncing: each television stores its own subscriptions locally.
 
 ## Interface
 
