@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Reproducible Debian-format webOS IPK containing only the TV launcher.
+# Reproducible Debian-format webOS IPK containing the TV launcher, backend, Xray and recovery.
 set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 command -v dpkg-deb >/dev/null || { echo 'dpkg-deb required (Linux/Ubuntu or GitHub Actions)' >&2; exit 1; }
@@ -18,6 +18,8 @@ trap 'rm -rf "$TMP"' EXIT
 APP="$TMP/usr/palm/applications/su.cvpn.webos"
 PKG="$TMP/usr/palm/packages/su.cvpn.webos"
 mkdir -p "$APP" "$PKG" "$TMP/DEBIAN" "$ROOT/dist"
+[[ -s "$ROOT/dist/payload/SHA256SUMS" && -s "$ROOT/dist/payload/bin/xray" && -s "$ROOT/dist/payload/XRAY-LICENSE.txt" ]] || { echo "Missing verified All-in-One payload; run prepare-bundle.sh" >&2; exit 1; }
+cp -a "$ROOT/dist/payload" "$APP/payload"
 for f in appinfo.json index.html icon.png largeicon.png icon-400.png qr-bundle.js QR-NOTICE.txt QR-THIRD-PARTY-LICENSE.txt; do
   cp "$ROOT/launcher/$f" "$APP/$f"
 done
@@ -34,7 +36,7 @@ Section: misc
 Priority: optional
 Architecture: all
 Maintainer: CVPN Project
-Description: CVPN webOS QR launcher; root VPN backend must be installed separately.
+Description: CVPN webOS All-in-One: launcher, root VPN backend and Xray-core.
 webOS-Package-Format-Version: 2
 webOS-Packager-Version: custom-debian2
 EOF
