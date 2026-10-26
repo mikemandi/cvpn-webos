@@ -18,9 +18,10 @@ description: |
   Import your own supported VLESS configurations and HTTPS subscriptions from a phone,
   pair securely with a temporary QR/PIN and control the VPN on the TV.
 
-  **Important:** the IPK installs the television launcher only. A separate root
-  engine/backend setup and compatible Xray-core binary are required. The app
-  cannot configure system-wide VPN on an unrooted television. IPv6 is fail-closed;
+  **Important:** the CVPN webOS 2.1.0 IPK bundles its root backend, Xray-core,
+  VPN Engine and recovery components. It configures them on first launch using
+  Homebrew's root service. The app cannot run a system-wide VPN without root.
+  IPv6 is fail-closed;
   do not expose the local HTTP control panel to untrusted networks.
 
   Installation and device requirements: https://github.com/{a.repository}#installation
