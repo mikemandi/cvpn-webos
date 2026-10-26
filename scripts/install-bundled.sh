@@ -112,7 +112,7 @@ install() {
     chmod 700 "$BASE/state"
     # Share the Engine lock to avoid changing binaries during a concurrent VPN start.
     mkdir "$BASE/state/lock" 2>/dev/null || refuse engine_busy
-    printf '%s\n' "$" > "$BASE/state/lock/pid"
+    printf '%s\n' "$$" > "$BASE/state/lock/pid"
     trap 'restore_on_exit' 0
     [ ! -e "$BASE/state/active" ] || refuse vpn_running_disconnect_first
     if ip link show dev cvpn0 >/dev/null 2>&1; then refuse vpn_tun_present; fi
