@@ -46,6 +46,13 @@ class PublicPackageTests(unittest.TestCase):
         result=subprocess.run(['node','--check'],input=inline,text=True,capture_output=True,timeout=10)
         self.assertEqual(result.returncode,0,result.stderr)
 
+    def test_root_service_missing_callback_never_spins_forever(self):
+        launcher=(ROOT/'launcher/index.html').read_text()
+        self.assertIn("mode==='install'?90000:20000", launcher)
+        self.assertIn("HOMEBREW_SERVICE_TIMEOUT", launcher)
+        self.assertIn("clearTimeout(timeoutID)", launcher)
+        self.assertIn("if(finished)return", launcher)
+
     def test_all_in_one_replaces_legacy_root_bundle(self):
         self.assertFalse((ROOT/'dist/cvpn-webos-root-2.0.0.zip').exists(),
                          '2.1.0 users must never need a separate backend ZIP')
