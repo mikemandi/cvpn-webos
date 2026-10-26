@@ -65,6 +65,44 @@ class FreshInstallerMock(unittest.TestCase):
         self.assertIn('REFUSED=root_required',res.stderr)
         self.assertFalse(self.base.exists())
 
+    def set_kernel_arch(self, architecture, bits='32'):
+        # Mock kernel and userspace separately in this temporary test directory.
+        uname=self.bindir/'uname'
+        uname.write_text(f'#!/bin/sh\nif [ "$1" = -m ]; then echo {architecture}; else exec /usr/bin/uname "$@"; fi\n')
+        uname.chmod(0o755)
+        getconf=self.bindir/'getconf'
+        getconf.write_text(f'#!/bin/sh\nif [ "$1" = LONG_BIT ]; then echo {bits}; else exec /usr/bin/getconf "$@"; fi\n')
+        getconf.chmod(0o755)
+
+    def test_aarch64_kernel_with_32bit_userspace(self):
+        self.set_kernel_arch('aarch64', '32')
+        res=self.act('check')
+        self.assertEqual(res.returncode, 0, res.stderr)
+        self.assertIn('TARGET_ABI=armv7_on_aarch64_kernel', res.stdout)
+        self.assertIn('FRESH_PREFLIGHT_OK=YES', res.stdout)
+        self.assertFalse(self.base.exists())
+
+    def test_aarch64_kernel_with_64bit_userspace_rejected(self):
+        self.set_kernel_arch('aarch64', '64')
+        res=self.act('check')
+        self.assertNotEqual(res.returncode, 0)
+        self.assertIn('REFUSED=armv7_userspace_required', res.stderr)
+        self.assertFalse(self.base.exists())
+
+    def test_unknown_kernel_arch_rejected(self):
+        self.set_kernel_arch('x86_64', '64')
+        res=self.act('check')
+        self.assertNotEqual(res.returncode, 0)
+        self.assertIn('REFUSED=unsupported_kernel_arch:x86_64', res.stderr)
+        self.assertFalse(self.base.exists())
+
+    def test_first_install_aarch64_kernel_32bit_userspace(self):
+        self.set_kernel_arch('aarch64', '32')
+        res=self.act('install')
+        self.assertEqual(res.returncode, 0, res.stderr+res.stdout)
+        self.assertIn('FRESH_INSTALLED=YES', res.stdout)
+        self.assertTrue((self.base/'webui/access.key').exists())
+
     def test_check_does_not_create_user_store(self):
         res=self.act('check')
         self.assertEqual(res.returncode,0,res.stderr)
