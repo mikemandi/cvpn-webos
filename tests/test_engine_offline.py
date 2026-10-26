@@ -74,6 +74,12 @@ class EngineOffline(unittest.TestCase):
             self.assertIn('"autoOutboundsInterface":"wlan0"', runtime.read_text())
             self.assertEqual(runtime.stat().st_mode & 0o777, 0o600)
 
+    def test_dns_probe_uses_portable_timeout(self):
+        # BusyBox 1.31 on webOS 22 accepts 'timeout SECS COMMAND' but not '-t'.
+        self.assertIn('timeout 6 nslookup www.youtube.com', fn_source('probe'))
+        self.assertNotIn('timeout -t ', ENGINE)
+        self.assertIn('echo FAILED > "$STATE/probe.dns"', fn_source('probe'))
+
     def test_tls_probes_never_disable_certificate_validation(self):
         self.assertNotIn('curl -4 -k', ENGINE)
         self.assertIn('IPv6 default route exists', ENGINE)
