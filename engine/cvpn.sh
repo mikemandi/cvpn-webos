@@ -182,6 +182,29 @@ stop_now() {
     return "$rc"
 }
 
+# Different webOS builds expose incompatible timeout applets:
+#   timeout SECS COMMAND       (newer BusyBox)
+#   timeout -t SECS COMMAND    (older BusyBox)
+# Detect before creating any TUN, route, or DNS changes. Do not infer
+# compatibility from the kernel, CPU architecture or LG model.
+detect_timeout_style() {
+    if timeout 1 /bin/sh -c ':' >/dev/null 2>&1; then
+        TIMEOUT_STYLE=positional
+    elif timeout -t 1 /bin/sh -c ':' >/dev/null 2>&1; then
+        TIMEOUT_STYLE=legacy
+    else
+        return 1
+    fi
+    return 0
+}
+
+timed_nslookup() {
+    case "${TIMEOUT_STYLE:-}" in
+        positional) timeout 6 nslookup www.youtube.com ;;
+        legacy) timeout -t 6 nslookup www.youtube.com ;;
+        *) return 127 ;;
+    esac
+}
 # Probe budgets are deliberately bounded below the backend 85s command timeout
 # and the independent 90s rollback timer. Distinguish general internet access
 # from YouTube reachability: one service being blocked is not a broken tunnel.
@@ -216,7 +239,7 @@ probe() {
     attempt=1
     dns_ok=0
     while [ "$attempt" -le 2 ]; do
-        if timeout 6 nslookup www.youtube.com > "$STATE/dnscheck.out" 2>&1; then
+        if timed_nslookup > "$STATE/dnscheck.out" 2>&1; then
             dns_ok=1
             break
         fi
@@ -311,6 +334,8 @@ start_now() {
     for tool in nohup curl nslookup timeout mount umount awk; do
         command -v "$tool" >/dev/null 2>&1 || fail "Missing tool: $tool"
     done
+    detect_timeout_style || fail 'Unsupported timeout syntax; VPN unchanged'
+    say "DNS_TIMEOUT_STYLE=$TIMEOUT_STYLE"
     mkdir -p "$STATE" || fail 'Cannot create state'
     chmod 700 "$STATE"
     lock
