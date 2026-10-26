@@ -112,6 +112,20 @@ class AllInOneInstaller(unittest.TestCase):
         self.assertIn('REFUSED=vpn_running_disconnect_first',res.stderr)
         self.assertEqual(previous,(self.base/'bin/cvpn.sh').read_bytes())
 
+    def test_partial_copy_failure_rolls_back(self):
+        self.assertEqual(self.run_it('install').returncode,0)
+        original=(self.base/'bin/cvpn.sh').read_bytes()
+        (self.payload/'bin/engine').write_text('#!/bin/sh\necho new-engine\n')
+        self.regenerate_sums()
+        cp=self.fakebin/'cp'
+        cp.write_text('#!/bin/sh\ncase "$2" in *cvpn.sh.next.*) exit 23 ;; esac\nexec /bin/cp "$@"\n')
+        cp.chmod(0o755)
+        res=self.run_it('install')
+        self.assertNotEqual(res.returncode,0)
+        self.assertIn('ROLLBACK_ATTEMPTED=YES',res.stderr)
+        self.assertEqual((self.base/'bin/cvpn.sh').read_bytes(),original)
+        self.assertFalse((self.base/'state/lock').exists())
+
     def test_root_required(self):
         (self.fakebin/'id').write_text('#!/bin/sh\necho 1000\n')
         res=self.run_it('install')
