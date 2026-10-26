@@ -67,6 +67,35 @@ idle() {
         refuse resolver_bind_present
     fi
 }
+# On any partial update, restore CVPN binaries but never touch user secrets.
+restore_on_exit() {
+    code=$?
+    trap - 0
+    if [ "$code" -ne 0 ] && [ "${RESTORE_ON_EXIT:-0}" = 1 ]; then
+        if [ -x "$WEB/stop-panel.sh" ]; then sh "$WEB/stop-panel.sh" >/dev/null 2>&1 || true; fi
+        for item in xray panel engine worker boot-hook start-panel stop-panel; do
+            case "$item" in
+                xray) dst="$BASE/bin/xray";; panel) dst="$WEB/bin/cvpn-webos-panel";;
+                engine) dst="$BASE/bin/cvpn.sh";; worker) dst="$WEB/recovery/recovery-worker.sh";;
+                boot-hook) dst="$WEB/recovery/boot-hook.sh";;
+                start-panel|stop-panel) dst="$WEB/$item.sh";;
+            esac
+            if [ -s "$backup/$item" ]; then cp -p "$backup/$item" "$dst" || true;
+            else rm -f "$dst" || true; fi
+            rm -f "$dst.next.$" 2>/dev/null || true
+        done
+        if [ -s "$backup/old-hook" ]; then
+            ln -sfn "$(cat "$backup/old-hook")" "$HOOK" || true
+        else
+            rm -f "$HOOK" || true
+        fi
+        if [ -x "$WEB/start-panel.sh" ]; then sh "$WEB/start-panel.sh" >/dev/null 2>&1 || true; fi
+        echo ROLLBACK_ATTEMPTED=YES >&2
+    fi
+    rm -f "$BASE/state/lock/pid" 2>/dev/null || true
+    rmdir "$BASE/state/lock" 2>/dev/null || true
+    exit "$code"
+}
 install() {
     root_check
     if ready; then echo BUNDLE_READY=YES; exit 0; fi
@@ -84,7 +113,7 @@ install() {
     # Share the Engine lock to avoid changing binaries during a concurrent VPN start.
     mkdir "$BASE/state/lock" 2>/dev/null || refuse engine_busy
     printf '%s\n' "$" > "$BASE/state/lock/pid"
-    trap 'rm -f "$BASE/state/lock/pid"; rmdir "$BASE/state/lock" 2>/dev/null || true' 0
+    trap 'restore_on_exit' 0
     [ ! -e "$BASE/state/active" ] || refuse vpn_running_disconnect_first
     if ip link show dev cvpn0 >/dev/null 2>&1; then refuse vpn_tun_present; fi
     mkdir -p "$BASE/bin" "$BASE/config" "$WEB/bin" "$WEB/secrets" "$WEB/state" "$WEB/recovery" /var/lib/webosbrew/init.d
@@ -104,6 +133,7 @@ install() {
         esac
         [ ! -f "$dst" ] || cp -p "$dst" "$backup/$item"
     done
+    RESTORE_ON_EXIT=1
     if [ -x "$WEB/stop-panel.sh" ]; then sh "$WEB/stop-panel.sh" || refuse panel_stop_failed; fi
     for item in xray panel engine worker boot-hook start-panel stop-panel; do
         case "$item" in
@@ -128,23 +158,12 @@ install() {
     # App-owned symlink becomes dangling after uninstall rather than autostarting old service.
     ln -sfn "$PAYLOAD/bin/boot-hook" "$HOOK" || refuse boot_hook_failed
     if ! sh "$WEB/start-panel.sh" || ! panel_health; then
-        echo PANEL_START_FAILED_ROLLING_BACK=YES >&2
-        sh "$WEB/stop-panel.sh" >/dev/null 2>&1 || true
-        for item in xray panel engine worker boot-hook start-panel stop-panel; do
-            case "$item" in
-                xray) dst="$BASE/bin/xray";; panel) dst="$WEB/bin/cvpn-webos-panel";; engine) dst="$BASE/bin/cvpn.sh";;
-                worker) dst="$WEB/recovery/recovery-worker.sh";; boot-hook) dst="$WEB/recovery/boot-hook.sh";;
-                start-panel|stop-panel) dst="$WEB/$item.sh";;
-            esac
-            if [ -s "$backup/$item" ]; then cp -p "$backup/$item" "$dst"; else rm -f "$dst"; fi
-        done
-        if [ -s "$backup/old-hook" ]; then ln -sfn "$(cat "$backup/old-hook")" "$HOOK"; else rm -f "$HOOK"; fi
-        [ ! -x "$WEB/start-panel.sh" ] || sh "$WEB/start-panel.sh" >/dev/null 2>&1 || true
         refuse panel_start_failed_original_restored
     fi
     printf '%s\n' "$(manifest_hash)" > "$STAMP.next.$$"
     chmod 600 "$STAMP.next.$$"
-    mv -f "$STAMP.next.$$" "$STAMP"
+    mv -f "$STAMP.next.$" "$STAMP"
+    RESTORE_ON_EXIT=0
     echo BUNDLE_INSTALLED=YES
     echo BUNDLE_READY=YES
     echo VPN_AUTOSTART=NO
