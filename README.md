@@ -16,9 +16,9 @@ A privacy-focused VPN control experience for **rooted LG webOS TVs**. Pair your 
 
 ---
 
-## All-in-One 2.1.1 SSL compatibility hotfix (testing on new LG)
+## All-in-One 2.1.2 DNS timeout compatibility fix (testing on new LG)
  
-The **2.1.1 test IPK itself contains** the TV launcher, ARMv7 Go backend, Xray-core 26.10.21, VPN Engine and recovery scripts. Xray is downloaded **only in the GitHub Actions build**, with a fixed upstream SHA-256, not by the user or the TV.
+The **2.1.2 test IPK itself contains** the TV launcher, ARMv7 Go backend, Xray-core 26.10.21, VPN Engine and recovery scripts. Xray is downloaded **only in the GitHub Actions build**, with a fixed upstream SHA-256, not by the user or the TV.
 
 **End-user workflow:** root LG TV → install Homebrew Channel → install CVPN webOS IPK → open app → wait for automatic initialization → scan TV QR code → import a VLESS configuration/HTTPS subscription → connect. No SSH, PowerShell, manual Xray or root zip is required.
 
@@ -164,6 +164,10 @@ To repair an **existing clean install** without disturbing Xray or VPN routes,
 use `scripts/repair-first-import.ps1` with `-Action check`, then `-Action install`,
 together with the **recompiled ARMv7 backend**. Keep the initial backup for rollback.
 The original v2.0.1 GitHub Release does not include this fix. Wait for a verified newer tagged release before deploying the combined package.
+
+## LG timeout syntax compatibility — 2.1.2 test build
+
+On third LG, `timeout 8 nslookup ...` failed with `timeout: can't execute '8': No such file or directory`, proving `timeout` syntax differs across webOS builds. Engine detects positional `timeout SECS CMD` and legacy `timeout -t SECS CMD` before touching TUN, routes, or DNS; an unsupported implementation refuses to start. CI covers both variants. This change is not yet validated against all DNS failures on actual hardware.
 
 ## CA compatibility fix — 2.1.1 test build
 
