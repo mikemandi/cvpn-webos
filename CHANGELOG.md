@@ -16,3 +16,9 @@
 - First selected and Xray-validated server creates active configuration files with private permissions.
 - Existing installations keep their original VPN profiles and configuration.
 - Recoverable panel-only repair scripts; no changes to Xray, networking or TV Launcher.
+
+### Unreleased — portable DNS timeout on webOS 22
+
+- Use `timeout 6 nslookup ...` instead of `timeout -t 6 nslookup ...` in the Engine's startup DNS probe; the latter fails immediately with BusyBox 1.31.1.
+- Preserve bounded DNS probing and the existing safe rollback; do not disable TLS checks or extend the VPN trial timeout.
+- No tagged GitHub Release contains this update yet; existing TVs require a reviewed Engine-only update.
