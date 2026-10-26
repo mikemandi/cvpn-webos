@@ -1,6 +1,6 @@
 # Supported configuration and publication gates
 
-- TV must be rooted with Homebrew Channel startup hooks, Linux ARMv7/armv7l, `ip`, `curl`,
+- TV must be rooted with Homebrew Channel startup hooks, ARMv7 32-bit userspace (armv7l kernel, or aarch64 kernel with 32-bit userspace), `ip`, `curl`,
   `sha256sum`, BusyBox/ash, and working TUN support. Not LG Content Store compatible.
 - IPK is the television launcher / pairing UI **only**. A separate root backend install is
   required. Users MUST NOT expect VPN to work by installing the IPK alone.
