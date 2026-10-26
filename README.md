@@ -16,9 +16,9 @@ A privacy-focused VPN control experience for **rooted LG webOS TVs**. Pair your 
 
 ---
 
-## All-in-One 2.1.2 DNS timeout compatibility fix (testing on new LG)
+## All-in-One 2.1.3 reliable DNS/TLS readiness test (third LG test)
  
-The **2.1.2 test IPK itself contains** the TV launcher, ARMv7 Go backend, Xray-core 26.10.21, VPN Engine and recovery scripts. Xray is downloaded **only in the GitHub Actions build**, with a fixed upstream SHA-256, not by the user or the TV.
+The **2.1.3 test IPK itself contains** the TV launcher, ARMv7 Go backend, Xray-core 26.10.21, VPN Engine and recovery scripts. Xray is downloaded **only in the GitHub Actions build**, with a fixed upstream SHA-256, not by the user or the TV.
 
 **End-user workflow:** root LG TV → install Homebrew Channel → install CVPN webOS IPK → open app → wait for automatic initialization → scan TV QR code → import a VLESS configuration/HTTPS subscription → connect. No SSH, PowerShell, manual Xray or root zip is required.
 
@@ -164,6 +164,10 @@ To repair an **existing clean install** without disturbing Xray or VPN routes,
 use `scripts/repair-first-import.ps1` with `-Action check`, then `-Action install`,
 together with the **recompiled ARMv7 backend**. Keep the initial backup for rollback.
 The original v2.0.1 GitHub Release does not include this fix. Wait for a verified newer tagged release before deploying the combined package.
+
+## DNS readiness fix — 2.1.3 test build
+
+LG BusyBox 1.24.1 supports only `nslookup HOST SERVER` and has no `-type=A`. On that TV `nslookup` returned an IPv4 address and nevertheless hung until terminated (code 143). CVPN no longer treats `nslookup` exit status as the VPN DNS health check. Once Engine installs the split IPv4 routes and the temporary resolver bind mount, a TLS-certificate-verified `curl -4` request by **hostname** to `https://example.com/` checks ordinary system name resolution plus a working HTTPS data path through CVPN. The probe does not use `--resolve`, `-k`, or `--insecure`. Failure still rejects connection and safely restores the prior network; YouTube remains an advisory check. The 2.1.2 timeout-style detector is no longer required, so both legacy and newer BusyBox are supported without relying on their nslookup flags or completion behavior. Actual successful VPN connection on the third test LG has **not** yet been confirmed.
 
 ## LG timeout syntax compatibility — 2.1.2 test build
 
