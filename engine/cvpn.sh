@@ -202,13 +202,15 @@ probe() {
         [ "$attempt" -le 2 ] && sleep 1
     done
     if [ "$fixed_ok" -ne 1 ]; then
-        say 'FIXED_IP_HTTPS=FAILED'
-        echo FAILED > "$STATE/probe.general"
-        return 1
+        # Some LG firmware CA stores cannot validate Cloudflare's chain even
+        # with a healthy network (curl exit 60 on the direct WAN, too).
+        # Keep TLS verification ON; require independently verified HTTPS
+        # through the active TUN after system DNS succeeds.
+        say 'FIXED_IP_HTTPS=UNAVAILABLE (checking independent verified HTTPS)'
+    else
+        grep -E '^(ip|colo)=' "$STATE/ipcheck.out" || true
+        say 'FIXED_IP_HTTPS=OK'
     fi
-    grep -E '^(ip|colo)=' "$STATE/ipcheck.out" || true
-    say 'FIXED_IP_HTTPS=OK'
-    echo OK > "$STATE/probe.general"
 
     say 'PROBE_2_SYSTEM_DNS (DNS transport encryption is NOT verified by this test)'
     attempt=1
@@ -229,7 +231,32 @@ probe() {
     say 'SYSTEM_DNS=OK'
     echo OK > "$STATE/probe.dns"
 
-    say 'PROBE_3_YOUTUBE_HTTPS'
+    if [ "$fixed_ok" -ne 1 ]; then
+        # Do not turn certificate verification off or accept DNS alone as
+        # evidence of a working VPN. This request uses the live TUN routes.
+        say 'PROBE_3_INDEPENDENT_VERIFIED_HTTPS'
+        attempt=1
+        fallback_ok=0
+        while [ "$attempt" -le 2 ]; do
+            if curl -4 -fsS --noproxy '*' --connect-timeout 4 --max-time 8 \
+                -o /dev/null 'https://example.com/' \
+                > "$STATE/startup-fallback.out" 2> "$STATE/startup-fallback.err"; then
+                fallback_ok=1
+                break
+            fi
+            attempt=$((attempt + 1))
+            [ "$attempt" -le 2 ] && sleep 1
+        done
+        if [ "$fallback_ok" -ne 1 ]; then
+            say 'GENERAL_HTTPS=FAILED (Cloudflare fixed IP and independent TLS)'
+            echo FAILED > "$STATE/probe.general"
+            return 1
+        fi
+        say 'GENERAL_HTTPS=OK (independent verified TLS)'
+    fi
+    echo OK > "$STATE/probe.general"
+
+    say 'PROBE_4_YOUTUBE_HTTPS'
     attempt=1
     youtube_ok=0
     while [ "$attempt" -le 2 ]; do
@@ -247,12 +274,16 @@ probe() {
     else
         say 'YOUTUBE_HTTPS=UNAVAILABLE'
         echo UNAVAILABLE > "$STATE/probe.youtube"
-        say 'PROBE_4_GENERAL_HTTPS_FALLBACK'
-        if ! curl -4 -fsS --noproxy '*' --connect-timeout 4 --max-time 8 \
-            -o /dev/null 'https://example.com/' > "$STATE/startup-fallback.out" 2> "$STATE/startup-fallback.err"; then
-            say 'GENERAL_HTTPS=FAILED'
-            echo FAILED > "$STATE/probe.general"
-            return 1
+        # When the fixed-IP probe succeeded, independently confirm HTTPS
+        # after YouTube failure; when it failed, HTTPS was verified above.
+        if [ "$fixed_ok" -eq 1 ]; then
+            say 'PROBE_5_GENERAL_HTTPS_FALLBACK'
+            if ! curl -4 -fsS --noproxy '*' --connect-timeout 4 --max-time 8 \
+                -o /dev/null 'https://example.com/' > "$STATE/startup-fallback.out" 2> "$STATE/startup-fallback.err"; then
+                say 'GENERAL_HTTPS=FAILED'
+                echo FAILED > "$STATE/probe.general"
+                return 1
+            fi
         fi
         say 'GENERAL_HTTPS=OK (YouTube unavailable; this is NOT proof of streaming)'
     fi
