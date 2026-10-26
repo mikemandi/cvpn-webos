@@ -214,7 +214,7 @@ probe() {
     attempt=1
     dns_ok=0
     while [ "$attempt" -le 2 ]; do
-        if timeout -t 6 nslookup www.youtube.com > "$STATE/dnscheck.out" 2>&1; then
+        if timeout 6 nslookup www.youtube.com > "$STATE/dnscheck.out" 2>&1; then
             dns_ok=1
             break
         fi
