@@ -32,6 +32,9 @@ import (
 //go:embed public/*
 var frontend embed.FS
 
+//go:embed config-template.json
+var embeddedClientTemplate []byte
+
 const version = "2.0.0"
 
 var base = "/media/developer/cvpn-webos"
@@ -109,6 +112,11 @@ func writeProfiles(p profilesFile) error {
 func mustJSON(v any) []byte { b, _ := json.MarshalIndent(v, "", "  "); return b }
 func readConfig() (map[string]any, error) {
 	b, e := os.ReadFile(path("config", "client.json"))
+	if errors.Is(e, os.ErrNotExist) {
+		// A clean installation has no selected server yet. Use only the
+		// audited embedded TUN skeleton, never a copied user's VPN secret.
+		b, e = embeddedClientTemplate, nil
+	}
 	if e != nil {
 		return nil, e
 	}
@@ -1076,8 +1084,8 @@ func selectProfileLocked(p *profilesFile, id string) error {
 	if e := testConfig(cfg); e != nil {
 		return errors.New("Xray отклонил параметры сервера")
 	}
-	oldCfg, _ := os.ReadFile(path("config", "client.json"))
-	oldIP, _ := os.ReadFile(path("config", "server-ip.txt"))
+	oldCfg, cfgReadErr := os.ReadFile(path("config", "client.json"))
+	oldIP, ipReadErr := os.ReadFile(path("config", "server-ip.txt"))
 	if e := applyConfig(cfg, ip); e != nil {
 		return errors.New("Не удалось применить конфигурацию")
 	}
@@ -1085,8 +1093,11 @@ func selectProfileLocked(p *profilesFile, id string) error {
 	p.Active = id
 	if e := writeProfiles(*p); e != nil {
 		p.Active = old
-		if len(oldCfg) > 0 && len(oldIP) > 0 {
+		if cfgReadErr == nil && ipReadErr == nil {
 			_ = applyConfig(oldCfg, oldIP)
+		} else if errors.Is(cfgReadErr, os.ErrNotExist) && errors.Is(ipReadErr, os.ErrNotExist) {
+			_ = os.Remove(path("config", "client.json"))
+			_ = os.Remove(path("config", "server-ip.txt"))
 		}
 		return errors.New("Не удалось сохранить выбранный сервер")
 	}
@@ -1096,22 +1107,29 @@ func selectProfileLocked(p *profilesFile, id string) error {
 func applyConfig(cfg, server []byte) error {
 	configFile := path("config", "client.json")
 	ipFile := path("config", "server-ip.txt")
-	oldCfg, e := os.ReadFile(configFile)
-	if e != nil {
-		return e
+	oldCfg, cfgErr := os.ReadFile(configFile)
+	oldIP, ipErr := os.ReadFile(ipFile)
+	if cfgErr != nil && !errors.Is(cfgErr, os.ErrNotExist) {
+		return cfgErr
 	}
-	oldIP, e := os.ReadFile(ipFile)
-	if e != nil {
-		return e
+	if ipErr != nil && !errors.Is(ipErr, os.ErrNotExist) {
+		return ipErr
+	}
+	// Never silently repair only half a previously committed configuration.
+	if (cfgErr == nil) != (ipErr == nil) {
+		return errors.New("incomplete existing VPN configuration; manual recovery required")
 	}
 	if e := atomic(configFile, cfg, 0600); e != nil {
 		return e
 	}
 	if e := atomic(ipFile, server, 0600); e != nil {
-		_ = atomic(configFile, oldCfg, 0600)
+		if cfgErr == nil {
+			_ = atomic(configFile, oldCfg, 0600)
+		} else {
+			_ = os.Remove(configFile)
+		}
 		return e
 	}
-	// configuration test already succeeded; rollback route snapshots stay under existing engine.
 	_ = oldIP
 	return nil
 }
