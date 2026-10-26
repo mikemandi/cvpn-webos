@@ -1,5 +1,14 @@
 # Publishing CVPN webOS to webOS Homebrew Channel
 
+## 2.1.0 All-in-One prerelease gate
+
+For 2.1.0, the single `su.cvpn.webos_2.1.0_all.ipk` is expected to include Xray (ARMv7), backend, Engine, recovery and the TV launcher. End users must not install a backend ZIP, Xray binary, SSH tools or any PC scripts.
+
+Before a Homebrew PR, validate real-device first launch via `org.webosbrew.hbchannel.service/exec`, root failure states, working VPN, upgrade while disconnected, refusal while VPN is active, no credential loss, rollback on missing disk space, reboot/startup and uninstall cleanup behavior. The test builds from the feature branch are not yet considered production-ready.
+
+Confirm bundled Xray MPL-2.0 license notices and the CVPN project's own publishing license/pool. Do not claim published until a reviewed `v2.1.0` tag exists.
+
+
 Official instructions: https://github.com/webosbrew/apps-repo and https://repo.webosbrew.org/submit.
 
 **The Homebrew reviewers decide whether an app is listed.** Uploading an IPK to GitHub does not automatically add it to Homebrew Channel.
