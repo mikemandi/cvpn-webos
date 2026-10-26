@@ -182,104 +182,43 @@ stop_now() {
     return "$rc"
 }
 
-# Different webOS builds expose incompatible timeout applets:
-#   timeout SECS COMMAND       (newer BusyBox)
-#   timeout -t SECS COMMAND    (older BusyBox)
-# Detect before creating any TUN, route, or DNS changes. Do not infer
-# compatibility from the kernel, CPU architecture or LG model.
-detect_timeout_style() {
-    if timeout 1 /bin/sh -c ':' >/dev/null 2>&1; then
-        TIMEOUT_STYLE=positional
-    elif timeout -t 1 /bin/sh -c ':' >/dev/null 2>&1; then
-        TIMEOUT_STYLE=legacy
-    else
-        return 1
-    fi
-    return 0
-}
-
-timed_nslookup() {
-    case "${TIMEOUT_STYLE:-}" in
-        positional) timeout 6 nslookup www.youtube.com ;;
-        legacy) timeout -t 6 nslookup www.youtube.com ;;
-        *) return 127 ;;
-    esac
-}
-# Probe budgets are deliberately bounded below the backend 85s command timeout
-# and the independent 90s rollback timer. Distinguish general internet access
-# from YouTube reachability: one service being blocked is not a broken tunnel.
-# These checks do not prove streaming, UDP/QUIC or long-running stability.
+# Readiness probes use curl's system DNS resolver directly. Legacy webOS
+# BusyBox nslookup can return an A record yet hang waiting on another DNS
+# response and exit 143 under timeout; that must not reject a healthy tunnel.
+# This check keeps TLS certificate validation, never uses --resolve or a
+# proxy, and requires a real hostname lookup through the installed VPN routes.
+# The start path has already installed split IPv4 routes and a bind-mounted
+# resolver pointing at 8.8.8.8. The watchdog independently checks these.
 probe() {
     rm -f "$STATE/probe.general" "$STATE/probe.youtube" "$STATE/probe.dns"
-    say 'PROBE_1_FIXED_IP_HTTPS'
+    say 'PROBE_1_VERIFIED_HTTPS_WITH_SYSTEM_DNS'
     attempt=1
-    fixed_ok=0
+    general_ok=0
     while [ "$attempt" -le 2 ]; do
-        if curl -4 -fsS --noproxy '*' --connect-timeout 4 --max-time 8 \
-            --resolve one.one.one.one:443:1.0.0.1 \
-            https://one.one.one.one/cdn-cgi/trace > "$STATE/ipcheck.out" 2> "$STATE/ipcheck.err"; then
-            fixed_ok=1
+        if curl -4 -fsS --noproxy '*' --connect-timeout 4 --max-time 12 \
+            -o /dev/null 'https://example.com/' \
+            > "$STATE/startup-fallback.out" 2> "$STATE/startup-fallback.err"; then
+            general_ok=1
             break
         fi
         attempt=$((attempt + 1))
         [ "$attempt" -le 2 ] && sleep 1
     done
-    if [ "$fixed_ok" -ne 1 ]; then
-        # Some LG firmware CA stores cannot validate Cloudflare's chain even
-        # with a healthy network (curl exit 60 on the direct WAN, too).
-        # Keep TLS verification ON; require independently verified HTTPS
-        # through the active TUN after system DNS succeeds.
-        say 'FIXED_IP_HTTPS=UNAVAILABLE (checking independent verified HTTPS)'
-    else
-        grep -E '^(ip|colo)=' "$STATE/ipcheck.out" || true
-        say 'FIXED_IP_HTTPS=OK'
-    fi
-
-    say 'PROBE_2_SYSTEM_DNS (DNS transport encryption is NOT verified by this test)'
-    attempt=1
-    dns_ok=0
-    while [ "$attempt" -le 2 ]; do
-        if timed_nslookup > "$STATE/dnscheck.out" 2>&1; then
-            dns_ok=1
-            break
-        fi
-        attempt=$((attempt + 1))
-        [ "$attempt" -le 2 ] && sleep 1
-    done
-    if [ "$dns_ok" -ne 1 ]; then
-        say 'SYSTEM_DNS=FAILED'
+    if [ "$general_ok" -ne 1 ]; then
+        say 'GENERAL_HTTPS=FAILED (DNS, VPN transport or verified TLS)'
+        echo FAILED > "$STATE/probe.general"
         echo FAILED > "$STATE/probe.dns"
         return 1
     fi
-    say 'SYSTEM_DNS=OK'
-    echo OK > "$STATE/probe.dns"
-
-    if [ "$fixed_ok" -ne 1 ]; then
-        # Do not turn certificate verification off or accept DNS alone as
-        # evidence of a working VPN. This request uses the live TUN routes.
-        say 'PROBE_3_INDEPENDENT_VERIFIED_HTTPS'
-        attempt=1
-        fallback_ok=0
-        while [ "$attempt" -le 2 ]; do
-            if curl -4 -fsS --noproxy '*' --connect-timeout 4 --max-time 8 \
-                -o /dev/null 'https://example.com/' \
-                > "$STATE/startup-fallback.out" 2> "$STATE/startup-fallback.err"; then
-                fallback_ok=1
-                break
-            fi
-            attempt=$((attempt + 1))
-            [ "$attempt" -le 2 ] && sleep 1
-        done
-        if [ "$fallback_ok" -ne 1 ]; then
-            say 'GENERAL_HTTPS=FAILED (Cloudflare fixed IP and independent TLS)'
-            echo FAILED > "$STATE/probe.general"
-            return 1
-        fi
-        say 'GENERAL_HTTPS=OK (independent verified TLS)'
-    fi
+    # Successful HTTPS by hostname confirms the resolver and TCP/TLS data
+    # path are usable on the active VPN. It does not separately prove DNS
+    # encryption or availability of any particular service such as YouTube.
+    say 'GENERAL_HTTPS=OK (TLS verified; hostname resolved)'
     echo OK > "$STATE/probe.general"
+    echo OK > "$STATE/probe.dns"
+    say 'SYSTEM_DNS=OK (verified HTTPS hostname lookup, not an nslookup test)'
 
-    say 'PROBE_4_YOUTUBE_HTTPS'
+    say 'PROBE_2_YOUTUBE_HTTPS'
     attempt=1
     youtube_ok=0
     while [ "$attempt" -le 2 ]; do
@@ -295,20 +234,8 @@ probe() {
         say 'YOUTUBE_HTTPS=OK'
         echo OK > "$STATE/probe.youtube"
     else
-        say 'YOUTUBE_HTTPS=UNAVAILABLE'
+        say 'YOUTUBE_HTTPS=UNAVAILABLE (does not invalidate general HTTPS)'
         echo UNAVAILABLE > "$STATE/probe.youtube"
-        # When the fixed-IP probe succeeded, independently confirm HTTPS
-        # after YouTube failure; when it failed, HTTPS was verified above.
-        if [ "$fixed_ok" -eq 1 ]; then
-            say 'PROBE_5_GENERAL_HTTPS_FALLBACK'
-            if ! curl -4 -fsS --noproxy '*' --connect-timeout 4 --max-time 8 \
-                -o /dev/null 'https://example.com/' > "$STATE/startup-fallback.out" 2> "$STATE/startup-fallback.err"; then
-                say 'GENERAL_HTTPS=FAILED'
-                echo FAILED > "$STATE/probe.general"
-                return 1
-            fi
-        fi
-        say 'GENERAL_HTTPS=OK (YouTube unavailable; this is NOT proof of streaming)'
     fi
     say 'STARTUP_READINESS=GENERAL_INTERNET_VERIFIED'
     return 0
@@ -331,11 +258,9 @@ start_now() {
     [ -x "$XRAY" ] || fail "Missing Xray: $XRAY"
     [ -f "$CONFIG" ] || fail "Missing config: $CONFIG"
     [ -s "$SERVER_FILE" ] || fail 'Missing server IP'
-    for tool in nohup curl nslookup timeout mount umount awk; do
+    for tool in nohup curl mount umount awk; do
         command -v "$tool" >/dev/null 2>&1 || fail "Missing tool: $tool"
     done
-    detect_timeout_style || fail 'Unsupported timeout syntax; VPN unchanged'
-    say "DNS_TIMEOUT_STYLE=$TIMEOUT_STYLE"
     mkdir -p "$STATE" || fail 'Cannot create state'
     chmod 700 "$STATE"
     lock
