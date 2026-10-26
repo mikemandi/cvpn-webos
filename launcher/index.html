@@ -76,7 +76,14 @@ button:active { background:#B3CCFF; }
  function invokeInstaller(mode,done){
    var command='/bin/sh /media/developer/apps/usr/palm/applications/su.cvpn.webos/payload/install.sh '+mode;
    var finished=false;
-   function complete(ok,data){if(finished)return;finished=true;done(ok,data||{});}
+   // Some webOS builds silently drop Homebrew Luna callbacks. Never show
+   // a permanent initialization spinner. A timeout only changes the UI;
+   // it does NOT terminate or repeat a possibly still-running installer.
+   var maxWait=mode==='install'?90000:20000;
+   var timeoutID=setTimeout(function(){
+     complete(false,{error:'HOMEBREW_SERVICE_TIMEOUT'});
+   },maxWait);
+   function complete(ok,data){if(finished)return;finished=true;clearTimeout(timeoutID);done(ok,data||{});}
    try{
      if(window.PalmServiceBridge){
        var bridge=new window.PalmServiceBridge();
@@ -100,6 +107,7 @@ button:active { background:#B3CCFF; }
  }
  function installerFailure(data){
    var msg=(data&&data.stderrString)||(data&&data.error)||'Не удалось подготовить компоненты.';
+   if(msg==='HOMEBREW_SERVICE_TIMEOUT')return 'Root-служба Homebrew не ответила. Проверьте Homebrew Channel; не повторяйте установку, пока предыдущая команда выполняется.';
    var found=String(msg).match(/REFUSED=[a-zA-Z0-9_:.\\-]+/);
    return found?('Установка остановлена: '+found[0]):'Не удалось установить VPN-компоненты. Проверьте root и Homebrew Channel.';
  }
