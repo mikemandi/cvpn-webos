@@ -8,3 +8,11 @@
   release integrity metadata builder, GitHub Actions, Homebrew submission draft.
 - No personal TV profiles, authentication keys, subscriptions or Xray binary distributed.
 - Separate root backend bootstrap is a NEW workflow and has NOT been tested on real LG.
+
+
+### Unreleased — fresh installation import repair
+
+- Built-in secret-free TUN template for clean installs without a pre-existing client configuration.
+- First selected and Xray-validated server creates active configuration files with private permissions.
+- Existing installations keep their original VPN profiles and configuration.
+- Recoverable panel-only repair scripts; no changes to Xray, networking or TV Launcher.
