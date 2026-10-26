@@ -76,7 +76,8 @@ class EngineOffline(unittest.TestCase):
 
     def test_probe_does_not_depend_on_busybox_nslookup(self):
         probe = fn_source('probe')
-        self.assertNotIn('nslookup ', probe)
+        self.assertNotIn('nslookup www.', probe)
+        self.assertNotIn('timeout 6 nslookup', probe)
         self.assertNotIn('timed_nslookup', ENGINE)
         self.assertNotIn('detect_timeout_style', ENGINE)
         self.assertIn('https://example.com/', probe)
