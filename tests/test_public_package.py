@@ -37,15 +37,9 @@ class PublicPackageTests(unittest.TestCase):
             self.assertTrue(any(n.endswith('/payload/XRAY-LICENSE.txt') for n in paths))
             self.assertTrue(any(n.endswith('/payload/install.sh') for n in paths))
 
-    def test_root_bundle(self):
-        z=ROOT/'dist/cvpn-webos-root-2.0.0.zip'
-        self.assertTrue(z.is_file())
-        with zipfile.ZipFile(z) as t:
-            self.assertIsNone(t.testzip())
-            names=t.namelist()
-            self.assertIn('dist/cvpn-webos-panel-armv7',names)
-            self.assertNotIn('bin/xray',names)
-            self.assertFalse(any('access.key' in n or 'profiles.json' in n for n in names))
+    def test_all_in_one_replaces_legacy_root_bundle(self):
+        self.assertFalse((ROOT/'dist/cvpn-webos-root-2.0.0.zip').exists(),
+                         '2.1.0 users must never need a separate backend ZIP')
 
     def test_no_original_personal_ip_in_launcher(self):
         self.assertFalse((ROOT/'launcher/runtime.js').exists())
