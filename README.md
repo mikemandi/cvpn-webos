@@ -105,7 +105,7 @@ Launch CVPN webOS on the television, pair your phone via QR/PIN and import your 
 
 ### Existing RC5 / Stable TVs
 
-The new-root setup script is **not** an updater. If your TV already runs the tested Stable backend 2.0.0, do not run it. The independent Launcher IPK can be tested on an existing TV, but its 2.0.4 version has not been verified on a real LG at the time this public packaging draft was created.
+The new-root setup script is **not** an updater. If your TV already runs the tested Stable backend 2.0.0, do not run it. Launcher 2.0.4 has been physically validated. The fresh backend installation on LG 55UQ76003LD worked after the first-import and BusyBox DNS timeout fixes; see [real-device test record](docs/TESTED_DEVICES.md).
 
 ## Build from source
 
@@ -123,7 +123,7 @@ Output files are written to `dist/`. The IPK uses the webOS Debian package struc
 After creating your repository and a tagged GitHub release:
 
 ```bash
-python3 scripts/make-manifest.py --repository OWNER/REPO --tag v2.0.0
+python3 scripts/make-manifest.py --repository OWNER/REPO --tag v2.0.2
 python3 scripts/make-homebrew-entry.py --repository OWNER/REPO
 ```
 
@@ -143,7 +143,7 @@ CVPN webOS — приложение для LG с root-доступом. Файл
 </details>
 
 
-### Clean-install first-import repair (pending real-device validation)
+### Clean-install first-import repair (validated on LG 55UQ76003LD)
 
 The initial clean-install package did not contain the trusted Xray TUN template.
 A new TV could reject every imported profile even when Xray itself ran normally.
@@ -153,4 +153,8 @@ The updated backend now embeds a **secret-free** template and writes the active
 To repair an **existing clean install** without disturbing Xray or VPN routes,
 use `scripts/repair-first-import.ps1` with `-Action check`, then `-Action install`,
 together with the **recompiled ARMv7 backend**. Keep the initial backup for rollback.
-The published v2.0.1 GitHub Release does not include this fix yet.
+The original v2.0.1 GitHub Release does not include this fix. Wait for a verified newer tagged release before deploying the combined package.
+
+## Release validation
+
+See [tested LG devices and remaining checks](docs/TESTED_DEVICES.md). The packaged TV IPK is a launcher only; fresh installations must separately install root backend and a compatible Xray binary. Real-device screenshots must be sanitized before the Homebrew submission.
