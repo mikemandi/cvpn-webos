@@ -1,0 +1,157 @@
+#!/bin/sh
+# CVPN webOS 2.1.0 first-launch root installer, invoked by the Homebrew root service.
+# No network downloads, no writes to system partitions, no automatic VPN activation.
+set -eu
+umask 077
+ACTION=${1:-status}
+APP=/media/developer/apps/usr/palm/applications/su.cvpn.webos
+PAYLOAD="$APP/payload"
+BASE=/media/developer/cvpn-webos
+WEB="$BASE/webui"
+HOOK=/var/lib/webosbrew/init.d/90-cvpn-webos
+STAMP="$WEB/state/bundle.sha256"
+FILES='bin/xray bin/panel bin/engine bin/worker bin/boot-hook bin/start-panel bin/stop-panel'
+refuse() { echo "REFUSED=$1" >&2; exit 1; }
+root_check() {
+    [ "$(id -u)" = 0 ] || refuse root_required
+    [ -f /var/lib/webosbrew/startup.sh ] || refuse homebrew_required
+    arch=$(uname -m) || refuse arch_unknown
+    case "$arch" in
+        armv7l) : ;;
+        aarch64) [ "$(getconf LONG_BIT 2>/dev/null)" = 32 ] || refuse armv7_userspace_required ;;
+        *) refuse unsupported_arch ;;
+    esac
+    for cmd in sh ip awk od tr sha256sum readlink curl cp mv mkdir chmod ln date grep; do
+        command -v "$cmd" >/dev/null 2>&1 || refuse "missing_tool:$cmd"
+    done
+    [ -c /dev/net/tun ] || refuse tun_unavailable
+    [ -s "$PAYLOAD/SHA256SUMS" ] || refuse payload_missing
+}
+verify_payload() {
+    (cd "$PAYLOAD" && sha256sum -c SHA256SUMS >/dev/null) || refuse payload_checksum_invalid
+    for f in $FILES; do [ -s "$PAYLOAD/$f" ] || refuse "payload_missing:$f"; done
+    for f in engine worker boot-hook start-panel stop-panel; do
+        sh -n "$PAYLOAD/bin/$f" || refuse "invalid_shell:$f"
+    done
+    "$PAYLOAD/bin/xray" version >/dev/null 2>&1 || refuse incompatible_xray
+}
+manifest_hash() { sha256sum "$PAYLOAD/SHA256SUMS" | awk '{print $1}'; }
+panel_health() {
+    [ -s "$WEB/access.key" ] || return 1
+    key=$(cat "$WEB/access.key")
+    n=0
+    while [ "$n" -lt 4 ]; do
+        response=$(curl -fsS --noproxy '*' --connect-timeout 2 --max-time 5 -H "X-CVPN-Key: $key" http://127.0.0.1:8765/api/status 2>/dev/null || true)
+        case "$response" in *'"version":"2.0.0"'*) return 0;; esac
+        n=$((n+1)); sleep 1
+    done
+    return 1
+}
+ready() {
+    [ -s "$STAMP" ] || return 1
+    [ "$(cat "$STAMP")" = "$(manifest_hash)" ] || return 1
+    [ -x "$WEB/bin/cvpn-webos-panel" ] || return 1
+    [ -x "$BASE/bin/xray" ] || return 1
+    [ -L "$HOOK" ] && [ "$(readlink "$HOOK")" = "$PAYLOAD/bin/boot-hook" ] || return 1
+    panel_health || return 1
+}
+idle() {
+    [ ! -e "$BASE/state/active" ] || refuse vpn_running_disconnect_first
+    [ ! -e "$BASE/state/lock" ] || refuse engine_busy
+    if ip link show dev cvpn0 >/dev/null 2>&1; then refuse vpn_tun_present; fi
+    for block in 0.0.0.0/1 128.0.0.0/1; do
+        route=$(ip -4 route show "$block") || refuse routes_unreadable
+        case "$route" in *'dev cvpn0'*) refuse vpn_routes_present;; esac
+    done
+    if awk '$2=="/var/lib/misc/resolv.conf" {found=1} END {exit(!found)}' /proc/mounts; then
+        refuse resolver_bind_present
+    fi
+}
+install() {
+    root_check
+    if ready; then echo BUNDLE_READY=YES; exit 0; fi
+    idle
+    verify_payload
+    [ ! -e "$HOOK" ] || [ -L "$HOOK" ] || refuse foreign_boot_hook
+    if [ -L "$HOOK" ]; then
+        case "$(readlink "$HOOK")" in
+            "$WEB/recovery/boot-hook.sh"|"$PAYLOAD/bin/boot-hook") : ;;
+            *) refuse foreign_boot_hook ;;
+        esac
+    fi
+    mkdir -p "$BASE/bin" "$BASE/config" "$BASE/state" "$WEB/bin" "$WEB/secrets" "$WEB/state" "$WEB/recovery" /var/lib/webosbrew/init.d
+    chmod 700 "$BASE/config" "$BASE/state" "$WEB/secrets" "$WEB/state"
+    backup="$WEB/state/backup-allinone-$(date -u +%Y%m%d%H%M%S)-$$"
+    mkdir -m 700 "$backup"
+    [ ! -L "$HOOK" ] || readlink "$HOOK" > "$backup/old-hook"
+    # Only executables are backed up; user credentials/profiles are untouched.
+    for item in xray panel engine worker boot-hook start-panel stop-panel; do
+        case "$item" in
+            xray) dst="$BASE/bin/xray";;
+            panel) dst="$WEB/bin/cvpn-webos-panel";;
+            engine) dst="$BASE/bin/cvpn.sh";;
+            worker) dst="$WEB/recovery/recovery-worker.sh";;
+            boot-hook) dst="$WEB/recovery/boot-hook.sh";;
+            start-panel|stop-panel) dst="$WEB/$item.sh";;
+        esac
+        [ ! -f "$dst" ] || cp -p "$dst" "$backup/$item"
+    done
+    if [ -x "$WEB/stop-panel.sh" ]; then sh "$WEB/stop-panel.sh" || refuse panel_stop_failed; fi
+    for item in xray panel engine worker boot-hook start-panel stop-panel; do
+        case "$item" in
+            xray) dst="$BASE/bin/xray";;
+            panel) dst="$WEB/bin/cvpn-webos-panel";;
+            engine) dst="$BASE/bin/cvpn.sh";;
+            worker) dst="$WEB/recovery/recovery-worker.sh";;
+            boot-hook) dst="$WEB/recovery/boot-hook.sh";;
+            start-panel|stop-panel) dst="$WEB/$item.sh";;
+        esac
+        cp "$PAYLOAD/bin/$item" "$dst.next.$$" || refuse payload_copy_failed
+        chmod 700 "$dst.next.$$" || refuse payload_permissions_failed
+        mv -f "$dst.next.$$" "$dst" || refuse payload_commit_failed
+    done
+    if [ ! -s "$WEB/access.key" ]; then
+        [ ! -e "$WEB/access.key" ] || refuse existing_access_key_corrupt
+        key=$(od -An -v -tx1 -N32 /dev/urandom | tr -d ' \n')
+        [ "${#key}" = 64 ] || refuse key_generation_failed
+        printf '%s\n' "$key" > "$WEB/access.key"
+        chmod 600 "$WEB/access.key"
+    fi
+    # App-owned symlink becomes dangling after uninstall rather than autostarting old service.
+    ln -sfn "$PAYLOAD/bin/boot-hook" "$HOOK" || refuse boot_hook_failed
+    if ! sh "$WEB/start-panel.sh" || ! panel_health; then
+        echo PANEL_START_FAILED_ROLLING_BACK=YES >&2
+        sh "$WEB/stop-panel.sh" >/dev/null 2>&1 || true
+        for item in xray panel engine worker boot-hook start-panel stop-panel; do
+            case "$item" in
+                xray) dst="$BASE/bin/xray";; panel) dst="$WEB/bin/cvpn-webos-panel";; engine) dst="$BASE/bin/cvpn.sh";;
+                worker) dst="$WEB/recovery/recovery-worker.sh";; boot-hook) dst="$WEB/recovery/boot-hook.sh";;
+                start-panel|stop-panel) dst="$WEB/$item.sh";;
+            esac
+            if [ -s "$backup/$item" ]; then cp -p "$backup/$item" "$dst"; else rm -f "$dst"; fi
+        done
+        if [ -s "$backup/old-hook" ]; then ln -sfn "$(cat "$backup/old-hook")" "$HOOK"; else rm -f "$HOOK"; fi
+        [ ! -x "$WEB/start-panel.sh" ] || sh "$WEB/start-panel.sh" >/dev/null 2>&1 || true
+        refuse panel_start_failed_original_restored
+    fi
+    printf '%s\n' "$(manifest_hash)" > "$STAMP.next.$$"
+    chmod 600 "$STAMP.next.$$"
+    mv -f "$STAMP.next.$$" "$STAMP"
+    echo BUNDLE_INSTALLED=YES
+    echo BUNDLE_READY=YES
+    echo VPN_AUTOSTART=NO
+    echo USER_DATA_PRESERVED=YES
+}
+case "$ACTION" in
+    status)
+        root_check
+        if ready; then
+            echo BUNDLE_READY=YES
+        else
+            echo BUNDLE_READY=NO
+            if [ -e "$BASE/state/active" ]; then echo UPGRADE_BLOCKED=VPN_RUNNING; fi
+        fi
+        ;;
+    install) install ;;
+    *) refuse invalid_action ;;
+esac
