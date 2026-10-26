@@ -28,5 +28,4 @@ jobs:
           name: cvpn-webos-preview
           path: |
             dist/*.ipk
-            dist/*.zip
           if-no-files-found: error
