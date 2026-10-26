@@ -12,4 +12,3 @@ bash scripts/prepare-bundle.sh
 bash scripts/build-ipk.sh
 printf 'BACKEND_SHA256='; sha256sum dist/cvpn-webos-panel-armv7
 printf 'BACKEND_BUILD_GO='; go version
-python3 scripts/package-root.py
