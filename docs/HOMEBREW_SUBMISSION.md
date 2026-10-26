@@ -7,7 +7,7 @@ Official instructions: https://github.com/webosbrew/apps-repo and https://repo.w
 ## A. Before opening a PR
 
 1. Verify copyright ownership and pick a source license if opting into `pool: main`. The generated template defaults to `pool: non-free` until ownership/licensing is resolved.
-2. Test the 2.0.4 launcher and **new TV bootstrap** on actual LG ARMv7. Test QR, cold boot, a fresh subscription, DNS/IPv6 safety and uninstall/recovery. The user's previous LG validated backend 2.0.0 but not this new installation pipeline.
+2. Launcher 2.0.4 and a fresh backend setup have been physically verified on LG 55UQ76003LD after the first-import and BusyBox timeout patches. Before PR, complete a fresh tagged release build check; separately verify cold boot, network restoration and uninstall behavior. See `docs/TESTED_DEVICES.md`.
 3. Replace historical design-preview images under `assets/` with accurate fresh live screenshots that contain **no** IP, subscription URL, UUID, token, PIN or user information.
 4. Confirm this is a separate **rooted TV product**, not an LG Content Store compatible application; IPK alone is a TV launcher without an installed backend.
 
@@ -15,7 +15,7 @@ Official instructions: https://github.com/webosbrew/apps-repo and https://repo.w
 
 1. Create a public GitHub repository e.g. `OWNER/cvpn-webos` and upload the source tree (do not upload historic `All.zip`).
 2. In Actions, wait for `Verify build` to pass. It uses Go 1.27.3 and creates an IPK and backend/root zip.
-3. Create tag **`v2.0.0`** and push it. The `Publish verified release artifacts` workflow publishes:
+3. Create a **new, verified release tag** (planned `v2.0.2`) and push it; do not retag or overwrite older releases. The `Publish verified release artifacts` workflow publishes:
    - `su.cvpn.webos_2.0.4_all.ipk`
    - `cvpn-webos-root-2.0.0.zip`
    - `su.cvpn.webos.manifest.json`
@@ -44,3 +44,9 @@ Official instructions: https://github.com/webosbrew/apps-repo and https://repo.w
 ## D. If rejected or not yet published
 
 Release the `IPK` and root zip to GitHub first. Users can sideload the IPK manually with `ares-install`; their TV still needs root/backend setup. Do not claim it is already in Homebrew Channel.
+
+## Verified publication state (2026-10-26)
+
+The two TVs have demonstrated the working VPN system. On the fresh LG webOS 22 television, two fixes were installed as separate hotfixes before a successful connection. The **new combined GitHub Release is not yet verified** and must not be represented as already installed in one pass. Public repository status has been confirmed; a new tag and successful Release Assets are still necessary.
+
+Homebrew index rules require honest descriptions, validated root-only compatibility, and disclosure of AI assistance. Generated Homebrew YAML omits historical design screenshots. Add actual screenshots before filing the PR, and sanitize all QR/PIN/server details.
