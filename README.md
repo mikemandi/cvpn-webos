@@ -141,3 +141,16 @@ The backend executes privileged network commands and cannot run as a regular san
 CVPN webOS — приложение для LG с root-доступом. Файл `.ipk` устанавливает только телевизионный интерфейс. Для работы VPN отдельно нужен backend, Engine и совместимый Xray. Подписки сохраняются отдельно на каждом ТВ. Через Homebrew Channel приложение станет доступно только после публикации релиза, подачи заявки и одобрения сопровождающими Homebrew. Перед отправкой необходимо проверить новую установку на реальном LG и подтвердить права на исходный код, библиотеку и изображения.
 
 </details>
+
+
+### Clean-install first-import repair (pending real-device validation)
+
+The initial clean-install package did not contain the trusted Xray TUN template.
+A new TV could reject every imported profile even when Xray itself ran normally.
+The updated backend now embeds a **secret-free** template and writes the active
+`client.json` / `server-ip.txt` only when a validated server is selected.
+
+To repair an **existing clean install** without disturbing Xray or VPN routes,
+use `scripts/repair-first-import.ps1` with `-Action check`, then `-Action install`,
+together with the **recompiled ARMv7 backend**. Keep the initial backup for rollback.
+The published v2.0.1 GitHub Release does not include this fix yet.
