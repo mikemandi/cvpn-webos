@@ -10,13 +10,13 @@ import unittest
 import zipfile
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-IPK = ROOT / 'dist/su.cvpn.webos_2.0.4_all.ipk'
+IPK = ROOT / 'dist/su.cvpn.webos_2.1.0_all.ipk'
 
 class PublicPackageTests(unittest.TestCase):
     def test_launcher_manifest(self):
         d = json.loads((ROOT / 'launcher/appinfo.json').read_text())
         self.assertEqual(d['id'], 'su.cvpn.webos')
-        self.assertEqual(d['version'], '2.0.4')
+        self.assertEqual(d['version'], '2.1.0')
         for f in [d['main'],d['icon'],d['largeIcon']]:
             self.assertTrue((ROOT / 'launcher' / f).is_file())
 
@@ -30,7 +30,12 @@ class PublicPackageTests(unittest.TestCase):
         with tarfile.open(fileobj=io.BytesIO(data),mode='r:gz') as t:
             paths=[m.name for m in t.getmembers()]
             self.assertTrue(any(n.endswith('/su.cvpn.webos/appinfo.json') for n in paths))
-            self.assertFalse(any('access.key' in n or '/secrets/' in n or 'client.json' in n or 'xray' in n for n in paths))
+            self.assertFalse(any('access.key' in n or '/secrets/' in n or 'client.json' in n for n in paths))
+            self.assertTrue(any(n.endswith('/payload/bin/xray') for n in paths))
+            self.assertTrue(any(n.endswith('/payload/bin/panel') for n in paths))
+            self.assertTrue(any(n.endswith('/payload/SHA256SUMS') for n in paths))
+            self.assertTrue(any(n.endswith('/payload/XRAY-LICENSE.txt') for n in paths))
+            self.assertTrue(any(n.endswith('/payload/install.sh') for n in paths))
 
     def test_root_bundle(self):
         z=ROOT/'dist/cvpn-webos-root-2.0.0.zip'
