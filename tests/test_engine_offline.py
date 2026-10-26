@@ -80,8 +80,70 @@ class EngineOffline(unittest.TestCase):
         self.assertNotIn('timeout -t ', ENGINE)
         self.assertIn('echo FAILED > "$STATE/probe.dns"', fn_source('probe'))
 
+    def run_probe_mock(self, fixed_ok=False, fallback_ok=True, dns_ok=True, youtube_ok=True):
+        """Mock every network command; simulate LG's Cloudflare curl (60) failure."""
+        with tempfile.TemporaryDirectory() as tmp:
+            state=pathlib.Path(tmp) / 'state'
+            state.mkdir()
+            fake=pathlib.Path(tmp) / 'bin'
+            fake.mkdir()
+            for name, script in {
+                'curl': ('#!/bin/sh\n'
+                         'case "$*" in\n'
+                         '  *one.one.one.one*) [ "$FIXED_OK" = yes ] && exit 0; '
+                         'echo "curl: (60) SSL certificate problem" >&2; exit 60;;\n'
+                         '  *https://example.com/*) [ "$FALLBACK_OK" = yes ] && exit 0; exit 60;;\n'
+                         '  *https://www.youtube.com/*) [ "$YOUTUBE_OK" = yes ] && exit 0; exit 22;;\n'
+                         '  *) exit 22;;\n'
+                         'esac\n'),
+                'timeout':'#!/bin/sh\n[ "$DNS_OK" = yes ]\n',
+                'sleep':'#!/bin/sh\nexit 0\n',
+            }.items():
+                p=fake/name
+                p.write_text(script)
+                p.chmod(0o700)
+            env=dict(os.environ,
+                     PATH=str(fake)+os.pathsep+os.environ.get('PATH','/usr/bin:/bin'),
+                     STATE=str(state), TEST_URL='https://www.youtube.com/',
+                     FIXED_OK='yes' if fixed_ok else 'no',
+                     FALLBACK_OK='yes' if fallback_ok else 'no',
+                     DNS_OK='yes' if dns_ok else 'no',
+                     YOUTUBE_OK='yes' if youtube_ok else 'no')
+            shell=("say() { printf '%s\\n' \"$1\"; }\n" + fn_source('probe') + '\nprobe\n')
+            r=subprocess.run(['/bin/sh','-c',shell],env=env,text=True,capture_output=True,timeout=10)
+            states={name:(state/name).read_text().strip() if (state/name).exists() else None
+                    for name in ('probe.general','probe.dns','probe.youtube')}
+            return r, states
+
+    def test_cloudflare_ca_failure_uses_verified_https_fallback(self):
+        r, states=self.run_probe_mock(fixed_ok=False, fallback_ok=True)
+        self.assertEqual(r.returncode,0,r.stderr+'\n'+r.stdout)
+        self.assertIn('FIXED_IP_HTTPS=UNAVAILABLE',r.stdout)
+        self.assertIn('GENERAL_HTTPS=OK',r.stdout)
+        self.assertEqual(states['probe.general'],'OK')
+        self.assertEqual(states['probe.dns'],'OK')
+
+    def test_cloudflare_ca_failure_and_fallback_failure_must_refuse(self):
+        r, states=self.run_probe_mock(fixed_ok=False, fallback_ok=False)
+        self.assertNotEqual(r.returncode,0)
+        self.assertIn('GENERAL_HTTPS=FAILED',r.stdout)
+        self.assertEqual(states['probe.general'],'FAILED')
+
+    def test_dns_failure_cannot_be_bypassed_by_fallback(self):
+        r, states=self.run_probe_mock(fixed_ok=False, fallback_ok=True, dns_ok=False)
+        self.assertNotEqual(r.returncode,0)
+        self.assertEqual(states['probe.dns'],'FAILED')
+
+    def test_youtube_unavailable_does_not_fail_verified_fallback(self):
+        r, states=self.run_probe_mock(fixed_ok=False, fallback_ok=True, youtube_ok=False)
+        self.assertEqual(r.returncode,0,r.stderr+'\n'+r.stdout)
+        self.assertEqual(states['probe.youtube'],'UNAVAILABLE')
+        self.assertEqual(states['probe.general'],'OK')
+
     def test_tls_probes_never_disable_certificate_validation(self):
         self.assertNotIn('curl -4 -k', ENGINE)
+        self.assertNotIn('--insecure', ENGINE)
+        self.assertIn('https://example.com/', fn_source('probe'))
         self.assertIn('IPv6 default route exists', ENGINE)
 
     def test_release_contains_no_private_payloads(self):
