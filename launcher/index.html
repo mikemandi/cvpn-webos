@@ -22,6 +22,85 @@ button { display:inline-block; box-sizing:border-box; min-width:168px; min-heigh
 button:focus { outline:2px solid #8DB5FF; outline-offset:3px; box-shadow:0 0 0 6px rgba(141,181,255,.13); }
 button:active { background:#B3CCFF; }
 @media (max-height:760px) { .panel{padding:20px 30px;} .subtitle{margin-bottom:8px;} #qr-canvas{width:255px;height:255px;margin:12px auto;} p{margin:8px 0;} }
+
+/* CVPN webOS / premium first-launch overlay: no remote assets or fake percentages.
+   Scales from 720p to 4K without depending on unsupported filter/backdrop CSS. */
+#setup-screen {position:fixed;inset:0;top:0;right:0;bottom:0;left:0;
+ display:flex;align-items:center;justify-content:center;overflow:hidden;
+ background:radial-gradient(ellipse 65% 70% at 50% 55%,#0d1b37 0%,#071226 65%,#040b19 100%); isolation:isolate}
+#setup-screen:before,#setup-screen:after {content:"";position:absolute;pointer-events:none;border-radius:50%;z-index:-1}
+#setup-screen:before {width:110vw;height:95vw;top:-77vw;left:-51vw;
+ background:radial-gradient(ellipse at 65% 80%,#193769 0%,#102348 49%,#071229 78%);
+ border:1px solid rgba(59,112,200,.16);box-shadow:0 0 95px rgba(26,63,135,.24)}
+#setup-screen:after {width:114vw;height:98vw;right:-80vw;bottom:-79vw;
+ background:radial-gradient(ellipse at 28% 18%,#153365 0%,#0c2046 48%,#08162e 85%);
+ border:1px solid rgba(45,106,221,.12);box-shadow:0 0 98px rgba(12,59,151,.18)}
+#setup-screen .panel {position:relative;box-sizing:border-box;width:900px;max-width:calc(100% - 72px);
+ max-height:calc(100% - 68px);overflow:auto;margin:0;padding:30px 68px 0;border-radius:30px;
+ border:1px solid rgba(109,158,232,.37);
+ background:linear-gradient(130deg,rgba(19,35,64,.95),rgba(12,24,45,.97) 64%,rgba(14,28,52,.96));
+ box-shadow:0 22px 80px rgba(0,0,0,.44),inset 0 1px 0 rgba(169,198,252,.07)}
+#setup-screen .panel:before {content:"";position:absolute;left:5%;top:0;width:90%;height:1px;
+ background:linear-gradient(90deg,transparent,rgba(136,178,252,.42),transparent)}
+.setup-brand-row {display:flex;justify-content:center;align-items:center;gap:26px;margin-bottom:14px}
+.setup-app-icon {width:80px;height:80px;flex:0 0 80px;border-radius:20px;
+ border:1px solid rgba(111,173,255,.55);background:#08172f url('icon.png') center/cover no-repeat;
+ box-shadow:0 0 0 3px rgba(48,113,204,.08),0 10px 24px rgba(2,12,37,.5)}
+.setup-brand-text {text-align:left}
+.setup-brand-name {font-size:40px;line-height:1.1;font-weight:700;letter-spacing:-1px;color:#f5f8ff}
+.setup-brand-name b {font-weight:600;color:#a5b6ff}
+.setup-brand-caption {margin-top:11px;color:#9db9e4;font-size:13px;font-weight:500;letter-spacing:5px}
+.setup-loader {width:178px;height:178px;position:relative;margin:18px auto 20px;display:flex;align-items:center;justify-content:center}
+.setup-loader:before {content:"";position:absolute;inset:0;border-radius:50%;
+ border:1px solid rgba(72,143,250,.28);background:radial-gradient(circle,rgba(17,39,84,.48),transparent 72%);
+ box-shadow:0 0 25px rgba(42,117,255,.12)}
+.setup-loader:after {content:"";position:absolute;inset:11px;border-radius:50%;
+ border:8px solid transparent;border-top-color:#21e0fb;border-right-color:#5382ff;border-bottom-color:#3385ff;
+ transform:rotate(22deg);box-shadow:0 0 8px rgba(27,124,255,.18);
+ animation:cvpn-orbit 2.4s linear infinite}
+.setup-loader-inner {position:relative;z-index:1;width:125px;height:125px;border-radius:50%;
+ display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 35% 28%,#1a3970,#0a1b38 74%);
+ border:1px solid #274c82;box-shadow:inset 0 0 16px rgba(39,110,230,.15)}
+.setup-tv-icon {width:74px;height:74px;stroke:#a8d6ff;stroke-width:3.2;fill:none;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 0 7px rgba(89,170,255,.38))}
+#setup-screen[data-phase="error"] .setup-loader:after {animation:none;border-top-color:#d77b91;border-right-color:#a14c71;border-bottom-color:#873960}
+#setup-screen[data-phase="ready"] .setup-loader:after {animation:none;border-color:#2dd1cc;transform:rotate(0deg)}
+#setup-title {font-size:38px;line-height:1.22;letter-spacing:-.6px;color:#f9fbff;font-weight:700;margin:0 0 10px}
+#setup-status {font-size:21px;line-height:1.4;min-height:30px;margin:0 auto;color:#91b1e5;overflow-wrap:break-word}
+.setup-steps {display:flex;flex-direction:column;text-align:left;width:468px;max-width:100%;
+ margin:28px auto 24px;gap:0}
+.setup-step {position:relative;display:flex;align-items:center;min-height:73px;gap:26px;color:#788fb7;font-size:20px;line-height:1.3}
+.setup-step:not(:last-child):after {content:"";position:absolute;top:50px;left:24px;height:23px;width:2px;background:#25416f}
+.setup-step.is-done:not(:last-child):after {background:#51a4e4}
+.setup-step .mark {display:flex;justify-content:center;align-items:center;width:50px;height:50px;flex:0 0 50px;
+ border-radius:50%;box-sizing:border-box;border:3px solid #2e446e;font-size:20px;font-weight:600;color:#6482b4;
+ background:#101d36}
+.setup-step.is-active {color:#f0f6ff;font-weight:700}
+.setup-step.is-active .mark {border-color:#71caff;color:#fff;box-shadow:0 0 0 3px rgba(70,128,250,.15),0 0 20px rgba(57,144,255,.34)}
+.setup-step.is-done {color:#b9cae7}
+.setup-step.is-done .mark {border-color:#2b998d;color:#71ebd2;background:#0f3340;box-shadow:0 0 14px rgba(28,189,156,.14)}
+.setup-bottom {position:relative;border-top:1px solid rgba(109,146,208,.17);padding:18px 0 23px}
+#setup-hint {font-size:16px;line-height:1.4;margin:0 auto;color:#87a2cd}
+.setup-info-icon {display:inline-flex;align-items:center;justify-content:center;vertical-align:middle;
+ font:700 14px Arial,sans-serif;width:19px;height:19px;border-radius:50%;
+ border:1.6px solid #8dafdf;color:#8dafdf;margin-right:11px}
+#setup-actions {display:flex;justify-content:center;gap:14px;margin:10px auto 2px}
+#setup-retry,#setup-close {font-size:17px;min-width:160px;min-height:48px}
+#setup-close {background:transparent;color:#aebfdf;border-color:#506380}
+#setup-retry:disabled {opacity:.48;cursor:default}
+@keyframes cvpn-orbit {to{transform:rotate(382deg)}}
+@media (prefers-reduced-motion:reduce) {.setup-loader:after{animation:none}}
+@media (max-height:820px) {#setup-screen .panel{padding:20px 44px 0}
+ .setup-brand-row{margin-bottom:4px}.setup-app-icon{width:62px;height:62px;flex-basis:62px}
+ .setup-brand-name{font-size:32px}.setup-loader{width:130px;height:130px;margin:8px auto 14px}
+ .setup-loader-inner{width:94px;height:94px}.setup-tv-icon{width:60px;height:60px}
+ #setup-title{font-size:30px}#setup-status{font-size:18px}.setup-steps{margin:12px auto 8px}
+ .setup-step{min-height:56px;font-size:17px}.setup-step .mark{width:38px;height:38px;flex-basis:38px;font-size:17px}
+ .setup-step:not(:last-child):after{left:18px;top:40px;height:16px}.setup-bottom{padding:12px 0 15px}
+ #setup-hint{font-size:13px}}
+@media (max-width:740px){#setup-screen .panel{max-width:calc(100% - 28px);padding:20px 20px 0}
+ .setup-brand-row{gap:12px}.setup-brand-name{font-size:27px}.setup-brand-caption{font-size:10px;letter-spacing:3px}
+ .setup-app-icon{width:58px;height:58px;flex-basis:58px}
+ #setup-title{font-size:26px}.setup-steps{width:100%}.setup-step{gap:14px}}
 </style>
 </head>
 <body>
@@ -37,6 +116,39 @@ button:active { background:#B3CCFF; }
   <button id="close-qr" type="button">Закрыть</button>
  </main>
 </div>
+<div id="setup-screen" data-phase="checking" hidden>
+ <main class="panel" role="status" aria-live="polite">
+  <div class="setup-brand-row">
+   <div class="setup-app-icon" aria-hidden="true"></div>
+   <div class="setup-brand-text">
+    <div class="setup-brand-name">CVPN <b>webOS</b></div>
+    <div class="setup-brand-caption">PRIVATE NETWORK</div>
+   </div>
+  </div>
+  <div class="setup-loader" aria-hidden="true"><div class="setup-loader-inner">
+   <svg class="setup-tv-icon" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+    <rect x="9" y="15" width="62" height="44" rx="5"/>
+    <path d="M32 66h16 M40 59v7"/>
+    <path d="M27 35q13-13 26 0 M32 40q8-8 16 0"/>
+    <circle cx="40" cy="46" r="2" fill="#a8d6ff" stroke="none"/>
+   </svg>
+  </div></div>
+  <h1 id="setup-title">Подготавливаем CVPN</h1>
+  <p id="setup-status">Подготавливаем необходимые компоненты для работы</p>
+  <div class="setup-steps" id="setup-steps" aria-label="Этапы подготовки">
+   <div class="setup-step is-active" data-step="0"><span class="mark">1</span><span>Проверяем устройство</span></div>
+   <div class="setup-step" data-step="1"><span class="mark">2</span><span>Подготавливаем компоненты</span></div>
+   <div class="setup-step" data-step="2"><span class="mark">3</span><span>Запускаем CVPN</span></div>
+  </div>
+  <div class="setup-bottom">
+   <p id="setup-hint"><span class="setup-info-icon" aria-hidden="true">i</span><span id="setup-hint-text">Пожалуйста, не выключайте телевизор во время подготовки</span></p>
+   <div id="setup-actions">
+    <button id="setup-retry" type="button" hidden>Повторить</button>
+    <button id="setup-close" type="button" hidden>Закрыть</button>
+   </div>
+  </div>
+ </main>
+</div>
 <script src="qr-bundle.js"></script>
 <script>
 (function(){
@@ -46,11 +158,147 @@ button:active { background:#B3CCFF; }
  function parseParams(raw){try{return typeof raw==='string'?JSON.parse(raw):(raw||{});}catch(e){return {};}}
  function platformParams(){var p={};try{if(window.webOSSystem && window.webOSSystem.launchParams){p=parseParams(window.webOSSystem.launchParams());}}catch(e){}try{if(!p.mode && window.PalmSystem && window.PalmSystem.launchParams){p=parseParams(window.PalmSystem.launchParams);}}catch(e){}return p;}
  function shut(){try{window.close();}catch(e){}}
- function showNormal(){if(didNormalLaunch)return;didNormalLaunch=true;qrMode=false;clearInterval(expiryTimer);qrScreen.hidden=true;
-  var pixel=new Image();pixel.src='http://127.0.0.1:8765/tv/notify?nonce='+Date.now();
-  // Close whether the TV's old browser accepts or rejects the image. Some
-  // builds spuriously fire onerror after the backend has already queued Alert.
-  clearTimeout(closeTimer);closeTimer=setTimeout(shut,1400);
+ var installing=false, setupGeneration=0, retryStatusOnly=false;
+ var setupScreen=document.getElementById('setup-screen');
+ var setupTitle=document.getElementById('setup-title');
+ var setupStatus=document.getElementById('setup-status');
+ var setupHint=document.getElementById('setup-hint');
+ var setupRetry=document.getElementById('setup-retry');
+ var setupClose=document.getElementById('setup-close');
+ var setupSteps=document.querySelectorAll('.setup-step');
+ function stage(index,phase){
+   setupScreen.setAttribute('data-phase',phase||'checking');
+   for(var i=0;i<setupSteps.length;i++){
+     setupSteps[i].className='setup-step'+(i<index?' is-done':(i===index?' is-active':''));
+     setupSteps[i].querySelector('.mark').textContent=i<index?'✓':String(i+1);
+   }
+ }
+ function setupMessage(title,message,step,phase,retry,hint){
+   setupScreen.hidden=false;qrScreen.hidden=true;
+   setupTitle.textContent=title;setupStatus.textContent=message;
+   stage(step,phase);
+   setupRetry.hidden=!retry;setupRetry.disabled=!retry;
+   setupClose.hidden=!retry;
+   document.getElementById('setup-hint-text').textContent=hint||'Пожалуйста, не выключайте телевизор во время подготовки';
+   if(retry)setupRetry.focus();
+ }
+ function failSetup(data){
+   installing=false;
+   var stderr=String((data&&data.stderrString)||'');
+   var error=String((data&&data.error)||'');
+   var code=(stderr.match(/REFUSED=([a-zA-Z0-9_:.\\-]+)/)||[])[1]||'';
+   var details='Не удалось завершить подготовку. Повторите проверку.';
+   var hint='Если ошибка повторяется, откройте Homebrew Channel.';
+   if(code==='vpn_running_disconnect_first'||code==='vpn_tun_present'||code==='vpn_routes_present'||code==='resolver_bind_present'){
+     details='Чтобы обновить CVPN, сначала отключите VPN в CVPN Connect.';
+     hint='Ваше подключение не изменено. После отключения нажмите «Повторить».';
+     retryStatusOnly=true;
+   }else if(code==='engine_busy'||code==='installer_busy'){
+     details='Подготовка уже выполняется. Проверьте состояние немного позже.';
+     hint='Не выключайте телевизор, пока выполняется установка.';
+     retryStatusOnly=true;
+   }else if(code==='homebrew_required'||code==='root_required'||/denied|permission|not allowed/i.test(stderr+' '+error)){
+     details='Для подготовки нужен Homebrew Channel с root-доступом.';
+     hint='Проверьте Homebrew Channel и разрешения приложения.';
+     retryStatusOnly=true;
+   }else if(code==='unsupported_arch'||code==='armv7_userspace_required'||code==='tun_unavailable'){
+     details='Этот телевизор не поддерживает необходимые компоненты VPN.';
+     hint='Подробности совместимости указаны в документации CVPN.';
+     retryStatusOnly=true;
+   }else if(error==='HOMEBREW_SERVICE_TIMEOUT'){
+     details='Телевизор не ответил на запрос подготовки.';
+     hint='Подготовка может продолжаться. Нажмите «Проверить снова» после завершения.';
+     retryStatusOnly=true;
+   }else if(code==='payload_checksum_invalid'||code.indexOf('payload_missing')===0){
+     details='Не удалось проверить встроенные компоненты CVPN.';
+     hint='Попробуйте переустановить официальный пакет приложения.';
+     retryStatusOnly=true;
+   }
+   setupMessage('Не удалось подготовить CVPN',details,0,'error',true,hint);
+   setupRetry.textContent=retryStatusOnly?'Проверить снова':'Повторить';
+ }
+ // Fixed, package-owned commands only. Never interpolate user input.
+ // Do not start a second install when a previous Homebrew request timed out.
+ function invokeInstaller(mode,done){
+   var command='/bin/sh /media/developer/apps/usr/palm/applications/su.cvpn.webos/payload/install.sh '+mode;
+   var finished=false;
+   var maxWait=mode==='install'?90000:35000;
+   var timeoutID=setTimeout(function(){
+     complete(false,{error:'HOMEBREW_SERVICE_TIMEOUT'});
+   },maxWait);
+   function complete(ok,data){
+     if(finished)return;
+     finished=true;clearTimeout(timeoutID);done(ok,data||{});
+   }
+   try{
+     if(window.PalmServiceBridge){
+       var bridge=new window.PalmServiceBridge();
+       bridge.onservicecallback=function(raw){
+         var data=parseParams(raw);
+         complete(data.returnValue===true&&!data.error,data);
+       };
+       bridge.call('luna://org.webosbrew.hbchannel.service/exec',JSON.stringify({command:command}));
+       return;
+     }
+     if(window.webOS&&webOS.service&&webOS.service.request){
+       webOS.service.request('luna://org.webosbrew.hbchannel.service',{
+         method:'exec',parameters:{command:command},subscribe:false,
+         onSuccess:function(data){complete(data.returnValue===true&&!data.error,data);},
+         onFailure:function(data){complete(false,data);}
+       });
+       return;
+     }
+     complete(false,{error:'SERVICE_UNAVAILABLE'});
+   }catch(e){complete(false,{error:'SERVICE_UNAVAILABLE'});}
+ }
+ function panelReady(){
+   installing=false;setupScreen.hidden=true;didNormalLaunch=true;
+   var pixel=new Image();pixel.src='http://127.0.0.1:8765/tv/notify?nonce='+Date.now();
+   clearTimeout(closeTimer);closeTimer=setTimeout(shut,1400);
+ }
+ function completedSetup(generation){
+   if(qrMode||generation!==setupGeneration)return;
+   setupMessage('CVPN готов к работе','Все необходимые компоненты подготовлены.',3,'ready',false,'Откройте CVPN Connect, чтобы управлять подключением');
+   setTimeout(function(){if(generation===setupGeneration&&!qrMode)panelReady();},700);
+ }
+ function showNormal(){
+   if(didNormalLaunch||installing)return;
+   installing=true;qrMode=false;clearInterval(expiryTimer);setupGeneration++;
+   var generation=setupGeneration;
+   setupMessage('Подготавливаем CVPN','Проверяем необходимые компоненты для работы',0,'checking',false);
+   invokeInstaller('status',function(ok,data){
+     if(generation!==setupGeneration||qrMode)return;
+     if(!ok){failSetup(data);return;}
+     var output=String(data.stdoutString||'');
+     if(output.indexOf('BUNDLE_READY=YES')!==-1){retryStatusOnly=false;completedSetup(generation);return;}
+     // Unexpected/partial Luna response must never trigger a privileged install.
+     if(output.indexOf('BUNDLE_READY=NO')===-1){failSetup({error:'SERVICE_INVALID_RESPONSE'});return;}
+     if(output.indexOf('UPGRADE_BLOCKED=VPN_RUNNING')!==-1){
+       retryStatusOnly=true;failSetup({stderrString:'REFUSED=vpn_running_disconnect_first'});return;
+     }
+     if(output.indexOf('INSTALL_IN_PROGRESS=YES')!==-1){
+       retryStatusOnly=true;failSetup({stderrString:'REFUSED=installer_busy'});return;
+     }
+     if(retryStatusOnly){
+       // A status-only recheck found no active VPN/installer. Do not launch
+       // anything during the same retry; make the next install an explicit
+       // second user action so a slow earlier process cannot be duplicated.
+       retryStatusOnly=false;installing=false;
+       setupMessage('Можно продолжить','Проверка завершена. Нажмите «Продолжить», чтобы подготовить CVPN.',1,'checking',true,'Во время подготовки не выключайте телевизор.');
+       setupRetry.textContent='Продолжить';
+       return;
+     }
+     setupMessage('Подготавливаем CVPN','Подготавливаем необходимые компоненты для работы',1,'installing',false);
+     invokeInstaller('install',function(installOK,info){
+       if(generation!==setupGeneration||qrMode)return;
+       if(!installOK||String(info.stdoutString||'').indexOf('BUNDLE_READY=YES')===-1){
+         failSetup(info);return;
+       }
+       setupMessage('Подготавливаем CVPN','Запускаем CVPN',2,'starting',false);
+       // A successful installer always verified /api/status before returning.
+       retryStatusOnly=false;completedSetup(generation);
+     });
+   });
  }
  function renderCode(data){if(!qrMode)return;
   var hint=document.getElementById('qr-hint'),canvas=document.getElementById('qr-canvas');
@@ -70,9 +318,11 @@ button:active { background:#B3CCFF; }
   catch(e){canvas.hidden=true;hint.textContent='Не удалось отобразить QR. Используйте адрес и PIN.';}
  }
  window.cvpnQRInfo=renderCode;
- function showQR(){qrMode=true;didNormalLaunch=false;clearTimeout(closeTimer);qrScreen.hidden=false;document.getElementById('qr-hint').textContent='Действует 3 минуты · Только домашняя сеть';document.getElementById('qr-address').textContent='';document.getElementById('qr-code').textContent='—';var s=document.createElement('script');s.src='http://127.0.0.1:8765/tv/qr-data.js?nonce='+Date.now();s.onerror=function(){document.getElementById('qr-hint').textContent='Панель недоступна. Проверьте службу CVPN.';};document.head.appendChild(s);document.getElementById('close-qr').focus();}
+ function showQR(){setupGeneration++;qrMode=true;didNormalLaunch=false;installing=false;setupScreen.hidden=true;clearTimeout(closeTimer);qrScreen.hidden=false;document.getElementById('qr-hint').textContent='Действует 3 минуты · Только домашняя сеть';document.getElementById('qr-address').textContent='';document.getElementById('qr-code').textContent='—';var s=document.createElement('script');s.src='http://127.0.0.1:8765/tv/qr-data.js?nonce='+Date.now();s.onerror=function(){document.getElementById('qr-hint').textContent='Панель недоступна. Проверьте службу CVPN.';};document.head.appendChild(s);document.getElementById('close-qr').focus();}
  function handle(params){if(params && params.mode==='qr')showQR();else showNormal();}
  document.getElementById('close-qr').onclick=shut;
+ setupRetry.onclick=function(){if(!installing)showNormal();};
+ setupClose.onclick=shut;
  document.addEventListener('keydown',function(e){if(qrMode && (e.keyCode===461||e.keyCode===27)){e.preventDefault();shut();}});
  document.addEventListener('webOSLaunch',function(e){handle((e && e.detail && e.detail.mode)?e.detail:platformParams());});
  document.addEventListener('webOSRelaunch',function(e){handle((e && e.detail && e.detail.mode)?e.detail:platformParams());});

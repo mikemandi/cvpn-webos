@@ -21,12 +21,11 @@ jobs:
         run: bash tests/run_offline.sh
       - name: IPK inspection
         run: |
-          dpkg-deb --info dist/su.cvpn.webos_2.0.4_all.ipk
-          dpkg-deb --contents dist/su.cvpn.webos_2.0.4_all.ipk | grep /usr/palm/applications/su.cvpn.webos/appinfo.json
+          dpkg-deb --info dist/su.cvpn.webos_2.2.2_all.ipk
+          dpkg-deb --contents dist/su.cvpn.webos_2.2.2_all.ipk | grep /usr/palm/applications/su.cvpn.webos/appinfo.json
       - uses: actions/upload-artifact@v4
         with:
           name: cvpn-webos-preview
           path: |
             dist/*.ipk
-            dist/*.zip
           if-no-files-found: error

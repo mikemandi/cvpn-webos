@@ -1,5 +1,49 @@
 # Changelog
 
+## 2.2.2 RC — flash-friendly updates and orphan safety (2026-10-27)
+
+- Bounded app-owned binary backup retention to two archives after successful
+  upgrade, reducing flash/disk exhaustion on older LG TVs.
+- Installer now refuses replacing files while an orphaned Xray process is active,
+  even when Engine's session marker is absent.
+- Regression tests cover backup bounds, rollback safety and live Xray refusal.
+- 2.2.1 UI and timeout compatibility fixes unchanged. Root/TV startup, networking
+  and fresh-install still require acceptance on clean LG hardware.
+
+## 2.2.1 RC — UI reference, installer resilience, code audit (2026-10-27)
+
+- Revised the entire first-run TV layout to match the supplied CVPN webOS
+  design reference: cobalt/navy gradient, glass panel, branded app mark,
+  animated TV connection ring, connected progress timeline and clear safety note.
+- Extended first-run status timeout to 35 seconds to cover the four
+  5-second panel health retries on slow ARMv7 televisions.
+- Differentiate live vs stale installer locks. Safely recover a stale PID lock
+  **only after** confirming there is no active CVPN state, TUN, split-route or
+  DNS bind mount. Never discard a lock with ambiguous ownership.
+- Runtime/UI test and installer regression coverage updated.
+- Engine 0.1.4, Go backend 2.0.0 and native Xray unchanged.
+- Release candidate only: fresh-LG first-run/permissions/rollback/standby
+  and uninstall lifecycle still require actual device acceptance.
+
+## 2.2.0 RC — premium onboarding and first-install hardening (2026-10-27)
+
+- Reworked the installation overlay to a legible, understated three-step
+  CVPN preparation experience, with reduced-motion support, accessible retry
+  focus, success and safe recovery states. All binaries are included in IPK:
+  there is **no** runtime download, fake percentage, or network installer.
+- Declare `lunabus.query` application permission for Homebrew root-service
+  calls. Older Homebrew service mapping may require a supported version;
+  no automatic elevation or firmware changes are performed.
+- Finite Homebrew callback deadlines; reject malformed permission responses;
+  prevent concurrent install retries and stale callbacks closing QR.
+- In-progress installation state reported from Engine lock; preserve existing
+  network and private profiles on update or failure.
+- Runtime Launcher smoke tests, offline installer lock/rollback tests,
+  refreshed release safety policy, and fresh-LG acceptance checklist.
+- VPN Engine 0.1.4, backend 2.0.0, Xray 26.10.21 unchanged.
+- **Not yet production certified:** fresh-TV root-service/ACG permission
+  and no-SSH installation remain a required hardware acceptance test.
+
 ## 2.0.0 Stable — public source/packaging preparation (2026-10-25)
 - Backend 2.0.0 and VPN Engine 0.1.4 unchanged from the TV-tested Stable.
 - Versioned launcher IPK 2.0.4 (separate from VPN engine version), historical hard-coded

@@ -6,4 +6,5 @@ bash -n scripts/build-ipk.sh scripts/build-release.sh scripts/setup.sh
 sh -n engine/cvpn.sh recovery/recovery-worker.sh recovery/boot-hook.sh scripts/start-panel.sh scripts/stop-panel.sh scripts/install-root.sh
 (cd server && go test -race ./... && go vet ./... && go test -cover ./...)
 python3 -m unittest discover -s tests -v
+node tests/test_launcher_runtime.js
 printf 'PUBLIC_OFFLINE_CHECKS_OK=YES\n'

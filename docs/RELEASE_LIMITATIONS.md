@@ -1,18 +1,58 @@
-# Supported configuration and publication gates
+# CVPN webOS 2.2.2 — supported devices and release gates
 
-- TV must be rooted with Homebrew Channel startup hooks, ARMv7 32-bit userspace (armv7l kernel, or aarch64 kernel with 32-bit userspace), `ip`, `curl`,
-  `sha256sum`, BusyBox/ash, and working TUN support. Not LG Content Store compatible.
-- IPK is the television launcher / pairing UI **only**. A separate root backend install is
-  required. Users MUST NOT expect VPN to work by installing the IPK alone.
-- New TV needs a compatible Xray ARMv7 binary supplied by the owner and checked on that TV.
-  None is bundled here (no hidden downloads or arbitrary remote scripts).
-- Web-panel over HTTP port 8765: trusted LAN ONLY; do not port-forward; cookie interception
-  is possible on hostile Wi-Fi networks.
-- IPv6 does NOT pass through tunnel: the engine refuses activation on IPv6 default route.
-- There is no generic Kill Switch, and the engine restores normal connectivity on failure.
-- Existing TV's Stable 2.0.0 backend is not changed by this publication package.
-- TV launcher 2.0.4 is a separate component version; backend/engine are 2.0.0/0.1.4.
-- GitHub workflow must pass and root bootstrap must be tested on an independent TV before
-  reviewers should consider final acceptance. Root/boot lifecycle is hardware-dependent.
-- Material screenshots under assets are *historical interface previews*, not certified
-  live screenshots of the final release. Replace with real captures before PR submission.
+**Status: hardware-tested release candidate on the `feature/all-in-one-v2.1.0` branch.**
+One-IPK first-run, VPN, exit-IP, YouTube, disconnect/reconnect and ordinary
+power off/on **passed on LG 55UK6450PLC**, as reported by the owner.
+Do not merge into stable/main, tag a public release or submit to Homebrew
+until the remaining QA, licensing, uninstall and publication gates are closed.
+See `docs/QA_ACCEPTANCE_2.2.2.md`.
+
+## Supported platform
+
+- LG webOS with **working root and Homebrew Channel**. The LG Content Store is not supported.
+- ARMv7 32-bit userspace: `armv7l` or compatible `aarch64` kernel with `getconf LONG_BIT=32`.
+- Working `/dev/net/tun`, IPv4 default gateway, supported WAN interface `eth0`, `wlan0` or `wlan1`.
+- Homebrew root execution service must permit `su.cvpn.webos` to call
+  `org.webosbrew.hbchannel.service/exec`. The app requests `lunabus.query`;
+  Homebrew service mappings vary by release. Test this from the **app itself**,
+  not only from a root SSH shell. **Do not automatically elevate/update Homebrew**
+  or patch system Luna permission files.
+- Native Xray v26.10.21 ARMv7 and the Go panel are shipped inside the same IPK;
+  no first-run internet download, remote install script, or SSH is intended.
+- IPK package version 2.2.2 / backend 2.0.0 / VPN Engine 0.1.4.
+  The existing proven Engine routing/recovery code is retained.
+
+## Network and security trade-offs
+
+- IPv4-only tunneling. If IPv6 has a default route, the Engine refuses activation.
+- No system-wide kill switch. On disconnect/error, **ordinary connectivity is restored**.
+- No VPN autostart at boot. A currently active VPN is not automatically resumed after restart.
+- Temporary DNS redirect to 8.8.8.8 through TUN; HTTPS readiness by hostname.
+  The startup check does **not** prove DoH, UDP/QUIC, streaming, or absence of every DNS leak.
+- If Wi-Fi fails, watchdog/recovery may restore ordinary internet rather than reconnect;
+  automatic retry could hide real network issues and is deliberately not enabled.
+- Local control over HTTP port 8765 must be limited to a **trusted private LAN**;
+  never port-forward. Profile secrets are protected by filesystem permissions,
+  **not encrypted at rest**.
+- Updates refuse to replace Engine/Xray while an active VPN, its route, its TUN,
+  the DNS bind mount or Engine lock is present. Users should disconnect before upgrading.
+- Browser lifecycle, root-service permissions and power management vary by LG model.
+  We cannot validate those scenarios from CI alone.
+
+## Required evidence before publication
+
+1. CI succeeds: Go tests, race detector, Go vet, installer rollback, offline
+   launcher behavior, integrity and IPK inspection.
+2. **Passed on one clean LG:** single IPK installed and root service performed
+   preparation with no manual backend/Xray installation. Verify other firmware
+   and Homebrew versions separately.
+3. **Passed in owner-reported functional test:** pairing/connect, Netherlands
+   external exit, actual YouTube playback, disconnect/reconnect and ordinary
+   TV power off/on. Profile corner cases and fault-injection remain open.
+4. Wi-Fi flaps, standby/return, unplanned process death, corrupted file scenarios,
+   no hanging preparation UI, and recovery after reboot on that test TV.
+5. No personal secrets/TV IPs in the IPK; review permissions, CVE/dependencies
+   and third-party licensing; complete real screenshots and uninstall policy.
+
+**Stop-release:** any unrecovered routes/DNS, loss of power/root, exposed secrets,
+no-response first-run without user-visible recovery, or need for SSH on a fresh TV.

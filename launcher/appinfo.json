@@ -6,16 +6,18 @@
   "icon": "icon.png",
   "largeIcon": "largeicon.png",
   "iconColor": "#10234D",
-  "version": "2.0.4",
+  "version": "2.2.2",
   "vendor": "CVPN",
   "appDescription": "CVPN Connect · VPN для LG webOS (root required)",
   "resolution": "1920x1080",
-  "requiredACG": [],
   "disableBackHistoryAPI": true,
   "noSplashOnLaunch": true,
   "spinnerOnLaunch": false,
   "defaultWindowType": "overlay",
   "transparent": true,
   "handlesRelaunch": true,
-  "uiRevision": 2
+  "uiRevision": 2,
+  "requiredPermissions": [
+    "lunabus.query"
+  ]
 }
