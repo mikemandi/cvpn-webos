@@ -1,0 +1,52 @@
+name: Rebuild transparent CVPN app icons
+on:
+  push:
+    branches:
+      - fix/transparent-rounded-icons-2.2.3
+    paths:
+      - scripts/normalize-app-icons.py
+      - .github/workflows/refresh-icons.yml
+permissions:
+  contents: write
+jobs:
+  app-icons:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: true
+          ref: fix/transparent-rounded-icons-2.2.3
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Install image conversion dependency
+        run: python -m pip install 'Pillow==12.0.0'
+      - name: Generate pixel-perfect transparent PNGs
+        run: python scripts/normalize-app-icons.py
+      - name: Verify PNG transparency at all sizes
+        run: |
+          python - <<'PY'
+          from PIL import Image
+          from pathlib import Path
+          for rel, expected in {'launcher/icon.png':80,'launcher/largeicon.png':130,'launcher/icon-400.png':400,'assets/icon160.png':160}.items():
+              with Image.open(rel) as im:
+                  assert im.mode == 'RGBA', rel
+                  assert im.size == (expected,expected), rel
+                  alpha=im.getchannel('A')
+                  assert alpha.getpixel((0,0)) == 0, rel
+                  assert alpha.getpixel((expected-1,0)) == 0, rel
+                  assert alpha.getpixel((expected//2,expected//2)) == 255, rel
+          print('Rounded-corner PNG alpha test passed')
+          PY
+      - name: Commit generated binary icon assets
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add launcher/icon.png launcher/largeicon.png launcher/icon-400.png assets/icon160.png
+          if git diff --cached --quiet; then
+            echo "Icons already updated"
+          else
+            git commit -m "assets: transparent rounded blue app icons for GitHub and LG"
+            git push origin HEAD:fix/transparent-rounded-icons-2.2.3
+          fi
