@@ -1,6 +1,8 @@
 # Changelog
 
-## 2.2.5 RC — precise TV spacing and reliable remote focus (2026-10-28)
+[English](CHANGELOG.md) | [Русский](CHANGELOG.ru.md)
+
+## 2.2.5 Stable — precise TV spacing and reliable remote focus (2026-10-28)
 
 - Removed the app icon from both QR and preparation dialogs; centered a matching
   CVPN (bold white) / webOS (lighter blue) wordmark and PRIVATE NETWORK caption.
@@ -10,7 +12,7 @@
 - Explicit arrow-key focus switching between Retry and Close on error;
   LG Back/Escape closes the error dialog; OK/Enter activates the focused action.
 - No changes to VPN Engine, Xray, root installer, keys or subscriptions.
-- Release candidate: recheck error focus and UI on physical LG before stable.
+- Owner confirmed the revised LG TV dialogs and remote focus on hardware; v2.2.5 released as Stable. This does not guarantee compatibility with every LG firmware.
 
 
 ## 2.2.4 RC — unified onboarding, internationalization and automatic recovery (2026-10-28)
