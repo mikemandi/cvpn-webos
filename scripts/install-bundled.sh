@@ -71,6 +71,9 @@ lock_state() {
 }
 idle() {
     [ ! -e "$BASE/state/active" ] || refuse vpn_running_disconnect_first
+    if command -v pidof >/dev/null 2>&1 && [ -n "$(pidof xray 2>/dev/null || true)" ]; then
+        refuse vpn_xray_present
+    fi
     if ip link show dev cvpn0 >/dev/null 2>&1; then refuse vpn_tun_present; fi
     for block in 0.0.0.0/1 128.0.0.0/1; do
         route=$(ip -4 route show "$block") || refuse routes_unreadable
@@ -121,6 +124,24 @@ restore_on_exit() {
     rm -f "$BASE/state/lock/pid" 2>/dev/null || true
     rmdir "$BASE/state/lock" 2>/dev/null || true
     exit "$code"
+}
+# Keep at most the two newest app-owned binary backups after a successful
+# update. This limits flash usage on LG TVs with small /media/developer space.
+# Never inspect or delete user profiles/configuration, and never prune on
+# rollback/failure: those archives may be needed to restore the old version.
+prune_binary_backups() {
+    keep_prev=''
+    keep_latest=''
+    for entry in "$WEB"/state/backup-allinone-*; do
+        [ -d "$entry" ] || continue
+        if [ -n "$keep_prev" ]; then
+            case "$keep_prev" in
+                "$WEB"/state/backup-allinone-*) rm -rf "$keep_prev" 2>/dev/null || true ;;
+            esac
+        fi
+        keep_prev=$keep_latest
+        keep_latest=$entry
+    done
 }
 install() {
     root_check
@@ -190,6 +211,7 @@ install() {
     chmod 600 "$STAMP.next"
     mv -f "$STAMP.next" "$STAMP"
     RESTORE_ON_EXIT=0
+    prune_binary_backups
     echo BUNDLE_INSTALLED=YES
     echo BUNDLE_READY=YES
     echo VPN_AUTOSTART=NO
