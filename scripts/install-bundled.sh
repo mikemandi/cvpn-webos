@@ -177,6 +177,9 @@ case "$ACTION" in
         else
             echo BUNDLE_READY=NO
             if [ -e "$BASE/state/active" ]; then echo UPGRADE_BLOCKED=VPN_RUNNING; fi
+            # A timed-out launcher must only re-check the in-flight install;
+            # do not start another installer while it owns the Engine lock.
+            if [ -d "$BASE/state/lock" ]; then echo INSTALL_IN_PROGRESS=YES; fi
         fi
         ;;
     install) install ;;
