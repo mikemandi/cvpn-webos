@@ -1,58 +1,50 @@
-# CVPN webOS 2.2.2 — supported devices and release gates
+# CVPN webOS 2.2.5 — compatibility and release limitations
 
-**Status: hardware-tested release candidate on the `feature/all-in-one-v2.1.0` branch.**
-One-IPK first-run, VPN, exit-IP, YouTube, disconnect/reconnect and ordinary
-power off/on **passed on LG 55UK6450PLC**, as reported by the owner.
-Do not merge into stable/main, tag a public release or submit to Homebrew
-until the remaining QA, licensing, uninstall and publication gates are closed.
-See `docs/QA_ACCEPTANCE_2.2.2.md`.
+[English](RELEASE_LIMITATIONS.md) | [Русский](RELEASE_LIMITATIONS.ru.md)
 
-## Supported platform
+**Current public release:** [v2.2.5 Stable](https://github.com/mikemandi/cvpn-webos/releases/tag/v2.2.5) (2026-10-28). Stable means a publicly published, owner-accepted build; it **does not** assert comprehensive firmware support, an independent security audit or Homebrew Channel catalog approval.
 
-- LG webOS with **working root and Homebrew Channel**. The LG Content Store is not supported.
-- ARMv7 32-bit userspace: `armv7l` or compatible `aarch64` kernel with `getconf LONG_BIT=32`.
-- Working `/dev/net/tun`, IPv4 default gateway, supported WAN interface `eth0`, `wlan0` or `wlan1`.
-- Homebrew root execution service must permit `su.cvpn.webos` to call
-  `org.webosbrew.hbchannel.service/exec`. The app requests `lunabus.query`;
-  Homebrew service mappings vary by release. Test this from the **app itself**,
-  not only from a root SSH shell. **Do not automatically elevate/update Homebrew**
-  or patch system Luna permission files.
-- Native Xray v26.10.21 ARMv7 and the Go panel are shipped inside the same IPK;
-  no first-run internet download, remote install script, or SSH is intended.
-- IPK package version 2.2.2 / backend 2.0.0 / VPN Engine 0.1.4.
-  The existing proven Engine routing/recovery code is retained.
+## Supported environment
 
-## Network and security trade-offs
+- Rooted **LG webOS** television with compatible Homebrew Channel root-service permissions.
+- ARMv7-compatible **32-bit userspace**: native armv7l or a compatible aarch64 kernel reporting 32-bit userspace.
+- Working **/dev/net/tun**, IPv4 network gateway and supported network interface (Ethernet/Wi-Fi as provided by the target platform).
+- Trusted local network and a phone/computer for browser pairing. The local API is HTTP on **TCP/8765**.
+- A compatible VPN profile/subscription from any provider. **No account or payment to CVPN is necessary** to run the client.
 
-- IPv4-only tunneling. If IPv6 has a default route, the Engine refuses activation.
-- No system-wide kill switch. On disconnect/error, **ordinary connectivity is restored**.
-- No VPN autostart at boot. A currently active VPN is not automatically resumed after restart.
-- Temporary DNS redirect to 8.8.8.8 through TUN; HTTPS readiness by hostname.
-  The startup check does **not** prove DoH, UDP/QUIC, streaming, or absence of every DNS leak.
-- If Wi-Fi fails, watchdog/recovery may restore ordinary internet rather than reconnect;
-  automatic retry could hide real network issues and is deliberately not enabled.
-- Local control over HTTP port 8765 must be limited to a **trusted private LAN**;
-  never port-forward. Profile secrets are protected by filesystem permissions,
-  **not encrypted at rest**.
-- Updates refuse to replace Engine/Xray while an active VPN, its route, its TUN,
-  the DNS bind mount or Engine lock is present. Users should disconnect before upgrading.
-- Browser lifecycle, root-service permissions and power management vary by LG model.
-  We cannot validate those scenarios from CI alone.
+Not compatible with unrooted TVs or official LG Content Store installation. Firmware, Homebrew service permissions and available Linux tools vary by LG model.
 
-## Required evidence before publication
+The All-in-One IPK contains the **TV launcher 2.2.5, backend 2.0.0, VPN Engine 0.1.4 and Xray-core 26.10.21 ARMv7**. The initial setup does **not** require separate downloads of Xray/backend on the TV.
 
-1. CI succeeds: Go tests, race detector, Go vet, installer rollback, offline
-   launcher behavior, integrity and IPK inspection.
-2. **Passed on one clean LG:** single IPK installed and root service performed
-   preparation with no manual backend/Xray installation. Verify other firmware
-   and Homebrew versions separately.
-3. **Passed in owner-reported functional test:** pairing/connect, Netherlands
-   external exit, actual YouTube playback, disconnect/reconnect and ordinary
-   TV power off/on. Profile corner cases and fault-injection remain open.
-4. Wi-Fi flaps, standby/return, unplanned process death, corrupted file scenarios,
-   no hanging preparation UI, and recovery after reboot on that test TV.
-5. No personal secrets/TV IPs in the IPK; review permissions, CVE/dependencies
-   and third-party licensing; complete real screenshots and uninstall policy.
+## VPN and security trade-offs
 
-**Stop-release:** any unrecovered routes/DNS, loss of power/root, exposed secrets,
-no-response first-run without user-visible recovery, or need for SSH on a fresh TV.
+- **IPv4-only:** VPN applies to supported IPv4 routing. If an active IPv6 default route exists, the engine refuses to connect to avoid an obvious bypass.
+- **No universal kill switch.** If the VPN disconnects or encounters an error, ordinary internet access can be restored. Never treat the product as guaranteed leak prevention.
+- **No VPN autoconnect after reboot.** Reopen and connect manually.
+- **DNS:** network recovery attempts to restore routes and DNS. HTTPS connectivity tests validate certificates/hostnames, but they do **not** prove that DoH, all UDP/QUIC traffic, streaming applications or every DNS request is tunneled.
+- **LAN management:** pairing codes, sessions and CSRF provide application checks, but **HTTP over LAN is not end-to-end encrypted**. Never expose port 8765 to the WAN.
+- **Secret storage:** profiles and access keys stay on the TV with restrictive file permissions; they are **not encrypted at rest**.
+
+## Installation and failure behavior
+
+- The root installer refuses to overwrite engine/Xray binaries if it detects an active VPN process, TUN, VPN route, DNS mount or lock.
+- The installer keeps existing profiles, backs up app binaries and attempts rollback after partial failure. Unexpected power loss or unsupported firmware can still require recovery.
+- A launcher Homebrew callback timeout is not proof that installation stopped; the app performs read-only status polling rather than attempting a concurrent installer.
+- Removing the IPK may **leave persistent application profile/backend data**. Do not assume uninstall securely erases keys.
+- First-run Homebrew root permission changes are not made automatically, and users must not silently patch system ACLs to bypass compatibility checks.
+
+## Actual acceptance evidence
+
+- **LG 55UK6450PLC, webOS 4.4.3-22 / firmware 05.50.70:** owner-reported All-in-One 2.2.2 first run, QR/pairing, Netherlands VPN exit IP, YouTube playback, disconnect/reconnect and normal off/on.
+- **LG 55UQ76003LD, webOS 22:** earlier fresh bootstrap and VPN after first-import/BusyBox fixes; this is **not** a one-pass v2.2.5 clean-install certification.
+- **v2.2.5 UI on LG:** the owner confirmed that refined TV dialogs, Russian/English interface and error-dialog remote focus work on hardware; do not infer additional model-specific network testing.
+
+See [tested hardware](TESTED_DEVICES.md) and [2.2.2 QA evidence](QA_ACCEPTANCE_2.2.2.md).
+
+## Known gaps and future validation
+
+Physical tests across additional LG models and firmware, fault injection, standby, network flaps, clean reinstall/uninstall, power loss during upgrade, cross-app DNS/IPv6 behavior, security review, component/asset licensing and upstream Homebrew approval remain limited or incomplete.
+
+**Stop and report immediately** if routes/DNS cannot be restored, existing private profiles are unexpectedly erased, the TV loses normal network access, or an installation requires privilege bypasses or exposed secrets.
+
+[Security](SECURITY.md) · [Licensing review](../LICENSE-PUBLISHING-REVIEW.md) · [English README](../README.md) · [Русский README](../README.ru.md)
