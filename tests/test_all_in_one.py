@@ -187,7 +187,7 @@ class AllInOneInstaller(unittest.TestCase):
         (self.payload/'bin/engine').write_text('#!/bin/sh\\necho changed\\n')
         self.regenerate_sums()
         pidof=self.fakebin/'pidof'
-        pidof.write_text('#!/bin/sh\\n[ "$1" = xray ] && echo 4242\\n')
+        pidof.write_text(chr(10).join(['#!/bin/sh', '[ "$1" = xray ] && echo 4242', '']))
         pidof.chmod(0o755)
         res=self.run_it('install')
         self.assertNotEqual(res.returncode,0)
