@@ -55,9 +55,22 @@ ready() {
     [ -L "$HOOK" ] && [ "$(readlink "$HOOK")" = "$PAYLOAD/bin/boot-hook" ] || return 1
     panel_health || return 1
 }
+# Detect a lock left by a killed installer/Engine without deleting locks
+# owned by a live process or those with ambiguous/missing PID metadata.
+# State is read-only until idle() has checked the VPN's routes and DNS mount.
+lock_state() {
+    [ -d "$BASE/state/lock" ] || { echo absent; return; }
+    [ -s "$BASE/state/lock/pid" ] || { echo unknown; return; }
+    lock_pid=$(cat "$BASE/state/lock/pid" 2>/dev/null || true)
+    case "$lock_pid" in ''|*[!0-9]*) echo unknown; return;; esac
+    if kill -0 "$lock_pid" 2>/dev/null; then
+        echo busy
+    else
+        echo stale
+    fi
+}
 idle() {
     [ ! -e "$BASE/state/active" ] || refuse vpn_running_disconnect_first
-    [ ! -e "$BASE/state/lock" ] || refuse engine_busy
     if ip link show dev cvpn0 >/dev/null 2>&1; then refuse vpn_tun_present; fi
     for block in 0.0.0.0/1 128.0.0.0/1; do
         route=$(ip -4 route show "$block") || refuse routes_unreadable
@@ -66,6 +79,19 @@ idle() {
     if awk '$2=="/var/lib/misc/resolv.conf" {found=1} END {exit(!found)}' /proc/mounts; then
         refuse resolver_bind_present
     fi
+    # Safe stale-lock recovery is limited to the local CVPN lock and only
+    # occurs when no VPN state/resources exist. No system routes are changed.
+    case "$(lock_state)" in
+        absent) : ;;
+        stale)
+            old_pid=$(cat "$BASE/state/lock/pid") || refuse engine_busy
+            case "$old_pid" in ''|*[!0-9]*) refuse engine_busy;; esac
+            kill -0 "$old_pid" 2>/dev/null && refuse engine_busy
+            rm -f "$BASE/state/lock/pid" || refuse engine_busy
+            rmdir "$BASE/state/lock" 2>/dev/null || refuse engine_busy
+            ;;
+        *) refuse engine_busy ;;
+    esac
 }
 # On any partial update, restore CVPN binaries but never touch user secrets.
 restore_on_exit() {
@@ -179,7 +205,10 @@ case "$ACTION" in
             if [ -e "$BASE/state/active" ]; then echo UPGRADE_BLOCKED=VPN_RUNNING; fi
             # A timed-out launcher must only re-check the in-flight install;
             # do not start another installer while it owns the Engine lock.
-            if [ -d "$BASE/state/lock" ]; then echo INSTALL_IN_PROGRESS=YES; fi
+            case "$(lock_state)" in
+                stale) echo STALE_LOCK_RECOVERABLE=YES ;;
+                busy|unknown) echo INSTALL_IN_PROGRESS=YES ;;
+            esac
         fi
         ;;
     install) install ;;
