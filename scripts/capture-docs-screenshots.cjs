@@ -72,16 +72,16 @@ async function phone(browser,origin,tab,file,modal){
 async function tv(browser,origin,mode,file){
  const ctx=await browser.newContext({viewport:{width:1280,height:720},deviceScaleFactor:1,locale:'en-US',reducedMotion:'reduce'});
  const page=await ctx.newPage();
+ // Mock only the Homebrew callback boundary so genuine TV setup UI stays in its checking state.
+ await page.addInitScript(()=>{window.PalmServiceBridge=function(){this.call=function(){};};});
  await page.route('http://127.0.0.1:8765/**',r=>r.fulfill({status:200,contentType:'text/javascript',body:''}));
  await page.goto(origin+'/tv-launcher',{waitUntil:'domcontentloaded'});
  await page.evaluate(mode=>{
   document.body.style.setProperty('background','linear-gradient(115deg,#1b2941,#0a1527 72%)','important');
   window.cvpnLanguageInfo({localePreference:'en',resolvedTVLocale:'en'});
   if(mode==='setup'){
-   document.getElementById('setup-screen').hidden=false;
-   document.getElementById('qr-screen').hidden=true;
-   document.getElementById('setup-title').textContent='Preparing CVPN';
-   document.getElementById('setup-status').textContent='Checking the required components';
+   // Let the real launcher set every translated title, step and footer.
+   document.dispatchEvent(new CustomEvent('webOSLaunch',{detail:{mode:'normal'}}));
   } else {
    document.dispatchEvent(new CustomEvent('webOSLaunch',{detail:{mode:'qr'}}));
    // Example address reserved by RFC 5737, non-functional sample code.
