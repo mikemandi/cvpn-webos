@@ -5,17 +5,17 @@ on:
       - 'v*'
     # A one-time, owner-approved publication branch. The connected GitHub
     # integration cannot create Git tags; this branch uses the SAME tested
-    # release job and action-gh-release to create immutable v2.2.3 assets.
+    # release job and action-gh-release to create immutable v2.2.4 assets.
     branches:
-      - 'publish/v2.2.3'
+      - 'publish/v2.2.4'
 permissions:
   contents: write
 jobs:
   release:
-    if: github.ref == 'refs/heads/publish/v2.2.3' || startsWith(github.ref, 'refs/tags/v')
+    if: github.ref == 'refs/heads/publish/v2.2.4' || startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-24.04
     env:
-      RELEASE_TAG: ${{ github.ref_type == 'tag' && github.ref_name || 'v2.2.3' }}
+      RELEASE_TAG: ${{ github.ref_type == 'tag' && github.ref_name || 'v2.2.4' }}
     steps:
       - uses: actions/checkout@v6
       - name: Validate the approved release tag and version
@@ -25,7 +25,7 @@ jobs:
           VERSION="$(python3 -c 'import json; print(json.load(open("launcher/appinfo.json"))["version"])')"
           test "$RELEASE_TAG" = "v$VERSION" || { echo "Tag/version mismatch"; exit 1; }
           if [[ "$GITHUB_REF" == refs/heads/* ]]; then
-            test "$GITHUB_REF" = 'refs/heads/publish/v2.2.3'
+            test "$GITHUB_REF" = 'refs/heads/publish/v2.2.4'
             if git ls-remote --exit-code --tags origin "refs/tags/$RELEASE_TAG" >/dev/null 2>&1; then
               echo "Release tag already exists; refusing to overwrite existing assets"
               exit 1

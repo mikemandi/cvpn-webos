@@ -1,5 +1,24 @@
 # Changelog
 
+## 2.2.4 RC — unified onboarding, internationalization and automatic recovery (2026-10-28)
+
+- Preparation and QR now use the same floating TV overlay, card and branded
+  app icon: no full-screen blue setup illustration, no cramped stepper layout.
+- Added RU/EN to **all** TV setup, error, QR and expiration countdown states.
+  Russian TV settings render Russian; other languages fall back to English.
+  A manual selection in CVPN Connect overrides the TV language on both screens.
+- First launch retrieves the persisted preference via a local-only JSONP endpoint.
+  Existing TV QR locale metadata is honored on display.
+- Short, bounded panel readiness probe on repeated app launches; only a genuine
+  install waits for the slower health/restart path. No fake loading percent.
+- Removed the spurious intermediate **Continue** UI from interrupted installs:
+  automatically poll READ-ONLY state until the existing installation completes,
+  then close normally; only actionable errors show Retry/Close.
+- The main VPN Engine, Xray, subscription storage and network routes are unchanged.
+- Comprehensive offline UI localization, retry, timeout, and Go language API tests.
+- **Hardware rollout:** v2.2.4 is a candidate until a TV confirms the new UI.
+  Existing tested 2.2.2/2.2.3 VPN connection behavior is unchanged.
+
 ## 2.2.3 — transparent rounded app icon (2026-10-28)
 
 - Fixed opaque square corners on the LG launcher and GitHub/Homebrew artwork.

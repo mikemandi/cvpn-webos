@@ -151,6 +151,33 @@ func showNativePairingAlert(message string) error {
 	return nil
 }
 
+// TV launcher locale is read-only and returns no credentials or pairing PIN.
+// Used during first-run setup to honor the selected CVPN Connect language even
+// when the LG web app's navigator.language does not reflect webOS menu locale.
+func (a *app) tvLanguageData(w http.ResponseWriter, r *http.Request) {
+    if !localTVRequest(r) {
+        http.Error(w, "TV only", http.StatusForbidden)
+        return
+    }
+    if r.Method != http.MethodGet {
+        http.Error(w, "GET only", http.StatusMethodNotAllowed)
+        return
+    }
+    pref := readLanguageSetting()
+    resolved := ""
+    if pref == "auto" {
+        resolved = detectLGUILanguage()
+    }
+    payload, _ := json.Marshal(map[string]string{
+        "localePreference": pref,
+        "resolvedTVLocale": resolved,
+    })
+    w.Header().Set("Cache-Control", "no-store")
+    w.Header().Set("X-Content-Type-Options", "nosniff")
+    w.Header().Set("Content-Type", "application/javascript; charset=utf-8")
+    _, _ = fmt.Fprintf(w, "window.cvpnLanguageInfo(%s);", payload)
+}
+
 // tvQRData is private to the television loopback. It never issues another PIN
 // and does not expose the secret to phones on the LAN.
 func (a *app) tvQRData(w http.ResponseWriter, r *http.Request) {

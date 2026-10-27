@@ -36,24 +36,34 @@ verify_payload() {
     "$PAYLOAD/bin/xray" version >/dev/null 2>&1 || refuse incompatible_xray
 }
 manifest_hash() { sha256sum "$PAYLOAD/SHA256SUMS" | awk '{print $1}'; }
+# Status is on the TV launcher's critical path; do not spend 4x5s
+# waiting for backend health on EVERY relaunch. Longer retries are reserved
+# for the first install/start and never delay an already-matching bundle.
 panel_health() {
     [ -s "$WEB/access.key" ] || return 1
     key=$(cat "$WEB/access.key")
-    n=0
-    while [ "$n" -lt 4 ]; do
-        response=$(curl -fsS --noproxy '*' --connect-timeout 2 --max-time 5 -H "X-CVPN-Key: $key" http://127.0.0.1:8765/api/status 2>/dev/null || true)
+    count=0
+    limit=4
+    [ "${1:-}" = quick ] && limit=1
+    while [ "$count" -lt "$limit" ]; do
+        response=$(curl -fsS --noproxy '*' --connect-timeout 1 --max-time 3 \
+            -H "X-CVPN-Key: $key" http://127.0.0.1:8765/api/status 2>/dev/null || true)
         case "$response" in *'"version":"2.0.0"'*) return 0;; esac
-        n=$((n+1)); sleep 1
+        count=$((count+1))
+        [ "$count" -lt "$limit" ] && sleep 1
     done
     return 1
 }
-ready() {
+bundle_present() {
     [ -s "$STAMP" ] || return 1
     [ "$(cat "$STAMP")" = "$(manifest_hash)" ] || return 1
     [ -x "$WEB/bin/cvpn-webos-panel" ] || return 1
     [ -x "$BASE/bin/xray" ] || return 1
     [ -L "$HOOK" ] && [ "$(readlink "$HOOK")" = "$PAYLOAD/bin/boot-hook" ] || return 1
-    panel_health || return 1
+}
+ready() {
+    bundle_present || return 1
+    panel_health "${1:-}" || return 1
 }
 # Detect a lock left by a killed installer/Engine without deleting locks
 # owned by a live process or those with ambiguous/missing PID metadata.
@@ -220,7 +230,7 @@ install() {
 case "$ACTION" in
     status)
         root_check
-        if ready; then
+        if ready quick; then
             echo BUNDLE_READY=YES
         else
             echo BUNDLE_READY=NO
