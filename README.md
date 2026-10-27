@@ -4,17 +4,17 @@
 supported **rooted LG webOS televisions**. The interface is controlled from a
 phone on the same trusted LAN via a QR pairing flow.
 
-**Current candidate:** 2.2.0 All-in-One (feature branch; not yet Homebrew
+**Current candidate:** 2.2.1 All-in-One (feature branch; not yet Homebrew
 published). **Backend:** 2.0.0. **Engine:** 0.1.4. **Xray:** 26.10.21 ARMv7.
 
 [Website](https://cvpn.su) · [Security](docs/SECURITY.md) ·
-[Hardware acceptance](docs/QA_ACCEPTANCE_2.2.0.md) ·
+[Hardware acceptance](docs/QA_ACCEPTANCE_2.2.1.md) ·
 [Compatibility](docs/RELEASE_LIMITATIONS.md) ·
 [Changelog](CHANGELOG.md)
 
 ## What is included in the All-in-One IPK
 
-`su.cvpn.webos_2.2.0_all.ipk` includes:
+`su.cvpn.webos_2.2.1_all.ipk` includes:
 
 - A TV Launcher: QR pairing and premium preparation/onboarding interface
 - Native ARMv7 Go 2.0.0 control panel and its local mobile interface
@@ -26,14 +26,14 @@ published). **Backend:** 2.0.0. **Engine:** 0.1.4. **Xray:** 26.10.21 ARMv7.
 The **TV does not download Xray or the backend** on first launch. Its
 initialization screen prepares verified components already included in the IPK.
 
-## Status of 2.2.0
+## Status of 2.2.1
 
 The previous candidate **2.1.3** successfully connected and played YouTube on
 the third LG, including recovery of video after temporary Wi-Fi interruptions.
 On that TV, the initial installation had to be completed manually via root SSH;
 this is an *unresolved first-run acceptance issue*, not a shipping workflow.
 
-This 2.2.0 candidate addresses it by declaring `lunabus.query`, correctly
+This 2.2.1 candidate addresses it by declaring `lunabus.query`, correctly
 handling the Homebrew root-service callback, bounding the waiting UI, presenting
 clearer error states and preventing parallel installers on retry. **The
 improvement still requires validation on a fresh fourth LG** before a production
@@ -104,7 +104,7 @@ bash scripts/build-release.sh
 bash tests/run_offline.sh
 ```
 
-The build output is `dist/su.cvpn.webos_2.2.0_all.ipk`. The offline suite
+The build output is `dist/su.cvpn.webos_2.2.1_all.ipk`. The offline suite
 includes Go race/vet tests, fake-root installer integration/rollback,
 headless Launcher JS tests, package checks and shell syntax tests.
 
@@ -114,7 +114,7 @@ reviewed before tagging a public release. See
 
 ## Test the next fresh LG before release
 
-Follow **[QA_ACCEPTANCE_2.2.0.md](docs/QA_ACCEPTANCE_2.2.0.md)**, particularly:
+Follow **[QA_ACCEPTANCE_2.2.1.md](docs/QA_ACCEPTANCE_2.2.1.md)**, particularly:
 
 - Fresh TV and single IPK; **no command line or manual component installation**
 - Normal/QR launch, retry after permission denial or delay, repeated launch
