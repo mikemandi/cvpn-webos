@@ -335,9 +335,21 @@ button:active {background:#aecaff}
    var generation=setupGeneration;
    setupMessage('Подготавливаем CVPN','Проверяем необходимые компоненты для работы',0,'checking',false);
    requestLanguage();
+   initialStatus(generation,0);
+ }
+ function initialStatus(generation,attempt){
+   if(generation!==setupGeneration||qrMode)return;
    invokeInstaller('status',function(ok,data){
      if(generation!==setupGeneration||qrMode)return;
-     if(!ok){failSetup(data);return;}
+     if(!ok){
+       // Old webOS may take longer to answer the root-service IPC. Retry
+       // only the harmless READ-ONLY status check, never installation.
+       if(data.error==='HOMEBREW_SERVICE_TIMEOUT'&&attempt<2){
+         setTimeout(function(){initialStatus(generation,attempt+1);},1200);
+         return;
+       }
+       failSetup(data);return;
+     }
      var output=String(data.stdoutString||'');
      if(output.indexOf('BUNDLE_READY=YES')!==-1){completedSetup(generation);return;}
      if(output.indexOf('BUNDLE_READY=NO')===-1){failSetup({error:'SERVICE_INVALID_RESPONSE'});return;}
