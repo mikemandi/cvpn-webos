@@ -1,5 +1,15 @@
 # Changelog
 
+## 2.2.2 RC — flash-friendly updates and orphan safety (2026-10-27)
+
+- Bounded app-owned binary backup retention to two archives after successful
+  upgrade, reducing flash/disk exhaustion on older LG TVs.
+- Installer now refuses replacing files while an orphaned Xray process is active,
+  even when Engine's session marker is absent.
+- Regression tests cover backup bounds, rollback safety and live Xray refusal.
+- 2.2.1 UI and timeout compatibility fixes unchanged. Root/TV startup, networking
+  and fresh-install still require acceptance on clean LG hardware.
+
 ## 2.2.1 RC — UI reference, installer resilience, code audit (2026-10-27)
 
 - Revised the entire first-run TV layout to match the supplied CVPN webOS
