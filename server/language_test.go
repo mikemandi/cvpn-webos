@@ -46,3 +46,33 @@ func TestNativePairingAlertEnglishButtons(t *testing.T) {
 		t.Fatalf("english buttons: %s", data)
 	}
 }
+
+func TestTVLauncherLanguageEndpointLocalAndExplicitPreference(t *testing.T) {
+ original := base
+ base = t.TempDir()
+ defer func(){base=original}()
+ a:= &app{}
+ // Manual preference must be available to Launcher without exposing secrets.
+ post:=httptest.NewRequest(http.MethodPost,"/api/language",strings.NewReader(`{"language":"en"}`))
+ a.languageAPI(httptest.NewRecorder(),post)
+ remote:=httptest.NewRequest(http.MethodGet,"/tv/language.js",nil)
+ remote.RemoteAddr="192.168.0.12:4567"
+ w:=httptest.NewRecorder()
+ a.tvLanguageData(w,remote)
+ if w.Code!=http.StatusForbidden {t.Fatalf("non-TV could request locale endpoint: %d",w.Code)}
+ local:=httptest.NewRequest(http.MethodGet,"/tv/language.js",nil)
+ local.RemoteAddr="127.0.0.1:1234"
+ w=httptest.NewRecorder()
+ a.tvLanguageData(w,local)
+ if w.Code!=200 {t.Fatalf("local locale rejected: %d",w.Code)}
+ result:=w.Body.String()
+ if !strings.Contains(result,`"localePreference":"en"`) ||
+    !strings.Contains(result,"window.cvpnLanguageInfo(") ||
+    strings.Contains(result,"access.key") || strings.Contains(result,"pairURL") {
+      t.Fatalf("unexpected localized response: %s",result)
+ }
+ w=httptest.NewRecorder()
+ local.Method=http.MethodPost
+ a.tvLanguageData(w,local)
+ if w.Code!=http.StatusMethodNotAllowed {t.Fatalf("POST permitted: %d",w.Code)}
+}
