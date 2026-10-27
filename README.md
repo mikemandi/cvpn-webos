@@ -1,5 +1,8 @@
 # CVPN webOS
 
+![CVPN webOS – blue rounded app icon with transparent corners](assets/icon160.png)
+
+
 **PRIVATE NETWORK · CVPN Connect** — a **free-of-charge universal VPN client**
 for supported **rooted LG webOS televisions**. Import compatible VLESS/Reality
 profiles or HTTPS subscriptions from **any provider**, including your own
@@ -8,7 +11,7 @@ activation, pairing, or ordinary VPN features. CVPN (cvpn.su) is an optional
 service recommendation. Configure and control the TV securely from a phone
 on the same trusted LAN using temporary QR/PIN pairing.
 
-**Version:** 2.2.2 All-in-One. **Distribution:** free of charge; rooted LG only. **Backend:** 2.0.0. **Engine:** 0.1.4. **Xray:** 26.10.21 ARMv7.
+**Version:** 2.2.3 All-in-One (app icon alpha hotfix). **Distribution:** free of charge; rooted LG only. **Backend:** 2.0.0. **Engine:** 0.1.4. **Xray:** 26.10.21 ARMv7.
 
 [Website](https://cvpn.su) · [Security](docs/SECURITY.md) ·
 [Hardware acceptance](docs/QA_ACCEPTANCE_2.2.2.md) ·
@@ -17,7 +20,7 @@ on the same trusted LAN using temporary QR/PIN pairing.
 
 ## What is included in the All-in-One IPK
 
-`su.cvpn.webos_2.2.2_all.ipk` includes:
+`su.cvpn.webos_2.2.3_all.ipk` includes:
 
 - A TV Launcher: QR pairing and premium preparation/onboarding interface
 - Native ARMv7 Go 2.0.0 control panel and its local mobile interface
@@ -114,7 +117,7 @@ bash scripts/build-release.sh
 bash tests/run_offline.sh
 ```
 
-The build output is `dist/su.cvpn.webos_2.2.2_all.ipk`. The offline suite
+The build output is `dist/su.cvpn.webos_2.2.3_all.ipk`. The offline suite
 includes Go race/vet tests, fake-root installer integration/rollback,
 headless Launcher JS tests, package checks and shell syntax tests.
 

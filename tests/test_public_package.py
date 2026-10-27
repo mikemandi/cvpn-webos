@@ -5,20 +5,22 @@ import json
 import pathlib
 import re
 import shutil
+import struct
 import subprocess
 import tarfile
 import tempfile
 import unittest
 import zipfile
+import zlib
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-IPK = ROOT / 'dist/su.cvpn.webos_2.2.2_all.ipk'
+IPK = ROOT / 'dist/su.cvpn.webos_2.2.3_all.ipk'
 
 class PublicPackageTests(unittest.TestCase):
     def test_launcher_manifest(self):
         d = json.loads((ROOT / 'launcher/appinfo.json').read_text())
         self.assertEqual(d['id'], 'su.cvpn.webos')
-        self.assertEqual(d['version'], '2.2.2')
+        self.assertEqual(d['version'], '2.2.3')
         self.assertIn('lunabus.query', d['requiredPermissions'])
         for f in [d['main'],d['icon'],d['largeIcon']]:
             self.assertTrue((ROOT / 'launcher' / f).is_file())
@@ -39,6 +41,41 @@ class PublicPackageTests(unittest.TestCase):
             self.assertTrue(any(n.endswith('/payload/SHA256SUMS') for n in paths))
             self.assertTrue(any(n.endswith('/payload/XRAY-LICENSE.txt') for n in paths))
             self.assertTrue(any(n.endswith('/payload/install.sh') for n in paths))
+
+    def test_app_icons_have_real_transparent_corners(self):
+        # Decode PNG row 0 using only stdlib; no Pillow needed in main CI.
+        for rel, size in [
+            ('launcher/icon.png',80),
+            ('launcher/largeicon.png',130),
+            ('launcher/icon-400.png',400),
+            ('assets/icon160.png',160),
+        ]:
+            png=(ROOT/rel).read_bytes()
+            self.assertTrue(png.startswith(bytes([137, 80, 78, 71, 13, 10, 26, 10])),rel)
+            width,height,depth,ctype=struct.unpack('>IIBB',png[16:26])
+            self.assertEqual((width,height,depth,ctype),(size,size,8,6),rel)
+            pos=8
+            compressed=bytearray()
+            while pos<len(png):
+                length=struct.unpack('>I',png[pos:pos+4])[0]
+                tag=png[pos+4:pos+8]
+                if tag==b'IDAT':
+                    compressed.extend(png[pos+8:pos+8+length])
+                pos+=12+length
+                if tag==b'IEND':break
+            pixels=zlib.decompress(compressed)
+            filter_type=pixels[0]
+            first=bytearray(pixels[1:1+size*4])
+            self.assertIn(filter_type,range(5),rel)
+            if filter_type in (1,3,4):
+                for i in range(4,len(first)):
+                    left=first[i-4]
+                    if filter_type==1 or filter_type==4:
+                        first[i]=(first[i]+left)&255
+                    else:
+                        first[i]=(first[i]+left//2)&255
+            self.assertEqual(first[3],0,rel+' top-left')
+            self.assertEqual(first[(size-1)*4+3],0,rel+' top-right')
 
     def test_launcher_inline_javascript_syntax(self):
         if shutil.which('node') is None:

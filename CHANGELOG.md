@@ -1,5 +1,18 @@
 # Changelog
 
+## 2.2.3 — transparent rounded app icon (2026-10-28)
+
+- Fixed opaque square corners on the LG launcher and GitHub/Homebrew artwork.
+- Preserved the original blue rounded icon tile, white TV/cast symbol,
+  lighting and color treatment; only the pixels beyond the rounded square
+  are transparent (true 8-bit alpha, antialiased borders).
+- Updated all four shipped icon asset sizes from one 400px source
+  (80, 130, 160 and 400px).
+- No changes to Xray, backend, subscription support, root installer,
+  recovery scripts or VPN Engine 0.1.4.
+- 2.2.2 physical clean-LG test remains applicable to VPN functionality;
+  2.2.3 is an app-artwork-only package revision.
+
 ## 2.2.2 RC — flash-friendly updates and orphan safety (2026-10-27)
 
 - Bounded app-owned binary backup retention to two archives after successful

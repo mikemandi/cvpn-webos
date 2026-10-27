@@ -1,4 +1,4 @@
-# Homebrew listing PR — CVPN webOS v2.2.2
+# Homebrew listing PR — CVPN webOS v2.2.3
 
 **Title:** Add CVPN webOS — free VPN client for rooted LG televisions
 
@@ -41,7 +41,7 @@
 >
 > See https://github.com/mikemandi/cvpn-webos for installation and
 > security limitations. Public release:
-> https://github.com/mikemandi/cvpn-webos/releases/tag/v2.2.2
+> https://github.com/mikemandi/cvpn-webos/releases/tag/v2.2.3
 
 **Required submission steps once release assets are visible:**
 
