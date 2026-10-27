@@ -20,25 +20,19 @@ const server=http.createServer((req,res)=>{
  fs.createReadStream(f).pipe(res);
 });
 async function translate(page){
- await page.evaluate(dictionary=>{
-  const pairs=Object.entries(dictionary).filter(([a,b])=>a&&b&&a!==b).sort((a,b)=>b[0].length-a[0].length);
-  const walker=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);
-  let n;
-  while((n=walker.nextNode())){
-    if(!/[А-Яа-яЁё]/.test(n.nodeValue))continue;
-    let s=n.nodeValue;
-    for(const [a,b] of pairs)if(s.includes(a))s=s.split(a).join(b);
-    n.nodeValue=s;
-  }
-  document.documentElement.lang='en';
-  document.getElementById('settings-language').value='en';
+ // Use the app's OWN i18n.js, not a separate screenshot translation table.
+ await page.evaluate(()=>{
+  if(!window.CVPNLocale)throw new Error('Real app localization did not load');
+  window.CVPNLocale.set('en');
+  window.CVPNLocale.refresh();
+  // Closed language dropdown: use English for its inaccessible off-screen option.
   document.querySelector('#settings-language option[value=ru]').textContent='Russian';
   document.getElementById('settings-panel-address').textContent='—';
- },translations);
+ });
 }
 async function preparePhone(page,origin,tab){
  await page.route('**/app.js*',r=>r.fulfill({status:200,contentType:'application/javascript',body:''}));
- await page.route('**/i18n.js*',r=>r.fulfill({status:200,contentType:'application/javascript',body:''}));
+ await page.addInitScript(()=>localStorage.setItem('cvpn_webos_language','en'));
  await page.goto(origin+'/',{waitUntil:'networkidle'});
  await page.evaluate(name=>{
   const $=id=>document.getElementById(id);
