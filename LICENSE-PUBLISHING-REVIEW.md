@@ -6,6 +6,10 @@ The operator must confirm ownership and choose the license for CVPN source befor
 an open-source license grant.
 
 The QR implementation's Apache-2.0 license is shipped as `launcher/QR-THIRD-PARTY-LICENSE.txt`.
-Xray-core is not bundled in this repository and has its own upstream license.
+The 2.2.0 All-in-One **IPK includes an Xray-core ARMv7 binary** downloaded from
+upstream and SHA256-verified during CI, together with `XRAY-LICENSE.txt`.
+The upstream code is not vendored into this repository, but binary redistribution
+rights and all required upstream copyright/license notices must be reviewed
+before public release.
 
 Do not upload old historical project archives containing `private/access.key` or real subscriptions.
