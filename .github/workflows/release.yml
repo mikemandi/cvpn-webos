@@ -79,5 +79,6 @@ jobs:
           files: |
             dist/*.ipk
             dist/*.manifest.json
+            dist/*.yml
             dist/SHA256SUMS
           generate_release_notes: true
