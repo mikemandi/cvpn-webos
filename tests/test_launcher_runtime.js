@@ -10,7 +10,7 @@ const source=html.split('<script>')[1].split('</script>')[0];
 
 function fixture(responses) {
   const els={};
-  const calls=[], bridges=[], timers=[];
+  const calls=[], bridges=[], timers=[], handlers={};
   const steps=Array.from({length:3},()=>({
     className:'setup-step',
     mark:{textContent:''},
@@ -27,7 +27,7 @@ function fixture(responses) {
   }
   const document={
     getElementById:element,querySelectorAll(){return steps;},
-    addEventListener(){},createElement(){return {src:'',onerror:null};},
+    addEventListener(event,cb){handlers[event]=cb;},createElement(){return {src:'',onerror:null};},
     head:{appendChild(){}},
   };
   let closed=false, nextTimer=1;
@@ -59,7 +59,7 @@ function fixture(responses) {
     clearInterval(){},setInterval(){return 40;},
   };
   vm.runInNewContext(source,context,{timeout:1000});
-  return {element,steps,calls,bridges,fire,get closed(){return closed}};
+  return {element,steps,calls,bridges,fire,launch(mode){handlers.webOSLaunch({detail:{mode:mode}});},get closed(){return closed}};
 }
 const yes={returnValue:true,stdoutString:'BUNDLE_READY=YES\n'};
 const no={returnValue:true,stdoutString:'BUNDLE_READY=NO\n'};
@@ -107,14 +107,16 @@ run('upgrade while VPN runs: never call installer',()=>{
 run('malformed service reply: fail without starting installer',()=>{
   const f=fixture([{returnValue:true}]);
   f.fire(250);
-  // Missing expected status tokens is not proof of a healthy install. UI may
-  // invoke the verified installer; must remain bounded and not show ready.
+  assert.strictEqual(f.calls.length,1);
+  assert.strictEqual(f.element('setup-retry').hidden,false);
   assert.strictEqual(f.element('setup-screen').hidden,false);
 });
 run('QR relaunch invalidates obsolete status callback',()=>{
   const f=fixture([null]);f.fire(250);assert.strictEqual(f.bridges.length,1);
-  // QR mode can be launched by the backend independently of setup.
-  // We cannot access handle directly; simulate a webOS launch event separately.
-  assert.strictEqual(f.element('setup-screen').hidden,false);
+  f.launch('qr');
+  assert.strictEqual(f.element('qr-screen').hidden,false);
+  f.bridges[0].onservicecallback(JSON.stringify(yes));
+  assert.strictEqual(f.element('qr-screen').hidden,false);
+  assert.strictEqual(f.element('setup-screen').hidden,true);
 });
 if(process.exitCode) process.exit(process.exitCode);
