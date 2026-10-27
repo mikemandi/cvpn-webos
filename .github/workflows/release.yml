@@ -3,13 +3,34 @@ on:
   push:
     tags:
       - 'v*'
+    # A one-time, owner-approved publication branch. The connected GitHub
+    # integration cannot create Git tags; this branch uses the SAME tested
+    # release job and action-gh-release to create immutable v2.2.2 assets.
+    branches:
+      - 'publish/v2.2.2'
 permissions:
   contents: write
 jobs:
   release:
+    if: github.ref == 'refs/heads/publish/v2.2.2' || startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-24.04
+    env:
+      RELEASE_TAG: ${{ github.ref_type == 'tag' && github.ref_name || 'v2.2.2' }}
     steps:
       - uses: actions/checkout@v6
+      - name: Validate the approved release tag and version
+        shell: bash
+        run: |
+          set -euo pipefail
+          VERSION="$(python3 -c 'import json; print(json.load(open("launcher/appinfo.json"))["version"])')"
+          test "$RELEASE_TAG" = "v$VERSION" || { echo "Tag/version mismatch"; exit 1; }
+          if [[ "$GITHUB_REF" == refs/heads/* ]]; then
+            test "$GITHUB_REF" = 'refs/heads/publish/v2.2.2'
+            if git ls-remote --exit-code --tags origin "refs/tags/$RELEASE_TAG" >/dev/null 2>&1; then
+              echo "Release tag already exists; refusing to overwrite existing assets"
+              exit 1
+            fi
+          fi
       - uses: actions/setup-go@v6
         with:
           go-version: '1.27.3'
@@ -21,7 +42,7 @@ jobs:
       - name: Generate Homebrew metadata
         env:
           TARGET_REPOSITORY: ${{ github.repository }}
-          RELEASE_TAG: ${{ github.ref_name }}
+          RELEASE_TAG: ${{ env.RELEASE_TAG }}
         run: |
           python3 scripts/make-manifest.py --repository "$TARGET_REPOSITORY" --tag "$RELEASE_TAG"
           python3 scripts/make-homebrew-entry.py --repository "$TARGET_REPOSITORY"
@@ -29,6 +50,32 @@ jobs:
       - name: Publish release (manual reviewer approval still required for Homebrew index)
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ env.RELEASE_TAG }}
+          target_commitish: ${{ github.sha }}
+          name: CVPN webOS ${{ env.RELEASE_TAG }} Stable
+          body: |
+            **Free VPN client for compatible rooted LG webOS televisions.**
+            Supports VLESS/Reality profiles and HTTPS subscriptions from any provider.
+            **A subscription to CVPN (cvpn.su) is entirely optional.**
+            
+            This All-in-One IPK contains the launcher, ARMv7 backend, Xray-core,
+            network safety/recovery logic and Homebrew setup payload.
+            
+            **Prerequisites:** root, compatible Homebrew Channel, ARMv7 32-bit
+            userspace, TUN, and a trusted home network. Not compatible with
+            unrooted LG TVs or the LG Content Store.
+            
+            **Limitations:** IPv4-only VPN; refuses connection with an active
+            IPv6 default route; no universal kill switch or VPN autostart.
+            The local management page uses HTTP and must not be exposed to
+            untrusted or public networks.
+            
+            First-run, DNS/HTTPS, external IP, YouTube, disconnect/reconnect and
+            ordinary power off/on were tested on LG 55UK6450PLC (webOS 4.4.3-22).
+            Compatibility with other webOS/firmware versions is not guaranteed.
+            
+            Developed with AI assistance and reviewed/tested on real LG hardware.
+            See README, third-party notices and security documentation in source.
           files: |
             dist/*.ipk
             dist/*.manifest.json
