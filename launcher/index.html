@@ -84,7 +84,7 @@ button:active {background:#aecaff}
  <main class="panel" role="dialog" aria-labelledby="qr-heading">
   <div class="brand-row">
    <img class="brand-icon" src="icon.png" alt="">
-   <div class="brand-copy"><div class="brand-name">CVPN <span>webOS</span></div><div class="brand-caption">PRIVATE NETWORK</div></div>
+   <div class="brand-copy"><div class="brand-name" id="qr-heading">CVPN <span>webOS</span></div><div class="brand-caption">PRIVATE NETWORK</div></div>
   </div>
   <p id="qr-instruction">Наведите камеру телефона на QR-код</p>
   <canvas id="qr-canvas" width="512" height="512" aria-label="QR-код для подключения смартфона"></canvas>
@@ -123,20 +123,64 @@ button:active {background:#aecaff}
 <script src="qr-bundle.js"></script>
 <script>
 (function(){
- "use strict";
- var didNormalLaunch=false, qrMode=false, closeTimer=0, expiryTimer=0;
- var qrScreen=document.getElementById('qr-screen');
+ 'use strict';
+ var qrScreen=document.getElementById('qr-screen'),setupScreen=document.getElementById('setup-screen');
+ var setupTitle=document.getElementById('setup-title'),setupStatus=document.getElementById('setup-status');
+ var setupRetry=document.getElementById('setup-retry'),setupClose=document.getElementById('setup-close');
+ var setupSteps=document.querySelectorAll('.setup-step'),closeTimer=0,expiryTimer=0;
+ var qrMode=false,installing=false,didNormalLaunch=false,setupGeneration=0,setupState=null;
+ var qrHintRaw='Действует 3 минуты · Только домашняя сеть',qrSeconds=null;
+ var initialLang='';
+ try{initialLang=(typeof navigator!=='undefined'&&(navigator.language||navigator.userLanguage))||'';}catch(e){}
+ var pageLang=/^ru(?:[-_]|$)/i.test(initialLang)?'ru':'en';
+
+ // All customer-facing TV strings have exact English equivalents. The backend
+ // preference wins over TV locale; a non-Russian TV falls back to English.
+ // No user input, tokens, PINs or profile addresses enter this dictionary.
+ var english={
+  'Наведите камеру телефона на QR-код':'Point your phone camera at the QR code',
+  'QR-код для подключения смартфона':'QR code to pair your phone',
+  'Код подключения:':'Pairing code:',
+  'Действует 3 минуты · Только домашняя сеть':'Valid for 3 minutes · Home network only',
+  'Код действителен:':'Code expires in:',
+  'Только домашняя сеть':'Home network only',
+  'Закрыть':'Close',
+  'Повторить':'Retry',
+  'Проверить снова':'Check again',
+  'Подготавливаем CVPN':'Preparing CVPN',
+  'Проверяем необходимые компоненты для работы':'Checking required components',
+  'Подготавливаем необходимые компоненты для работы':'Preparing the components needed to run CVPN',
+  'Проверяем устройство':'Checking device',
+  'Подготавливаем компоненты':'Preparing components',
+  'Запускаем CVPN':'Starting CVPN',
+  'Пожалуйста, не выключайте телевизор во время подготовки':'Please do not turn off your TV during setup',
+  'CVPN готов к работе':'CVPN is ready',
+  'Все необходимые компоненты подготовлены.':'All required components are ready.',
+  'Откройте CVPN Connect, чтобы управлять подключением':'Open CVPN Connect to manage your connection',
+  'Не удалось подготовить CVPN':'Could not prepare CVPN',
+  'Не удалось завершить подготовку. Повторите проверку.':'Setup did not finish. Please try again.',
+  'Если ошибка повторяется, откройте Homebrew Channel.':'If the problem continues, check Homebrew Channel.',
+  'Чтобы обновить CVPN, сначала отключите VPN в CVPN Connect.':'Disconnect VPN in CVPN Connect before updating.',
+  'Ваше подключение не изменено. После отключения нажмите «Повторить».':'Your connection is unchanged. Disconnect and choose Retry.',
+  'Подготовка уже выполняется. Проверьте состояние немного позже.':'Setup is still running. Please wait for it to finish.',
+  'Не выключайте телевизор, пока выполняется установка.':'Do not turn off your TV while setup is running.',
+  'Для подготовки нужен Homebrew Channel с root-доступом.':'Homebrew Channel with root access is required.',
+  'Проверьте Homebrew Channel и разрешения приложения.':'Check Homebrew Channel and app permissions.',
+  'Этот телевизор не поддерживает необходимые компоненты VPN.':'This TV does not support the required VPN components.',
+  'Подробности совместимости указаны в документации CVPN.':'See the CVPN documentation for compatibility details.',
+  'Телевизор не ответил на запрос подготовки.':'The TV did not respond to the setup request.',
+  'Подготовка может продолжаться. Нажмите «Проверить снова» после завершения.':'Setup may still be running. Try again shortly.',
+  'Не удалось проверить встроенные компоненты CVPN.':'Could not verify the bundled CVPN components.',
+  'Попробуйте переустановить официальный пакет приложения.':'Try reinstalling the official app package.',
+  'Не удалось завершить установку. Проверьте Homebrew Channel.':'Installation could not finish. Check Homebrew Channel.',
+  'Код истёк. Запустите CVPN webOS ещё раз.':'The code has expired. Open CVPN webOS again.',
+  'Не удалось отобразить QR. Используйте адрес и PIN.':'Could not show QR. Use the address and PIN instead.',
+  'Панель недоступна. Проверьте службу CVPN.':'The control panel is unavailable. Check the CVPN service.'
+ };
+ function tr(str){return pageLang==='en'&&english[str]?english[str]:str;}
  function parseParams(raw){try{return typeof raw==='string'?JSON.parse(raw):(raw||{});}catch(e){return {};}}
- function platformParams(){var p={};try{if(window.webOSSystem && window.webOSSystem.launchParams){p=parseParams(window.webOSSystem.launchParams());}}catch(e){}try{if(!p.mode && window.PalmSystem && window.PalmSystem.launchParams){p=parseParams(window.PalmSystem.launchParams);}}catch(e){}return p;}
+ function platformParams(){var p={};try{if(window.webOSSystem&&window.webOSSystem.launchParams)p=parseParams(window.webOSSystem.launchParams());}catch(e){}try{if(!p.mode&&window.PalmSystem&&window.PalmSystem.launchParams)p=parseParams(window.PalmSystem.launchParams);}catch(e){}return p;}
  function shut(){try{window.close();}catch(e){}}
- var installing=false, setupGeneration=0, retryStatusOnly=false;
- var setupScreen=document.getElementById('setup-screen');
- var setupTitle=document.getElementById('setup-title');
- var setupStatus=document.getElementById('setup-status');
- var setupHint=document.getElementById('setup-hint');
- var setupRetry=document.getElementById('setup-retry');
- var setupClose=document.getElementById('setup-close');
- var setupSteps=document.querySelectorAll('.setup-step');
  function stage(index,phase){
    setupScreen.setAttribute('data-phase',phase||'checking');
    for(var i=0;i<setupSteps.length;i++){
@@ -144,59 +188,87 @@ button:active {background:#aecaff}
      setupSteps[i].querySelector('.mark').textContent=i<index?'✓':String(i+1);
    }
  }
- function setupMessage(title,message,step,phase,retry,hint){
+ function refreshSetup(){
+   if(!setupState)return;
+   setupTitle.textContent=tr(setupState.title);
+   setupStatus.textContent=tr(setupState.message);
+   document.getElementById('setup-hint-text').textContent=tr(setupState.hint);
+   setupRetry.textContent=tr(setupState.retryText||'Повторить');
+   stage(setupState.step,setupState.phase);
+ }
+ function setupMessage(title,message,step,phase,retry,hint,retryText){
+   setupState={title:title,message:message,step:step,phase:phase,
+     hint:hint||'Пожалуйста, не выключайте телевизор во время подготовки',
+     retryText:retryText||'Повторить'};
    setupScreen.hidden=false;qrScreen.hidden=true;
-   setupTitle.textContent=title;setupStatus.textContent=message;
-   stage(step,phase);
-   setupRetry.hidden=!retry;setupRetry.disabled=!retry;
-   setupClose.hidden=!retry;
-   document.getElementById('setup-hint-text').textContent=hint||'Пожалуйста, не выключайте телевизор во время подготовки';
+   setupRetry.hidden=!retry;setupRetry.disabled=!retry;setupClose.hidden=!retry;
+   refreshSetup();
    if(retry)setupRetry.focus();
+ }
+ function refreshQR(){
+   document.getElementById('qr-instruction').textContent=tr('Наведите камеру телефона на QR-код');
+   document.getElementById('qr-code-label').firstChild.nodeValue=tr('Код подключения:')+' ';
+   document.getElementById('qr-canvas').setAttribute('aria-label',tr('QR-код для подключения смартфона'));
+   document.getElementById('close-qr').textContent=tr('Закрыть');
+   var hint=document.getElementById('qr-hint');
+   if(qrSeconds!==null){
+     hint.textContent=tr('Код действителен:')+' '+Math.floor(qrSeconds/60)+':'+('0'+(qrSeconds%60)).slice(-2)+' · '+tr('Только домашняя сеть');
+   }else hint.textContent=tr(qrHintRaw);
+ }
+ function qrHint(raw){qrHintRaw=raw;qrSeconds=null;refreshQR();}
+ function setLanguage(preference,detected){
+   var choice=preference==='ru'||preference==='en'?preference:
+     detected==='ru'||detected==='en'?detected:pageLang;
+   if(choice!=='ru'&&choice!=='en')choice='en';
+   if(pageLang!==choice)pageLang=choice;
+   document.documentElement.lang=pageLang;
+   var names=['Проверяем устройство','Подготавливаем компоненты','Запускаем CVPN'];
+   for(var i=0;i<setupSteps.length;i++)setupSteps[i].querySelector('.step-name').textContent=tr(names[i]);
+   refreshSetup();refreshQR();
+ }
+ // Backend data is read-only, loopback-only and holds no pairing secrets.
+ window.cvpnLanguageInfo=function(data){if(data)setLanguage(data.localePreference,data.resolvedTVLocale);};
+ function requestLanguage(){
+   try{
+     var script=document.createElement('script');
+     script.src='http://127.0.0.1:8765/tv/language.js?nonce='+Date.now();
+     document.head.appendChild(script);
+   }catch(e){}
  }
  function failSetup(data){
    installing=false;
-   var stderr=String((data&&data.stderrString)||'');
-   var error=String((data&&data.error)||'');
-   var code=(stderr.match(/REFUSED=([a-zA-Z0-9_:.\\-]+)/)||[])[1]||'';
+   var stderr=String((data&&data.stderrString)||''),error=String((data&&data.error)||'');
+   var code=(stderr.match(/REFUSED=([a-zA-Z0-9_:.\-]+)/)||[])[1]||'';
    var details='Не удалось завершить подготовку. Повторите проверку.';
    var hint='Если ошибка повторяется, откройте Homebrew Channel.';
-   if(code==='vpn_running_disconnect_first'||code==='vpn_tun_present'||code==='vpn_routes_present'||code==='resolver_bind_present'){
+   if(code==='vpn_running_disconnect_first'||code==='vpn_xray_present'||code==='vpn_tun_present'||code==='vpn_routes_present'||code==='resolver_bind_present'){
      details='Чтобы обновить CVPN, сначала отключите VPN в CVPN Connect.';
      hint='Ваше подключение не изменено. После отключения нажмите «Повторить».';
-     retryStatusOnly=true;
    }else if(code==='engine_busy'||code==='installer_busy'){
      details='Подготовка уже выполняется. Проверьте состояние немного позже.';
      hint='Не выключайте телевизор, пока выполняется установка.';
-     retryStatusOnly=true;
    }else if(code==='homebrew_required'||code==='root_required'||/denied|permission|not allowed/i.test(stderr+' '+error)){
      details='Для подготовки нужен Homebrew Channel с root-доступом.';
      hint='Проверьте Homebrew Channel и разрешения приложения.';
-     retryStatusOnly=true;
    }else if(code==='unsupported_arch'||code==='armv7_userspace_required'||code==='tun_unavailable'){
      details='Этот телевизор не поддерживает необходимые компоненты VPN.';
      hint='Подробности совместимости указаны в документации CVPN.';
-     retryStatusOnly=true;
    }else if(error==='HOMEBREW_SERVICE_TIMEOUT'){
      details='Телевизор не ответил на запрос подготовки.';
      hint='Подготовка может продолжаться. Нажмите «Проверить снова» после завершения.';
-     retryStatusOnly=true;
    }else if(code==='payload_checksum_invalid'||code.indexOf('payload_missing')===0){
      details='Не удалось проверить встроенные компоненты CVPN.';
      hint='Попробуйте переустановить официальный пакет приложения.';
-     retryStatusOnly=true;
+   }else if(error==='INSTALL_INTERRUPTED'){
+     details='Не удалось завершить установку. Проверьте Homebrew Channel.';
    }
    setupMessage('Не удалось подготовить CVPN',details,0,'error',true,hint);
-   setupRetry.textContent=retryStatusOnly?'Проверить снова':'Повторить';
  }
- // Fixed, package-owned commands only. Never interpolate user input.
- // Do not start a second install when a previous Homebrew request timed out.
+ // All commands use package-owned constant paths. Never interpolate user data.
  function invokeInstaller(mode,done){
    var command='/bin/sh /media/developer/apps/usr/palm/applications/su.cvpn.webos/payload/install.sh '+mode;
-   var finished=false;
-   var maxWait=mode==='install'?90000:35000;
-   var timeoutID=setTimeout(function(){
-     complete(false,{error:'HOMEBREW_SERVICE_TIMEOUT'});
-   },maxWait);
+   var finished=false,maxWait=mode==='install'?90000:15000;
+   var timeoutID=setTimeout(function(){complete(false,{error:'HOMEBREW_SERVICE_TIMEOUT'});},maxWait);
    function complete(ok,data){
      if(finished)return;
      finished=true;clearTimeout(timeoutID);done(ok,data||{});
@@ -205,8 +277,7 @@ button:active {background:#aecaff}
      if(window.PalmServiceBridge){
        var bridge=new window.PalmServiceBridge();
        bridge.onservicecallback=function(raw){
-         var data=parseParams(raw);
-         complete(data.returnValue===true&&!data.error,data);
+         var data=parseParams(raw);complete(data.returnValue===true&&!data.error,data);
        };
        bridge.call('luna://org.webosbrew.hbchannel.service/exec',JSON.stringify({command:command}));
        return;
@@ -216,87 +287,141 @@ button:active {background:#aecaff}
          method:'exec',parameters:{command:command},subscribe:false,
          onSuccess:function(data){complete(data.returnValue===true&&!data.error,data);},
          onFailure:function(data){complete(false,data);}
-       });
-       return;
+       });return;
      }
      complete(false,{error:'SERVICE_UNAVAILABLE'});
    }catch(e){complete(false,{error:'SERVICE_UNAVAILABLE'});}
  }
  function panelReady(){
    installing=false;setupScreen.hidden=true;didNormalLaunch=true;
-   var pixel=new Image();pixel.src='http://127.0.0.1:8765/tv/notify?nonce='+Date.now();
+   var pixel=new Image();
+   pixel.src='http://127.0.0.1:8765/tv/notify?lang='+pageLang+'&nonce='+Date.now();
    clearTimeout(closeTimer);closeTimer=setTimeout(shut,1400);
  }
  function completedSetup(generation){
    if(qrMode||generation!==setupGeneration)return;
+   requestLanguage();
    setupMessage('CVPN готов к работе','Все необходимые компоненты подготовлены.',3,'ready',false,'Откройте CVPN Connect, чтобы управлять подключением');
-   setTimeout(function(){if(generation===setupGeneration&&!qrMode)panelReady();},700);
+   setTimeout(function(){if(generation===setupGeneration&&!qrMode)panelReady();},650);
+ }
+ // While a Homebrew install is running, statuses are READ-ONLY.
+ // Never show a spurious Continue button or issue a concurrent install.
+ function pollUntilReady(generation,attempt){
+   if(generation!==setupGeneration||qrMode)return;
+   if(attempt>=24){failSetup({error:'INSTALL_INTERRUPTED'});return;}
+   setTimeout(function(){
+     if(generation!==setupGeneration||qrMode)return;
+     invokeInstaller('status',function(ok,data){
+       if(generation!==setupGeneration||qrMode)return;
+       var output=String((data&&data.stdoutString)||'');
+       if(ok&&output.indexOf('BUNDLE_READY=YES')!==-1){completedSetup(generation);return;}
+       if(ok&&output.indexOf('UPGRADE_BLOCKED=VPN_RUNNING')!==-1){
+         failSetup({stderrString:'REFUSED=vpn_running_disconnect_first'});return;
+       }
+       if(!ok&&data.error!=='HOMEBREW_SERVICE_TIMEOUT'){failSetup(data);return;}
+       // A prior install can finish during an RPC timeout; status-only polls
+       // cannot corrupt Xray, the TUN, routes or saved subscriptions.
+       if(ok&&output.indexOf('BUNDLE_READY=NO')===-1){failSetup({error:'SERVICE_INVALID_RESPONSE'});return;}
+       if(ok&&output.indexOf('INSTALL_IN_PROGRESS=YES')===-1&&attempt>=2){
+         failSetup({error:'INSTALL_INTERRUPTED'});return;
+       }
+       pollUntilReady(generation,attempt+1);
+     });
+   },2400);
  }
  function showNormal(){
    if(didNormalLaunch||installing)return;
    installing=true;qrMode=false;clearInterval(expiryTimer);setupGeneration++;
    var generation=setupGeneration;
    setupMessage('Подготавливаем CVPN','Проверяем необходимые компоненты для работы',0,'checking',false);
+   requestLanguage();
    invokeInstaller('status',function(ok,data){
      if(generation!==setupGeneration||qrMode)return;
      if(!ok){failSetup(data);return;}
      var output=String(data.stdoutString||'');
-     if(output.indexOf('BUNDLE_READY=YES')!==-1){retryStatusOnly=false;completedSetup(generation);return;}
-     // Unexpected/partial Luna response must never trigger a privileged install.
+     if(output.indexOf('BUNDLE_READY=YES')!==-1){completedSetup(generation);return;}
      if(output.indexOf('BUNDLE_READY=NO')===-1){failSetup({error:'SERVICE_INVALID_RESPONSE'});return;}
      if(output.indexOf('UPGRADE_BLOCKED=VPN_RUNNING')!==-1){
-       retryStatusOnly=true;failSetup({stderrString:'REFUSED=vpn_running_disconnect_first'});return;
+       failSetup({stderrString:'REFUSED=vpn_running_disconnect_first'});return;
      }
      if(output.indexOf('INSTALL_IN_PROGRESS=YES')!==-1){
-       retryStatusOnly=true;failSetup({stderrString:'REFUSED=installer_busy'});return;
-     }
-     if(retryStatusOnly){
-       // A status-only recheck found no active VPN/installer. Do not launch
-       // anything during the same retry; make the next install an explicit
-       // second user action so a slow earlier process cannot be duplicated.
-       retryStatusOnly=false;installing=false;
-       setupMessage('Можно продолжить','Проверка завершена. Нажмите «Продолжить», чтобы подготовить CVPN.',1,'checking',true,'Во время подготовки не выключайте телевизор.');
-       setupRetry.textContent='Продолжить';
-       return;
+       setupMessage('Подготавливаем CVPN','Подготавливаем необходимые компоненты для работы',1,'installing',false);
+       pollUntilReady(generation,0);return;
      }
      setupMessage('Подготавливаем CVPN','Подготавливаем необходимые компоненты для работы',1,'installing',false);
      invokeInstaller('install',function(installOK,info){
        if(generation!==setupGeneration||qrMode)return;
-       if(!installOK||String(info.stdoutString||'').indexOf('BUNDLE_READY=YES')===-1){
+       if(!installOK){
+         if(info.error==='HOMEBREW_SERVICE_TIMEOUT'){pollUntilReady(generation,0);return;}
          failSetup(info);return;
        }
+       if(String(info.stdoutString||'').indexOf('BUNDLE_READY=YES')===-1){
+         failSetup({error:'SERVICE_INVALID_RESPONSE'});return;
+       }
        setupMessage('Подготавливаем CVPN','Запускаем CVPN',2,'starting',false);
-       // A successful installer always verified /api/status before returning.
-       retryStatusOnly=false;completedSetup(generation);
+       completedSetup(generation);
      });
    });
  }
- function renderCode(data){if(!qrMode)return;
-  var hint=document.getElementById('qr-hint'),canvas=document.getElementById('qr-canvas');
-  if(!data || !data.ok){canvas.hidden=true;document.getElementById('qr-code').textContent='—';hint.textContent='Код истёк. Запустите CVPN webOS ещё раз.';return;}
-  canvas.hidden=false; document.getElementById('qr-code').textContent=data.code.substring(0,3)+' '+data.code.substring(3);
-  clearInterval(expiryTimer);
-  if (data.expires) {
-    var expiresAt=Date.parse(data.expires);
-    var updateCountdown=function(){var remaining=Math.ceil((expiresAt-Date.now())/1000);
-      if(remaining<=0){clearInterval(expiryTimer);canvas.hidden=true;document.getElementById('qr-code').textContent='—';hint.textContent='Код истёк. Запустите CVPN webOS ещё раз.';return;}
-      hint.textContent='Код действителен: '+Math.floor(remaining/60)+':'+('0'+(remaining%60)).slice(-2)+' · Только домашняя сеть';};
-    updateCountdown();expiryTimer=setInterval(updateCountdown,1000);
-  }
-
-  document.getElementById('qr-address').textContent=data.address;
-  try{var q=new window.CVPNQRCode.QRCode(0,window.CVPNQRCode.Level.M);q.addData(data.pairURL);q.make();var n=q.getModuleCount();var c=canvas.getContext('2d');c.fillStyle='#ffffff';c.fillRect(0,0,512,512);var unit=512/(n+8);c.fillStyle='#111111';for(var y=0;y<n;y++)for(var x=0;x<n;x++)if(q.isDark(y,x)){c.fillRect(Math.floor((x+4)*unit),Math.floor((y+4)*unit),Math.ceil(unit),Math.ceil(unit));}}
-  catch(e){canvas.hidden=true;hint.textContent='Не удалось отобразить QR. Используйте адрес и PIN.';}
+ function renderCode(data){
+   if(!qrMode)return;
+   var canvas=document.getElementById('qr-canvas');
+   if(data)setLanguage(data.localePreference,data.resolvedTVLocale);
+   if(!data||!data.ok){
+     canvas.hidden=true;document.getElementById('qr-code').textContent='—';
+     qrHint('Код истёк. Запустите CVPN webOS ещё раз.');return;
+   }
+   canvas.hidden=false;document.getElementById('qr-code').textContent=data.code.substring(0,3)+' '+data.code.substring(3);
+   clearInterval(expiryTimer);qrSeconds=null;
+   if(data.expires){
+     var expiresAt=Date.parse(data.expires);
+     var countdown=function(){
+       var remaining=Math.ceil((expiresAt-Date.now())/1000);
+       if(remaining<=0){
+         clearInterval(expiryTimer);canvas.hidden=true;
+         document.getElementById('qr-code').textContent='—';
+         qrHint('Код истёк. Запустите CVPN webOS ещё раз.');return;
+       }
+       qrSeconds=remaining;refreshQR();
+     };
+     countdown();expiryTimer=setInterval(countdown,1000);
+   }
+   document.getElementById('qr-address').textContent=data.address;
+   try{
+     var q=new window.CVPNQRCode.QRCode(0,window.CVPNQRCode.Level.M);
+     q.addData(data.pairURL);q.make();
+     var n=q.getModuleCount(),ctx=canvas.getContext('2d');
+     ctx.fillStyle='#ffffff';ctx.fillRect(0,0,512,512);
+     var unit=512/(n+8);ctx.fillStyle='#111111';
+     for(var y=0;y<n;y++)for(var x=0;x<n;x++)
+       if(q.isDark(y,x))ctx.fillRect(Math.floor((x+4)*unit),Math.floor((y+4)*unit),Math.ceil(unit),Math.ceil(unit));
+   }catch(e){canvas.hidden=true;qrHint('Не удалось отобразить QR. Используйте адрес и PIN.');}
  }
  window.cvpnQRInfo=renderCode;
- function showQR(){setupGeneration++;qrMode=true;didNormalLaunch=false;installing=false;setupScreen.hidden=true;clearTimeout(closeTimer);qrScreen.hidden=false;document.getElementById('qr-hint').textContent='Действует 3 минуты · Только домашняя сеть';document.getElementById('qr-address').textContent='';document.getElementById('qr-code').textContent='—';var s=document.createElement('script');s.src='http://127.0.0.1:8765/tv/qr-data.js?nonce='+Date.now();s.onerror=function(){document.getElementById('qr-hint').textContent='Панель недоступна. Проверьте службу CVPN.';};document.head.appendChild(s);document.getElementById('close-qr').focus();}
- function handle(params){if(params && params.mode==='qr')showQR();else showNormal();}
+ function showQR(){
+   setupGeneration++;qrMode=true;didNormalLaunch=false;installing=false;
+   setupScreen.hidden=true;clearTimeout(closeTimer);
+   qrScreen.hidden=false;clearInterval(expiryTimer);
+   document.getElementById('qr-address').textContent='';
+   document.getElementById('qr-code').textContent='—';
+   qrHint('Действует 3 минуты · Только домашняя сеть');
+   requestLanguage();
+   var script=document.createElement('script');
+   script.src='http://127.0.0.1:8765/tv/qr-data.js?nonce='+Date.now();
+   script.onerror=function(){qrHint('Панель недоступна. Проверьте службу CVPN.');};
+   document.head.appendChild(script);
+   document.getElementById('close-qr').focus();
+ }
+ function handle(params){if(params&&params.mode==='qr')showQR();else showNormal();}
  document.getElementById('close-qr').onclick=shut;
  setupRetry.onclick=function(){if(!installing)showNormal();};
  setupClose.onclick=shut;
- document.addEventListener('keydown',function(e){if(qrMode && (e.keyCode===461||e.keyCode===27)){e.preventDefault();shut();}});
- document.addEventListener('webOSLaunch',function(e){handle((e && e.detail && e.detail.mode)?e.detail:platformParams());});
- document.addEventListener('webOSRelaunch',function(e){handle((e && e.detail && e.detail.mode)?e.detail:platformParams());});
+ document.addEventListener('keydown',function(e){
+   if(qrMode&&(e.keyCode===461||e.keyCode===27)){e.preventDefault();shut();}
+ });
+ document.addEventListener('webOSLaunch',function(e){handle((e&&e.detail&&e.detail.mode)?e.detail:platformParams());});
+ document.addEventListener('webOSRelaunch',function(e){handle((e&&e.detail&&e.detail.mode)?e.detail:platformParams());});
+ setLanguage('auto','');
  setTimeout(function(){if(!didNormalLaunch&&!qrMode)handle(platformParams());},250);
 }());
 </script>
