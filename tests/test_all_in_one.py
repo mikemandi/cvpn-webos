@@ -131,6 +131,18 @@ class AllInOneInstaller(unittest.TestCase):
         self.assertIn("printf '%s\\n' \"$$\" > \"$BASE/state/lock/pid\"", SOURCE)
         self.assertNotIn("printf '%s\\n' \"$\" > \"$BASE/state/lock/pid\"", SOURCE)
 
+    def test_status_reports_in_progress_without_starting_second_install(self):
+        self.assertEqual(self.run_it('install').returncode,0)
+        (self.payload/'bin/engine').write_text('#!/bin/sh\\necho changed\\n')
+        self.regenerate_sums()
+        lock=self.base/'state/lock'
+        lock.mkdir()
+        (lock/'pid').write_text('12345')
+        res=self.run_it('status')
+        self.assertEqual(res.returncode,0,res.stderr)
+        self.assertIn('BUNDLE_READY=NO',res.stdout)
+        self.assertIn('INSTALL_IN_PROGRESS=YES',res.stdout)
+
     def test_root_required(self):
         (self.fakebin/'id').write_text('#!/bin/sh\necho 1000\n')
         res=self.run_it('install')
