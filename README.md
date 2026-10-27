@@ -1,20 +1,18 @@
 <div align="center">
-  <img src="assets/icon160.png" width="112" height="112" alt="CVPN webOS" />
-
-  # CVPN webOS
-
-  **PRIVATE NETWORK · VPN for LG webOS**
-
-  A free, independent VPN client for rooted LG televisions.
-  Import compatible VLESS/Reality profiles or HTTPS subscriptions **from any provider**.
-
-  **No CVPN subscription or account required.** CVPN is an optional recommended service.
-
-  [**Download IPK**](https://github.com/mikemandi/cvpn-webos/releases/latest) ·
-  [Installation](#getting-started) ·
-  [Compatibility](#compatibility) ·
-  [Security](docs/SECURITY.md) ·
-  [Changelog](CHANGELOG.md)
+  <img src="assets/icon160.png" width="112" height="112" alt="CVPN webOS app icon" />
+  <h1>CVPN webOS</h1>
+  <p><strong>PRIVATE NETWORK · VPN for LG webOS</strong></p>
+  <p>A free, independent VPN client for rooted LG televisions.<br />
+  Import compatible VLESS/Reality profiles or HTTPS subscriptions <strong>from any provider</strong>.</p>
+  <p><strong>No CVPN subscription or account required.</strong><br />
+  CVPN is an optional recommended service.</p>
+  <p>
+    <a href="https://github.com/mikemandi/cvpn-webos/releases/latest"><strong>Download IPK</strong></a>
+    &nbsp;·&nbsp; <a href="#getting-started">Installation</a>
+    &nbsp;·&nbsp; <a href="#compatibility">Compatibility</a>
+    &nbsp;·&nbsp; <a href="docs/SECURITY.md">Security</a>
+    &nbsp;·&nbsp; <a href="CHANGELOG.md">Changelog</a>
+  </p>
 </div>
 
 ---
