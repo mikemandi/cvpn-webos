@@ -96,7 +96,7 @@ async function tv(browser,origin,mode,file){
   }
  },{mode,lang:language});
  assertLanguage(await page.locator('body').innerText(),file);
- await page.screenshot({path:path.join(outDir,file),animations:'disabled'});
+ await page.screenshot({path:path.join(outDir,screenshotName(file)),animations:'disabled'});
  await ctx.close();
 }
 (async()=>{
