@@ -127,10 +127,21 @@ run('English denied Homebrew: bounded, error with useful controls',()=>{
  assert.strictEqual(f.el('setup-close').hidden,false);
  assert.strictEqual(f.el('setup-retry').textContent,'Retry');
 });
-run('Silent status: 15-second deadline, never launches install',()=>{
- const f=fixture([null]);f.fire(250);f.fire(15000);
- assert.strictEqual(f.calls.length,1);
+run('Slow Homebrew status is retried read-only without confusing user',()=>{
+ const f=fixture([null,yes]);f.fire(250);f.fire(15000);
+ assert.strictEqual(f.el('setup-retry').hidden,true);
+ f.fire(1200);
+ assert.strictEqual(f.calls.length,2);
+ assert(f.calls.every(c=>/ status$/.test(c)));
+ assert.strictEqual(f.el('setup-retry').hidden,true);
+ f.fire(650);assert.strictEqual(f.el('setup-screen').hidden,true);
+});
+run('Persistent silent status eventually shows a real error, no install',()=>{
+ const f=fixture([null,null,null]);f.fire(250);
+ f.fire(15000);f.fire(1200);f.fire(15000);f.fire(1200);f.fire(15000);
+ assert.strictEqual(f.calls.length,3);
  assert.strictEqual(f.el('setup-retry').hidden,false);
+ assert(f.calls.every(c=>/ status$/.test(c)));
 });
 run('Install callback timeout: background status polling, no Continue button',()=>{
  const f=fixture([no,null,yes]);f.fire(250);
