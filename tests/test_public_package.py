@@ -7,6 +7,7 @@ import re
 import shutil
 import subprocess
 import tarfile
+import tempfile
 import unittest
 import zipfile
 
@@ -70,6 +71,35 @@ class PublicPackageTests(unittest.TestCase):
         self.assertFalse((ROOT/'launcher/runtime.js').exists())
         for file in (ROOT/'launcher').glob('*.js'):
             self.assertNotIn('192.168.0.2',file.read_text())
+
+    def test_submission_metadata_uses_current_version(self):
+        with tempfile.TemporaryDirectory() as d:
+            homebrew = pathlib.Path(d)/'su.cvpn.webos.yml'
+            result = subprocess.run(
+                ['python3', str(ROOT/'scripts/make-homebrew-entry.py'),
+                 '--repository', 'mikemandi/cvpn-webos', '--output', str(homebrew)],
+                text=True, capture_output=True, timeout=15)
+            self.assertEqual(result.returncode,0,result.stderr)
+            yml=homebrew.read_text()
+            current=json.loads((ROOT/'launcher/appinfo.json').read_text())['version']
+            self.assertIn('webOS '+current+' IPK',yml)
+            self.assertNotIn('2.1.0',yml)
+            self.assertIn('pool: non-free',yml)
+            self.assertIn('root',yml.lower())
+
+    def test_manifest_default_release_tag_matches_app(self):
+        with tempfile.TemporaryDirectory() as d:
+            manifest = pathlib.Path(d)/'su.cvpn.webos.manifest.json'
+            result = subprocess.run(
+                ['python3', str(ROOT/'scripts/make-manifest.py'),
+                 '--repository', 'mikemandi/cvpn-webos', '--out', str(manifest)],
+                text=True, capture_output=True, timeout=15)
+            self.assertEqual(result.returncode,0,result.stderr)
+            data=json.loads(manifest.read_text())
+            current=json.loads((ROOT/'launcher/appinfo.json').read_text())['version']
+            self.assertEqual(data['version'],current)
+            self.assertIn('/releases/download/v'+current+'/',data['ipkUrl'])
+            self.assertTrue(data['ipkUrl'].endswith('su.cvpn.webos_'+current+'_all.ipk'))
 
     def test_boot_hook_target_and_no_auto_vpn(self):
         installer=(ROOT/'scripts/install-root.sh').read_text()
