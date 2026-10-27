@@ -23,12 +23,40 @@ button:focus { outline:2px solid #8DB5FF; outline-offset:3px; box-shadow:0 0 0 6
 button:active { background:#B3CCFF; }
 @media (max-height:760px) { .panel{padding:20px 30px;} .subtitle{margin-bottom:8px;} #qr-canvas{width:255px;height:255px;margin:12px auto;} p{margin:8px 0;} }
 
-/* First-launch installer. Root, backend and Xray are installed locally from IPK. */
-#setup-screen {position:fixed;top:0;right:0;bottom:0;left:0;display:flex;align-items:center;justify-content:center;background:rgba(4,8,16,.93)}
-#setup-screen .panel {border-color:#2B435F;max-width:640px}
-#setup-status {min-height:55px;overflow-wrap:anywhere}
-#setup-retry {margin-top:20px}
+/* All-in-One preparation is offline: payload ships within the IPK.
+   Restrained TV-first motion, no simulated percentage or fake download. */
+#setup-screen {position:fixed;inset:0;top:0;right:0;bottom:0;left:0;display:flex;align-items:center;justify-content:center;background:rgba(4,9,20,.96)}
+#setup-screen .panel {position:relative;width:640px;max-width:calc(100% - 48px);padding:44px 52px 34px;border:1px solid #273852;border-radius:26px;background:#0D1729;box-shadow:0 24px 80px rgba(0,0,0,.44);overflow:hidden}
+#setup-screen .panel:before {content:"";position:absolute;top:0;left:18%;width:64%;height:1px;background:linear-gradient(90deg,transparent,#7AA8FF,transparent);opacity:.6}
+#setup-screen .setup-brand {font-size:28px;letter-spacing:-.7px;font-weight:700;color:#F6F9FF}
+#setup-screen .setup-brand b {font-weight:600;color:#83B0FF}
+#setup-screen .setup-eyebrow {margin-top:8px;color:#798CA9;letter-spacing:3.4px;font-size:11px;font-weight:600}
+.setup-loader {width:114px;height:114px;position:relative;margin:32px auto 28px;display:flex;align-items:center;justify-content:center}
+.setup-loader:before {content:"";position:absolute;inset:0;border-radius:50%;border:2px solid #273956}
+.setup-loader:after {content:"";position:absolute;inset:0;border-radius:50%;border:2px solid transparent;border-top-color:#8BB5FF;border-right-color:#5F87D8;animation:cvpn-spin 1.7s linear infinite}
+.setup-loader-core {display:flex;width:86px;height:86px;align-items:center;justify-content:center;border-radius:50%;background:radial-gradient(circle at 35% 22%,#1D365B,#101E35 72%);border:1px solid #345078;box-shadow:0 0 38px rgba(88,147,244,.11)}
+.setup-loader-core span {font:bold 40px/1 Arial,Helvetica,sans-serif;letter-spacing:-3px;color:#EAF2FF}
+.setup-loader-core span i {font-style:normal;color:#84B3FF}
+#setup-screen[data-phase="error"] .setup-loader:after {border-top-color:#ECA5A7;border-right-color:#B95A67;animation:none}
+#setup-screen[data-phase="ready"] .setup-loader:after {border-color:#84B3FF;animation:none}
+#setup-screen[data-phase="error"] .setup-loader-core {box-shadow:0 0 22px rgba(219,93,115,.1)}
+#setup-title {margin:0;color:#F3F7FF;font-size:28px;line-height:1.24;letter-spacing:-.5px}
+#setup-status {max-width:500px;min-height:44px;margin:14px auto 16px;font-size:18px;line-height:1.45;color:#ABBAD0;overflow-wrap:break-word}
+.setup-steps {display:flex;flex-direction:column;gap:11px;margin:23px auto 16px;text-align:left;max-width:400px}
+.setup-step {display:flex;align-items:center;gap:14px;font-size:16px;color:#72829C;transition:color .2s ease}
+.setup-step .mark {display:inline-flex;align-items:center;justify-content:center;width:25px;height:25px;flex:0 0 25px;border-radius:50%;border:1px solid #34455E;font-size:12px;color:#8D9AB0}
+.setup-step.is-active {color:#D8E7FF}
+.setup-step.is-active .mark {border-color:#75A8FF;background:#18365A;box-shadow:0 0 0 4px rgba(101,157,244,.08);color:#A8CBFF}
+.setup-step.is-done {color:#AFC8E8}
+.setup-step.is-done .mark {background:#243F5C;border-color:#4E7FB4;color:#CAE3FF}
+#setup-hint {color:#7184A3;margin:25px auto 0;font-size:14px;line-height:1.4}
+#setup-actions {display:flex;justify-content:center;gap:12px;margin-top:4px}
+#setup-retry,#setup-close {font-size:17px;min-width:150px;min-height:48px}
+#setup-close {background:transparent;color:#B4C6E2;border-color:#506380}
 #setup-retry:disabled {opacity:.48;cursor:default}
+@keyframes cvpn-spin {to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce) {.setup-loader:after {animation:none}.setup-step {transition:none}}
+@media (max-height:700px) {#setup-screen .panel {padding:20px 38px}.setup-loader {margin:16px auto 12px;width:92px;height:92px}.setup-loader-core{width:70px;height:70px}.setup-loader-core span{font-size:33px}.setup-steps {margin:14px auto 8px;gap:7px}#setup-hint{margin-top:13px}}
 </style>
 </head>
 <body>
@@ -44,13 +72,23 @@ button:active { background:#B3CCFF; }
   <button id="close-qr" type="button">Закрыть</button>
  </main>
 </div>
-<div id="setup-screen" hidden>
+<div id="setup-screen" data-phase="checking" hidden>
  <main class="panel" role="status" aria-live="polite">
-  <h1>CVPN <span>webOS</span></h1>
-  <div class="subtitle">PRIVATE NETWORK</div>
-  <p id="setup-status">Проверяем компоненты приложения…</p>
-  <p id="setup-hint" style="font-size:16px">Для работы необходимы root и Homebrew Channel. Backend и Xray уже включены в приложение.</p>
-  <button id="setup-retry" type="button" hidden>Повторить</button>
+  <div class="setup-brand" aria-label="CVPN webOS">C<b>VPN</b></div>
+  <div class="setup-eyebrow">PRIVATE NETWORK</div>
+  <div class="setup-loader" aria-hidden="true"><div class="setup-loader-core"><span>C<i>·</i></span></div></div>
+  <h1 id="setup-title">Подготавливаем CVPN</h1>
+  <p id="setup-status">Подготавливаем необходимые компоненты для работы</p>
+  <div class="setup-steps" id="setup-steps" aria-label="Этапы подготовки">
+   <div class="setup-step is-active" data-step="0"><span class="mark">1</span><span>Проверяем устройство</span></div>
+   <div class="setup-step" data-step="1"><span class="mark">2</span><span>Подготавливаем компоненты</span></div>
+   <div class="setup-step" data-step="2"><span class="mark">3</span><span>Запускаем CVPN</span></div>
+  </div>
+  <p id="setup-hint">Пожалуйста, не выключайте телевизор во время подготовки</p>
+  <div id="setup-actions">
+   <button id="setup-retry" type="button" hidden>Повторить</button>
+   <button id="setup-close" type="button" hidden>Закрыть</button>
+  </div>
  </main>
 </div>
 <script src="qr-bundle.js"></script>
