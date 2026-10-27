@@ -23,40 +23,84 @@ button:focus { outline:2px solid #8DB5FF; outline-offset:3px; box-shadow:0 0 0 6
 button:active { background:#B3CCFF; }
 @media (max-height:760px) { .panel{padding:20px 30px;} .subtitle{margin-bottom:8px;} #qr-canvas{width:255px;height:255px;margin:12px auto;} p{margin:8px 0;} }
 
-/* All-in-One preparation is offline: payload ships within the IPK.
-   Restrained TV-first motion, no simulated percentage or fake download. */
-#setup-screen {position:fixed;inset:0;top:0;right:0;bottom:0;left:0;display:flex;align-items:center;justify-content:center;background:rgba(4,9,20,.96)}
-#setup-screen .panel {position:relative;width:640px;max-width:calc(100% - 48px);padding:44px 52px 34px;border:1px solid #273852;border-radius:26px;background:#0D1729;box-shadow:0 24px 80px rgba(0,0,0,.44);overflow:hidden}
-#setup-screen .panel:before {content:"";position:absolute;top:0;left:18%;width:64%;height:1px;background:linear-gradient(90deg,transparent,#7AA8FF,transparent);opacity:.6}
-#setup-screen .setup-brand {font-size:28px;letter-spacing:-.7px;font-weight:700;color:#F6F9FF}
-#setup-screen .setup-brand b {font-weight:600;color:#83B0FF}
-#setup-screen .setup-eyebrow {margin-top:8px;color:#798CA9;letter-spacing:3.4px;font-size:11px;font-weight:600}
-.setup-loader {width:114px;height:114px;position:relative;margin:32px auto 28px;display:flex;align-items:center;justify-content:center}
-.setup-loader:before {content:"";position:absolute;inset:0;border-radius:50%;border:2px solid #273956}
-.setup-loader:after {content:"";position:absolute;inset:0;border-radius:50%;border:2px solid transparent;border-top-color:#8BB5FF;border-right-color:#5F87D8;animation:cvpn-spin 1.7s linear infinite}
-.setup-loader-core {display:flex;width:86px;height:86px;align-items:center;justify-content:center;border-radius:50%;background:radial-gradient(circle at 35% 22%,#1D365B,#101E35 72%);border:1px solid #345078;box-shadow:0 0 38px rgba(88,147,244,.11)}
-.setup-loader-core span {font:bold 40px/1 Arial,Helvetica,sans-serif;letter-spacing:-3px;color:#EAF2FF}
-.setup-loader-core span i {font-style:normal;color:#84B3FF}
-#setup-screen[data-phase="error"] .setup-loader:after {border-top-color:#ECA5A7;border-right-color:#B95A67;animation:none}
-#setup-screen[data-phase="ready"] .setup-loader:after {border-color:#84B3FF;animation:none}
-#setup-screen[data-phase="error"] .setup-loader-core {box-shadow:0 0 22px rgba(219,93,115,.1)}
-#setup-title {margin:0;color:#F3F7FF;font-size:28px;line-height:1.24;letter-spacing:-.5px}
-#setup-status {max-width:500px;min-height:44px;margin:14px auto 16px;font-size:18px;line-height:1.45;color:#ABBAD0;overflow-wrap:break-word}
-.setup-steps {display:flex;flex-direction:column;gap:11px;margin:23px auto 16px;text-align:left;max-width:400px}
-.setup-step {display:flex;align-items:center;gap:14px;font-size:16px;color:#72829C;transition:color .2s ease}
-.setup-step .mark {display:inline-flex;align-items:center;justify-content:center;width:25px;height:25px;flex:0 0 25px;border-radius:50%;border:1px solid #34455E;font-size:12px;color:#8D9AB0}
-.setup-step.is-active {color:#D8E7FF}
-.setup-step.is-active .mark {border-color:#75A8FF;background:#18365A;box-shadow:0 0 0 4px rgba(101,157,244,.08);color:#A8CBFF}
-.setup-step.is-done {color:#AFC8E8}
-.setup-step.is-done .mark {background:#243F5C;border-color:#4E7FB4;color:#CAE3FF}
-#setup-hint {color:#7184A3;margin:25px auto 0;font-size:14px;line-height:1.4}
-#setup-actions {display:flex;justify-content:center;gap:12px;margin-top:4px}
-#setup-retry,#setup-close {font-size:17px;min-width:150px;min-height:48px}
-#setup-close {background:transparent;color:#B4C6E2;border-color:#506380}
+/* CVPN webOS / premium first-launch overlay: no remote assets or fake percentages.
+   Scales from 720p to 4K without depending on unsupported filter/backdrop CSS. */
+#setup-screen {position:fixed;inset:0;top:0;right:0;bottom:0;left:0;
+ display:flex;align-items:center;justify-content:center;overflow:hidden;
+ background:radial-gradient(ellipse 65% 70% at 50% 55%,#0d1b37 0%,#071226 65%,#040b19 100%); isolation:isolate}
+#setup-screen:before,#setup-screen:after {content:"";position:absolute;pointer-events:none;border-radius:50%;z-index:-1}
+#setup-screen:before {width:110vw;height:95vw;top:-77vw;left:-51vw;
+ background:radial-gradient(ellipse at 65% 80%,#193769 0%,#102348 49%,#071229 78%);
+ border:1px solid rgba(59,112,200,.16);box-shadow:0 0 95px rgba(26,63,135,.24)}
+#setup-screen:after {width:114vw;height:98vw;right:-80vw;bottom:-79vw;
+ background:radial-gradient(ellipse at 28% 18%,#153365 0%,#0c2046 48%,#08162e 85%);
+ border:1px solid rgba(45,106,221,.12);box-shadow:0 0 98px rgba(12,59,151,.18)}
+#setup-screen .panel {position:relative;box-sizing:border-box;width:900px;max-width:calc(100% - 72px);
+ max-height:calc(100% - 68px);overflow:auto;margin:0;padding:30px 68px 0;border-radius:30px;
+ border:1px solid rgba(109,158,232,.37);
+ background:linear-gradient(130deg,rgba(19,35,64,.95),rgba(12,24,45,.97) 64%,rgba(14,28,52,.96));
+ box-shadow:0 22px 80px rgba(0,0,0,.44),inset 0 1px 0 rgba(169,198,252,.07)}
+#setup-screen .panel:before {content:"";position:absolute;left:5%;top:0;width:90%;height:1px;
+ background:linear-gradient(90deg,transparent,rgba(136,178,252,.42),transparent)}
+.setup-brand-row {display:flex;justify-content:center;align-items:center;gap:26px;margin-bottom:14px}
+.setup-app-icon {width:80px;height:80px;flex:0 0 80px;border-radius:20px;
+ border:1px solid rgba(111,173,255,.55);background:#08172f url('icon.png') center/cover no-repeat;
+ box-shadow:0 0 0 3px rgba(48,113,204,.08),0 10px 24px rgba(2,12,37,.5)}
+.setup-brand-text {text-align:left}
+.setup-brand-name {font-size:40px;line-height:1.1;font-weight:700;letter-spacing:-1px;color:#f5f8ff}
+.setup-brand-name b {font-weight:600;color:#a5b6ff}
+.setup-brand-caption {margin-top:11px;color:#9db9e4;font-size:13px;font-weight:500;letter-spacing:5px}
+.setup-loader {width:178px;height:178px;position:relative;margin:18px auto 20px;display:flex;align-items:center;justify-content:center}
+.setup-loader:before {content:"";position:absolute;inset:0;border-radius:50%;
+ border:1px solid rgba(72,143,250,.28);background:radial-gradient(circle,rgba(17,39,84,.48),transparent 72%);
+ box-shadow:0 0 25px rgba(42,117,255,.12)}
+.setup-loader:after {content:"";position:absolute;inset:11px;border-radius:50%;
+ border:8px solid transparent;border-top-color:#21e0fb;border-right-color:#5382ff;border-bottom-color:#3385ff;
+ transform:rotate(22deg);box-shadow:0 0 8px rgba(27,124,255,.18);
+ animation:cvpn-orbit 2.4s linear infinite}
+.setup-loader-inner {position:relative;z-index:1;width:125px;height:125px;border-radius:50%;
+ display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 35% 28%,#1a3970,#0a1b38 74%);
+ border:1px solid #274c82;box-shadow:inset 0 0 16px rgba(39,110,230,.15)}
+.setup-tv-icon {width:74px;height:74px;stroke:#a8d6ff;stroke-width:3.2;fill:none;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 0 7px rgba(89,170,255,.38))}
+#setup-screen[data-phase="error"] .setup-loader:after {animation:none;border-top-color:#d77b91;border-right-color:#a14c71;border-bottom-color:#873960}
+#setup-screen[data-phase="ready"] .setup-loader:after {animation:none;border-color:#2dd1cc;transform:rotate(0deg)}
+#setup-title {font-size:38px;line-height:1.22;letter-spacing:-.6px;color:#f9fbff;font-weight:700;margin:0 0 10px}
+#setup-status {font-size:21px;line-height:1.4;min-height:30px;margin:0 auto;color:#91b1e5;overflow-wrap:break-word}
+.setup-steps {display:flex;flex-direction:column;text-align:left;width:468px;max-width:100%;
+ margin:28px auto 24px;gap:0}
+.setup-step {position:relative;display:flex;align-items:center;min-height:73px;gap:26px;color:#788fb7;font-size:20px;line-height:1.3}
+.setup-step:not(:last-child):after {content:"";position:absolute;top:50px;left:24px;height:23px;width:2px;background:#25416f}
+.setup-step.is-done:not(:last-child):after {background:#51a4e4}
+.setup-step .mark {display:flex;justify-content:center;align-items:center;width:50px;height:50px;flex:0 0 50px;
+ border-radius:50%;box-sizing:border-box;border:3px solid #2e446e;font-size:20px;font-weight:600;color:#6482b4;
+ background:#101d36}
+.setup-step.is-active {color:#f0f6ff;font-weight:700}
+.setup-step.is-active .mark {border-color:#71caff;color:#fff;box-shadow:0 0 0 3px rgba(70,128,250,.15),0 0 20px rgba(57,144,255,.34)}
+.setup-step.is-done {color:#b9cae7}
+.setup-step.is-done .mark {border-color:#2b998d;color:#71ebd2;background:#0f3340;box-shadow:0 0 14px rgba(28,189,156,.14)}
+.setup-bottom {position:relative;border-top:1px solid rgba(109,146,208,.17);padding:18px 0 23px}
+#setup-hint {font-size:16px;line-height:1.4;margin:0 auto;color:#87a2cd}
+.setup-info-icon {display:inline-flex;align-items:center;justify-content:center;vertical-align:middle;
+ font:700 14px Arial,sans-serif;width:19px;height:19px;border-radius:50%;
+ border:1.6px solid #8dafdf;color:#8dafdf;margin-right:11px}
+#setup-actions {display:flex;justify-content:center;gap:14px;margin:10px auto 2px}
+#setup-retry,#setup-close {font-size:17px;min-width:160px;min-height:48px}
+#setup-close {background:transparent;color:#aebfdf;border-color:#506380}
 #setup-retry:disabled {opacity:.48;cursor:default}
-@keyframes cvpn-spin {to{transform:rotate(360deg)}}
-@media (prefers-reduced-motion:reduce) {.setup-loader:after {animation:none}.setup-step {transition:none}}
-@media (max-height:700px) {#setup-screen .panel {padding:20px 38px}.setup-loader {margin:16px auto 12px;width:92px;height:92px}.setup-loader-core{width:70px;height:70px}.setup-loader-core span{font-size:33px}.setup-steps {margin:14px auto 8px;gap:7px}#setup-hint{margin-top:13px}}
+@keyframes cvpn-orbit {to{transform:rotate(382deg)}}
+@media (prefers-reduced-motion:reduce) {.setup-loader:after{animation:none}}
+@media (max-height:820px) {#setup-screen .panel{padding:20px 44px 0}
+ .setup-brand-row{margin-bottom:4px}.setup-app-icon{width:62px;height:62px;flex-basis:62px}
+ .setup-brand-name{font-size:32px}.setup-loader{width:130px;height:130px;margin:8px auto 14px}
+ .setup-loader-inner{width:94px;height:94px}.setup-tv-icon{width:60px;height:60px}
+ #setup-title{font-size:30px}#setup-status{font-size:18px}.setup-steps{margin:12px auto 8px}
+ .setup-step{min-height:56px;font-size:17px}.setup-step .mark{width:38px;height:38px;flex-basis:38px;font-size:17px}
+ .setup-step:not(:last-child):after{left:18px;top:40px;height:16px}.setup-bottom{padding:12px 0 15px}
+ #setup-hint{font-size:13px}}
+@media (max-width:740px){#setup-screen .panel{max-width:calc(100% - 28px);padding:20px 20px 0}
+ .setup-brand-row{gap:12px}.setup-brand-name{font-size:27px}.setup-brand-caption{font-size:10px;letter-spacing:3px}
+ .setup-app-icon{width:58px;height:58px;flex-basis:58px}
+ #setup-title{font-size:26px}.setup-steps{width:100%}.setup-step{gap:14px}}
 </style>
 </head>
 <body>
@@ -74,9 +118,21 @@ button:active { background:#B3CCFF; }
 </div>
 <div id="setup-screen" data-phase="checking" hidden>
  <main class="panel" role="status" aria-live="polite">
-  <div class="setup-brand" aria-label="CVPN webOS">C<b>VPN</b></div>
-  <div class="setup-eyebrow">PRIVATE NETWORK</div>
-  <div class="setup-loader" aria-hidden="true"><div class="setup-loader-core"><span>C<i>·</i></span></div></div>
+  <div class="setup-brand-row">
+   <div class="setup-app-icon" aria-hidden="true"></div>
+   <div class="setup-brand-text">
+    <div class="setup-brand-name">CVPN <b>webOS</b></div>
+    <div class="setup-brand-caption">PRIVATE NETWORK</div>
+   </div>
+  </div>
+  <div class="setup-loader" aria-hidden="true"><div class="setup-loader-inner">
+   <svg class="setup-tv-icon" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+    <rect x="9" y="15" width="62" height="44" rx="5"/>
+    <path d="M32 66h16 M40 59v7"/>
+    <path d="M27 35q13-13 26 0 M32 40q8-8 16 0"/>
+    <circle cx="40" cy="46" r="2" fill="#a8d6ff" stroke="none"/>
+   </svg>
+  </div></div>
   <h1 id="setup-title">Подготавливаем CVPN</h1>
   <p id="setup-status">Подготавливаем необходимые компоненты для работы</p>
   <div class="setup-steps" id="setup-steps" aria-label="Этапы подготовки">
@@ -84,10 +140,12 @@ button:active { background:#B3CCFF; }
    <div class="setup-step" data-step="1"><span class="mark">2</span><span>Подготавливаем компоненты</span></div>
    <div class="setup-step" data-step="2"><span class="mark">3</span><span>Запускаем CVPN</span></div>
   </div>
-  <p id="setup-hint">Пожалуйста, не выключайте телевизор во время подготовки</p>
-  <div id="setup-actions">
-   <button id="setup-retry" type="button" hidden>Повторить</button>
-   <button id="setup-close" type="button" hidden>Закрыть</button>
+  <div class="setup-bottom">
+   <p id="setup-hint"><span class="setup-info-icon" aria-hidden="true">i</span><span id="setup-hint-text">Пожалуйста, не выключайте телевизор во время подготовки</span></p>
+   <div id="setup-actions">
+    <button id="setup-retry" type="button" hidden>Повторить</button>
+    <button id="setup-close" type="button" hidden>Закрыть</button>
+   </div>
   </div>
  </main>
 </div>
@@ -121,7 +179,7 @@ button:active { background:#B3CCFF; }
    stage(step,phase);
    setupRetry.hidden=!retry;setupRetry.disabled=!retry;
    setupClose.hidden=!retry;
-   setupHint.textContent=hint||'Пожалуйста, не выключайте телевизор во время подготовки';
+   document.getElementById('setup-hint-text').textContent=hint||'Пожалуйста, не выключайте телевизор во время подготовки';
    if(retry)setupRetry.focus();
  }
  function failSetup(data){
