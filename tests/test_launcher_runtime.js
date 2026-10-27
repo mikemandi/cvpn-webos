@@ -99,6 +99,17 @@ run('silent install: retry performs status only, never a second install',()=>{
   assert(/ status$/.test(f.calls[2]));
   assert(f.element('setup-status').textContent.includes('уже выполняется'));
 });
+run('timed-out install can be explicitly continued after a clean status recheck',()=>{
+  const f=fixture([no,null,no,no,yes]);f.fire(250);f.fire(90000);
+  f.element('setup-retry').onclick();
+  assert.strictEqual(f.calls.length,3);
+  assert(/ status$/.test(f.calls[2]));
+  assert.strictEqual(f.element('setup-retry').textContent,'Продолжить');
+  assert.strictEqual(f.calls.filter(x=>/ install$/.test(x)).length,1);
+  f.element('setup-retry').onclick();
+  assert.strictEqual(f.calls.filter(x=>/ install$/.test(x)).length,2);
+  assert(f.element('setup-title').textContent.includes('готов'));
+});
 run('upgrade while VPN runs: never call installer',()=>{
   const f=fixture([{returnValue:true,stdoutString:'BUNDLE_READY=NO\nUPGRADE_BLOCKED=VPN_RUNNING\n'}]);
   f.fire(250);assert.strictEqual(f.calls.length,1);
