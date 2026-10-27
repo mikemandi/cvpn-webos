@@ -8,7 +8,7 @@
 
 A privacy-focused VPN control experience for **rooted LG webOS TVs**. Pair your phone with your TV, import your own VLESS servers or HTTPS subscription and control the connection from a clean, mobile-friendly dashboard.
 
-![Stable backend](https://img.shields.io/badge/backend-2.0.0-314c87) ![TV Launcher](https://img.shields.io/badge/launcher-2.0.4-314c87) ![Platform](https://img.shields.io/badge/platform-rooted%20LG%20webOS-19263d) ![CPU](https://img.shields.io/badge/CPU-ARMv7-19263d)
+![Stable backend](https://img.shields.io/badge/backend-2.0.0-314c87) ![All-in-One candidate](https://img.shields.io/badge/All--in--One-2.2.0%20RC-314c87) ![Platform](https://img.shields.io/badge/platform-rooted%20LG%20webOS-19263d) ![CPU](https://img.shields.io/badge/CPU-ARMv7-19263d)
 
 [Website](https://cvpn.su) · [Downloads](../../releases) · [Installation](#installation) · [Safety](docs/SECURITY.md)
 
@@ -16,11 +16,38 @@ A privacy-focused VPN control experience for **rooted LG webOS TVs**. Pair your 
 
 ---
 
+## All-in-One 2.2.0 — release candidate for production acceptance (2026-10-27)
+
+**Status:** Offline CI-verified candidate on a feature branch, **not** yet certified
+production-ready on a fresh LG.
+
+- Premium, low-motion TV preparation screen in the existing dark CVPN style.
+  The IPK already contains Xray and the backend: first launch **installs from
+  local verified payload**, without downloading components from the internet.
+- Guided, customer-readable states: Checking device / Preparing components /
+  Starting CVPN, with safe display of readiness, errors, retry and close.
+- The TV app explicitly requests **`lunabus.query`** to access the elevated
+  Homebrew Channel `/exec` Luna endpoint. Older Homebrew releases may lack
+  the corresponding service-side ACG mapping — verify on the target TV.
+- Finite 20-second status and 90-second install callback deadlines; a timed-out
+  install can only be **status-checked**, not blindly restarted, and an
+  in-progress Engine lock is surfaced by the installer.
+- Real offline tests cover Web Launcher states and permissions, copied-payload
+  integrity, installer rollback and update-preserved private user data.
+- **Unchanged:** Engine 0.1.4's VPN routing, DNS/TLS verification,
+  watchdog and network recovery; verified YouTube playback and persistent
+  connection on the third LG using 2.1.3.
+
+**Mandatory next step:** run the entire `docs/QA_ACCEPTANCE_2.2.0.md` plan on a
+fourth clean rooted LG, using only the IPK and UI. Do **not** publish until
+automatic installation actually succeeds without SSH. Hardware restart and
+uninstall behavior remain open gates.
+
 ## All-in-One 2.1.3 reliable DNS/TLS readiness test (third LG test)
  
 The **2.1.3 test IPK itself contains** the TV launcher, ARMv7 Go backend, Xray-core 26.10.21, VPN Engine and recovery scripts. Xray is downloaded **only in the GitHub Actions build**, with a fixed upstream SHA-256, not by the user or the TV.
 
-**End-user workflow:** root LG TV → install Homebrew Channel → install CVPN webOS IPK → open app → wait for automatic initialization → scan TV QR code → import a VLESS configuration/HTTPS subscription → connect. No SSH, PowerShell, manual Xray or root zip is required.
+**Intended end-user workflow:** root LG TV → Homebrew Channel → single CVPN IPK → automatic preparation → scan TV QR → import VLESS/subscription → connect. This no-SSH experience remains a **hardware acceptance criterion**, not a claim of proven compatibility across TVs.
 
 The TV app uses the Homebrew Channel root execution service with **fixed commands** to run its own bundled installer. Installer checks root, ARMv7 userspace, TUN, file hashes and an idle VPN. User profiles, secrets, access key and configs are retained across in-place upgrades. The VPN is never connected automatically. The existing 90-second trial and network recovery remain in the Engine.
 
