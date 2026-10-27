@@ -15,9 +15,12 @@ fault-injection work on every model**. See
 
 ## Review gates before tagging
 
-1. Confirm CVPN code and artwork ownership, a public distribution license
-   (or keep `pool: non-free` honestly), and rights/notices for bundled Xray,
-   QR library and all third-party code. Refer to
+1. Confirm CVPN code and artwork ownership and distribution rights. The app is
+   **free of charge**, supports **other providers' subscriptions** and has
+   **no mandatory CVPN account or payment**. Homebrew `pool: non-free` means
+   the CVPN-authored code currently has **no declared open-source license**;
+   it does **not** mean paid software. Do not invent a source license.
+   Keep the MPL-2.0 and QR library notices for bundled third-party code. Refer to
    [licensing review](../LICENSE-PUBLISHING-REVIEW.md).
 2. Review the live Homebrew [submission rules](https://github.com/webosbrew/apps-repo):
    **NO AI SLOP** — meaningful owner code review and testing, plus explicit
@@ -46,12 +49,14 @@ fault-injection work on every model**. See
 4. Generate `dist/su.cvpn.webos.yml` with
    `python3 scripts/make-homebrew-entry.py --repository mikemandi/cvpn-webos`.
    Its root requirement, version and limitations must remain accurate.
-   If distributing closed source, use `pool: non-free`; if using `main`,
-   first establish a compatible open-source license.
+   Use `pool: non-free` until the project owner explicitly adopts a valid
+   open-source license (even though the code is publicly visible).
 5. Fork [webosbrew/apps-repo](https://github.com/webosbrew/apps-repo), add
    `packages/su.cvpn.webos.yml` with **real** sanitized screenshots, and
    submit a PR to its maintainers. Clearly disclose AI-assisted code/design
-   and summarize your review and hardware testing.
+   and summarize your review and hardware testing. The connected GitHub
+   integration currently has read-only permissions to upstream apps-repo;
+   submit from a personal fork instead.
 6. Wait for maintainer approval before claiming Homebrew Channel availability.
 
 ## What users install
