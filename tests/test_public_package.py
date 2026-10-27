@@ -11,13 +11,13 @@ import unittest
 import zipfile
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-IPK = ROOT / 'dist/su.cvpn.webos_2.2.0_all.ipk'
+IPK = ROOT / 'dist/su.cvpn.webos_2.2.1_all.ipk'
 
 class PublicPackageTests(unittest.TestCase):
     def test_launcher_manifest(self):
         d = json.loads((ROOT / 'launcher/appinfo.json').read_text())
         self.assertEqual(d['id'], 'su.cvpn.webos')
-        self.assertEqual(d['version'], '2.2.0')
+        self.assertEqual(d['version'], '2.2.1')
         self.assertIn('lunabus.query', d['requiredPermissions'])
         for f in [d['main'],d['icon'],d['largeIcon']]:
             self.assertTrue((ROOT / 'launcher' / f).is_file())
@@ -49,10 +49,14 @@ class PublicPackageTests(unittest.TestCase):
 
     def test_root_service_missing_callback_never_spins_forever(self):
         launcher=(ROOT/'launcher/index.html').read_text()
-        self.assertIn("mode==='install'?90000:20000", launcher)
+        self.assertIn("mode==='install'?90000:35000", launcher)
         self.assertIn("BUNDLE_READY=NO", launcher)
         self.assertIn("INSTALL_IN_PROGRESS=YES", launcher)
         self.assertIn("Подготавливаем необходимые компоненты для работы", launcher)
+        self.assertIn('setup-tv-icon', launcher)
+        self.assertIn('setup-brand-row', launcher)
+        self.assertIn('setup-bottom', launcher)
+        self.assertIn('prefers-reduced-motion', launcher)
         self.assertIn("Пожалуйста, не выключайте телевизор", launcher)
         self.assertIn("HOMEBREW_SERVICE_TIMEOUT", launcher)
         self.assertIn("clearTimeout(timeoutID)", launcher)
