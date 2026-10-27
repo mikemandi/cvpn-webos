@@ -1,5 +1,18 @@
 # Changelog
 
+## 2.2.5 RC — precise TV spacing and reliable remote focus (2026-10-28)
+
+- Removed the app icon from both QR and preparation dialogs; centered a matching
+  CVPN (bold white) / webOS (lighter blue) wordmark and PRIVATE NETWORK caption.
+- Fixed missing Flexbox `gap` support on older LG webOS Chromium: step labels,
+  footer note and Retry/Close buttons now use explicit, tested margins.
+- Increased panel breathing room and adapted vertical rhythm for 1080p / 720p.
+- Explicit arrow-key focus switching between Retry and Close on error;
+  LG Back/Escape closes the error dialog; OK/Enter activates the focused action.
+- No changes to VPN Engine, Xray, root installer, keys or subscriptions.
+- Release candidate: recheck error focus and UI on physical LG before stable.
+
+
 ## 2.2.4 RC — unified onboarding, internationalization and automatic recovery (2026-10-28)
 
 - Preparation and QR now use the same floating TV overlay, card and branded
