@@ -1,34 +1,45 @@
-# Device validation — CVPN webOS Stable
+# CVPN webOS — tested hardware & compatibility
 
-Last updated: 2026-10-26.
+Updated: 2026-10-28 · Current TV app: **2.2.5**
 
-## Tested installations
+This is an evidence log, **not a list of guaranteed supported LG TVs**. Rooting, Homebrew versions, firmware updates, userspace architecture and TUN availability can affect compatibility.
 
-| Device | Environment | Evidence | Outcome |
+## Hardware evidence
+
+| Television | Software / architecture | Verified | Important limits |
 |---|---|---|---|
-| Original development LG TV (model not recorded in this report) | Rooted webOS, established CVPN backend; Ethernet and Wi-Fi tested | Successful RC5 to Stable upgrade, Launcher 2.0.4 installed and launched, VPN exit-IP tests performed | Passed |
-| LG 55UQ76003LD (2022) | webOS 22 / 7.6.0-1901; rooted Homebrew; `uname -m=aarch64`; `getconf LONG_BIT=32` | Fresh bootstrap, ARMv7 Xray 26.10.21 executed, Launcher installed, QR control and subscription import, VPN working after first-import and BusyBox timeout fixes | Passed with **post-install hotfixes** |
+| **LG 55UK6450PLC** | webOS 4.4.3-22, firmware 05.50.70; rooted Homebrew, ARMv7-compatible system | All-in-One **2.2.2** first-run preparation, QR and local panel; Netherlands VPN exit IP; YouTube, disconnect/reconnect and normal power off/on | Verified functional baseline; 2.2.3 only changed the app icon |
+| **LG 55UQ76003LD (2022)** | webOS 22 / 7.6.0-1901, rooted; aarch64 kernel with **32-bit userspace** | Fresh bootstrap and ARMv7 Xray 26.10.21, first import and VPN connection after sequential first-import/BusyBox fixes | This test used hotfixes; it does **not** prove every firmware supports a clean 2.2.5 install |
+| **Owner's LG test device for 2.2.5** | Exact model not separately recorded against the 2.2.5 visual acceptance | Owner confirmed the refined English/Russian setup and QR UI and remote-focused error dialog work on real LG hardware | A UI acceptance report; not a new cross-model network certification |
 
-The second television reported firmware `04.06.91` in conversation; verify the exact on-device revision before treating that number as tested compatibility. No claim is made for all UQ7600 models or all webOS 22 updates.
+Earlier TV tests used Ethernet and Wi-Fi; no universal compatibility claim is made for either.
 
-## Why this matters for the next release
+## What changed since the earlier release
 
-The old first-install bundle lacks a trusted client template and rejects `aarch64` kernels even when the userspace is ARMv7-compatible. The originally packaged Engine also used `timeout -t 6`, which BusyBox 1.31.1 rejects. Fixes are now in `main`:
+- **2.2.2:** self-contained All-in-One IPK with locally bundled backend, Xray, launcher, rollback and root service safeguards.
+- **2.2.3:** transparent rounded app icon only.
+- **2.2.4:** matched floating TV preparation/QR screens, RU/EN locale selection, bounded component checks and automatic completion polling.
+- **2.2.5:** corrected Flexbox spacing for older LG Chromium, centered text-only TV wordmark and explicit remote navigation between **Retry** and **Close**. VPN Engine and Xray transport remained unchanged.
 
-- Kernel `aarch64` + **32-bit userspace** accepted by bootstrap; 64-bit only rejected.
-- Secret-free embedded TUN template supports the first validated import and profile selection.
-- Startup DNS probe invokes the portable `timeout 6 nslookup …` form.
-- 90-second trial deadline, recovery, DNS routing safeguards and fail-closed IPv6 checks remain in place.
+The consolidated package also contains previous repairs for ARMv7-compatible 32-bit userspace running under aarch64 kernels, the first validated import and portable BusyBox DNS-probe timeout.
 
-**Important validation boundary:** The second TV successfully reached working VPN after sequential hotfixes. A one-pass install from the consolidated next tagged release still needs CI and package inspection; cold boot, uninstall, and reinstall are not separately certified here.
+## Compatibility prerequisites
 
-## Release gate
+A testable installation requires:
 
-1. Pass full `Verify build` workflow on final `main`.
-2. Create a **new tag** (planned `v2.0.2`) rather than rewriting `v2.0.1`.
-3. Verify release assets, SHA-256, public URLs and Homebrew manifest fields.
-4. Add accurate, sanitized screenshots of the actual final TV launcher and mobile management UI.
-5. Review source licensing, third-party notices and secrets in git history. Disclose AI-assisted development in the Homebrew PR.
-6. Document that the IPK is only the TV launcher and that the root backend and external Xray binary must be installed separately.
+1. Rooted LG webOS TV with a functioning Homebrew root service.
+2. ARMv7-compatible **32-bit** userspace and working **/dev/net/tun**.
+3. Sufficient app storage, a trusted LAN and a phone/browser to pair with the TV.
+4. A supported VPN provider profile or configuration for an actual connection.
 
-Never include or publish subscriber links, VLESS UUIDs, auth cookies, login PINs or private IP addresses in screenshots or sample configurations.
+Unrooted TVs and standard LG Content Store installations are not supported. VPN traffic is IPv4-only; connection is refused when an active IPv6 default route would bypass it. There is no universal kill switch or automatic VPN connection after a reboot.
+
+## What still needs testing
+
+- One-pass installation of the current IPK on additional untouched rooted LG models.
+- Firmware-specific Homebrew root-service compatibility and rollback behavior.
+- Repeated standby/cold-boot cycles and uninstall/reinstall scenarios on new TV hardware.
+
+Keep bug reports anonymized. Never include subscription URLs, VLESS UUIDs, tokens, pairing codes, local access keys or private TV IP addresses.
+
+[README](../README.md) · [Security](SECURITY.md) · [Release limitations](RELEASE_LIMITATIONS.md)
