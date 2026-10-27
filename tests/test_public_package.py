@@ -14,13 +14,13 @@ import zipfile
 import zlib
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-IPK = ROOT / 'dist/su.cvpn.webos_2.2.4_all.ipk'
+IPK = ROOT / 'dist/su.cvpn.webos_2.2.5_all.ipk'
 
 class PublicPackageTests(unittest.TestCase):
     def test_launcher_manifest(self):
         d = json.loads((ROOT / 'launcher/appinfo.json').read_text())
         self.assertEqual(d['id'], 'su.cvpn.webos')
-        self.assertEqual(d['version'], '2.2.4')
+        self.assertEqual(d['version'], '2.2.5')
         self.assertIn('lunabus.query', d['requiredPermissions'])
         for f in [d['main'],d['icon'],d['largeIcon']]:
             self.assertTrue((ROOT / 'launcher' / f).is_file())
@@ -92,6 +92,9 @@ class PublicPackageTests(unittest.TestCase):
         self.assertIn("INSTALL_IN_PROGRESS=YES", launcher)
         self.assertIn("Подготавливаем необходимые компоненты для работы", launcher)
         self.assertIn('setup-tv-icon', launcher)
+        self.assertNotIn('class="brand-icon"', launcher)
+        self.assertIn('margin-left:26px', launcher)
+        self.assertIn('setupClose:setupRetry', launcher)
         self.assertIn('brand-row', launcher)
         self.assertIn('setup-bottom', launcher)
         self.assertIn('prefers-reduced-motion', launcher)

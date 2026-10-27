@@ -19,16 +19,18 @@ function fixture(responses,language){
  function el(id) {
    if(!elements[id]){
      elements[id]={
+       id,
        hidden:true,textContent:'',className:'',firstChild:{nodeValue:''},
        attributes:{},setAttribute(k,v){this.attributes[k]=v;},
-       focus(){this.focused=true},
+       focus(){this.focused=true;document.activeElement=this;},
+       click(){if(this.onclick)this.onclick();},
        getContext(){return{fillStyle:'',fillRect(){}}}
      };
    }
    return elements[id];
  }
  const document={
-   documentElement:{lang:'ru'},getElementById:el,
+   documentElement:{lang:'ru'},activeElement:null,getElementById:el,
    querySelectorAll(){return steps;},
    addEventListener(name,fn){handlers[name]=fn;},
    createElement(){return{src:'',onerror:null};},
@@ -72,6 +74,8 @@ function fixture(responses,language){
    el,steps,calls,bridges,scripts,fire,
    get closed(){return closed},
    launch(mode){handlers.webOSLaunch({detail:{mode}})},
+   key(code){handlers.keydown({keyCode:code,preventDefault(){}});},
+   focused(){return document.activeElement&&document.activeElement.id;},
    backendLanguage(pref,resolved){window.cvpnLanguageInfo({localePreference:pref,resolvedTVLocale:resolved})},
    sendQR(data){window.cvpnQRInfo(data)},
    pageLanguage(){return document.documentElement.lang},
@@ -185,5 +189,18 @@ run('Opening QR while installing discards stale installer callbacks',()=>{
  f.bridges[0].onservicecallback(JSON.stringify(yes));
  assert.strictEqual(f.el('qr-screen').hidden,false);
  assert.strictEqual(f.el('setup-screen').hidden,true);
+});
+run('Error dialog remote arrows move focus to Close and back, OK activates it',()=>{
+ const f=fixture([{returnValue:false,error:'Permission denied'}]);f.fire(250);
+ assert.strictEqual(f.focused(),'setup-retry');
+ assert.strictEqual(f.el('setup-close').hidden,false);
+ f.key(39);assert.strictEqual(f.focused(),'setup-close');
+ f.key(37);assert.strictEqual(f.focused(),'setup-retry');
+ f.key(40);assert.strictEqual(f.focused(),'setup-close');
+ f.key(13);assert.strictEqual(f.closed,true);
+});
+run('LG Back closes error overlay even if Retry is focused',()=>{
+ const f=fixture([{returnValue:false,error:'Permission denied'}]);f.fire(250);
+ f.key(461);assert.strictEqual(f.closed,true);
 });
 if(process.exitCode)process.exit(process.exitCode);
