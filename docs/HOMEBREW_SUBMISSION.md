@@ -1,81 +1,31 @@
-# Publish CVPN webOS 2.2.4 to webOS Homebrew Channel
+# CVPN webOS 2.2.5 — Homebrew Channel submission guide
 
-**As of 2026-10-28: Homebrew listing not yet approved.** The 2.2.2 All-in-One IPK has
-passed offline CI and the core fresh-TV functional flow on one LG
-55UK6450PLC / webOS 4.4.3-22 / firmware 05.50.70 (owner-reported).
-v2.2.4 updates TV UI and backend's loopback-only localization endpoint; independent TV UI validation remains necessary. The user did **not** manually install Xray/backend: the Homebrew root
-service prepared bundled components on first app launch. The owner also
-confirmed a Netherlands exit address, YouTube playback, VPN disconnect,
-reconnect and ordinary television off/on.
+[English](HOMEBREW_SUBMISSION.md) | [Русский](HOMEBREW_SUBMISSION.ru.md)
 
-These results are **not evidence that uninstall, power-loss or
-fault-injection work on every model**. See
-[QA acceptance](QA_ACCEPTANCE_2.2.2.md) and
-[limitations](RELEASE_LIMITATIONS.md).
+**Current status, 2026-10-28:** [v2.2.5 Stable](https://github.com/mikemandi/cvpn-webos/releases/tag/v2.2.5) is published on GitHub with IPK, SHA256SUMS, manifest and Homebrew YAML. **A GitHub Release does not mean inclusion in the official webOS Homebrew Channel catalog.** No maintainer approval is asserted here.
 
-## Review gates before tagging
+## Before requesting catalog inclusion
 
-1. Confirm CVPN code and artwork ownership and distribution rights. The app is
-   **free of charge**, supports **other providers' subscriptions** and has
-   **no mandatory CVPN account or payment**. Homebrew `pool: non-free` means
-   the CVPN-authored code currently has **no declared open-source license**;
-   it does **not** mean paid software. Do not invent a source license.
-   Keep the MPL-2.0 and QR library notices for bundled third-party code. Refer to
-   [licensing review](../LICENSE-PUBLISHING-REVIEW.md).
-2. Review the live Homebrew [submission rules](https://github.com/webosbrew/apps-repo):
-   **NO AI SLOP** — meaningful owner code review and testing, plus explicit
-   disclosure of AI-assisted development in the PR; safe system networking;
-   no DRM bypass/piracy.
-3. Finish remaining acceptance: handling of network-loss/failure conditions,
-   correct persistent-data/uninstall policy, release-mode source/security audit,
-   no system DNS/routes left behind, and accurate sanitized screenshots
-   captured from the **actual LG application** rather than AI mockups.
-4. Record tested platforms precisely, don't claim broad model support,
-   a universal kill switch, or IPv6 tunneling. No Content Store compatibility.
-5. Do not include personal television addresses, real subscription URLs,
-   client UUIDs, Homebrew SSH keys, tokens or other private data in screenshots.
+1. **Rights:** verify CVPN-authored code/artwork ownership and third-party license compliance. No open-source license is currently assigned to CVPN-authored code. Keep **pool: non-free** rather than main until an appropriate source license is explicitly adopted. This refers to source redistribution terms, **not the price**; the app is free.
+2. **Third parties:** Xray-core **MPL-2.0** and QR **MIT / Apache-2.0** license notices must remain bundled. Verify corresponding-source availability and attribution.
+3. **Privacy:** use real-UI empty-state screenshots with no subscriptions, UUIDs, real PINs, private LAN addresses or credentials. Sanitized English images: [screenshots](../assets/screenshots). Russian screenshots are also available.
+4. **Safety:** document root/Homebrew requirements, IPv4-only routing, active IPv6 route refusal, absence of universal kill switch and autostart, and HTTP-only trusted-LAN control on TCP/8765.
+5. **Review:** independent hardware acceptance across all models has not been established. Complete meaningful human review of system-level effects and rollback/standby risks before catalog distribution.
+6. **AI disclosure:** current [webOS Homebrew rules](https://github.com/webosbrew/apps-repo) require meaningful human development, testing and review when AI tools assisted work; disclose use in the pull request. No piracy/DRM bypass claims or content.
 
-## Release process (after review approval)
+## Submission workflow
 
-1. Merge the verified candidate PR into `main` through normal review;
-   do not change working deployed LG televisions in the process.
-2. Create an **immutable new** release tag `v2.2.4` on the reviewed commit.
-   `.github/workflows/release.yml` builds and tests the IPK and creates
-   GitHub Release assets.
-3. Inspect the release's
-   `su.cvpn.webos_2.2.4_all.ipk`, `su.cvpn.webos.manifest.json`, and
-   `SHA256SUMS`. Verify SHA-256, manifest URL, icon URL and release download
-   all resolve correctly; verify no credentials and no separate root ZIP.
-4. Generate `dist/su.cvpn.webos.yml` with
-   `python3 scripts/make-homebrew-entry.py --repository mikemandi/cvpn-webos`.
-   Its root requirement, version and limitations must remain accurate.
-   Use `pool: non-free` until the project owner explicitly adopts a valid
-   open-source license (even though the code is publicly visible).
-5. Fork [webosbrew/apps-repo](https://github.com/webosbrew/apps-repo), add
-   `packages/su.cvpn.webos.yml` with **real** sanitized screenshots, and
-   submit a PR to its maintainers. Clearly disclose AI-assisted code/design
-   and summarize your review and hardware testing. The connected GitHub
-   integration currently has read-only permissions to upstream apps-repo;
-   submit from a personal fork instead.
-6. Wait for maintainer approval before claiming Homebrew Channel availability.
+1. Check all release assets at [v2.2.5](https://github.com/mikemandi/cvpn-webos/releases/tag/v2.2.5): IPK, SHA256SUMS, su.cvpn.webos.manifest.json and su.cvpn.webos.yml. Verify the file hashes, download addresses, version and icon.
+2. Generate/review the catalog package YAML from scripts/make-homebrew-entry.py if needed. For this published version, use the **2.2.5 artifact**, not an older 2.2.4 or a manually patched IPK.
+3. Fork [webosbrew/apps-repo](https://github.com/webosbrew/apps-repo), add the appropriate **packages/su.cvpn.webos.yml** entry, and keep pool: non-free unless licensing changes.
+4. Use accurate actual screenshots, feature summary and limitations. Explain the root installer, local HTTP risk and exactly which television models were owner-tested.
+5. Submit a PR to upstream maintainers **only after owner review and approval**. Explicitly disclose AI assistance, what was personally tested, remaining risks and who will maintain the app.
+6. Address maintainer feedback. **Do not claim Homebrew catalog availability until the maintainers accept it**.
+
+Useful references: [Homebrew submission rules](https://repo.webosbrew.org/submit) · [apps-repo](https://github.com/webosbrew/apps-repo) · [proposed PR text](HOMEBREW_PR_DRAFT.md).
 
 ## What users install
 
-Root and Homebrew are prerequisites and **not supplied by CVPN**.
-Users sideload the **single All-in-One IPK**; backend, Xray and Engine are
-bundled and configured automatically by the root service on supported TVs.
-Afterwards users pair via QR on a trusted LAN and control VPN from CVPN Connect.
+CVPN webOS installs as a single All-in-One IPK **after** the TV already has root/Homebrew. Its Xray, Go backend and VPN Engine are inside the package and prepared automatically. No account or paid CVPN subscription is required to import compatible third-party configurations.
 
-**Known boundaries:** rooted ARMv7 32-bit user space only, active IPv6
-default route blocks connection, no universal kill switch, no VPN autostart,
-and local HTTP management only on trusted LAN. App update must not modify
-Engine while VPN is connected. See [security](SECURITY.md).
-
-## Homebrew maintainers' current rules
-
-- https://repo.webosbrew.org/submit
-- https://github.com/webosbrew/apps-repo
-- https://github.com/webosbrew/webos-homebrew-channel
-
-Do not publish, open a submission PR or automatically merge before the
-owner has approved the public-facing description, licensing and risk policy.
+**Do not publish a root bypass or alter firmware ACLs as a quick compatibility fix.** For safety details read [Security](SECURITY.md), [Release limitations](RELEASE_LIMITATIONS.md) and [Licensing review](../LICENSE-PUBLISHING-REVIEW.md).
