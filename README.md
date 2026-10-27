@@ -1,11 +1,14 @@
 # CVPN webOS
 
-**PRIVATE NETWORK · CVPN Connect** — VPN and private subscription management for
-supported **rooted LG webOS televisions**. The interface is controlled from a
-phone on the same trusted LAN via a QR pairing flow.
+**PRIVATE NETWORK · CVPN Connect** — a **free-of-charge universal VPN client**
+for supported **rooted LG webOS televisions**. Import compatible VLESS/Reality
+profiles or HTTPS subscriptions from **any provider**, including your own
+server. **A CVPN subscription is optional**, not required for installation,
+activation, pairing, or ordinary VPN features. CVPN (cvpn.su) is an optional
+service recommendation. Configure and control the TV securely from a phone
+on the same trusted LAN using temporary QR/PIN pairing.
 
-**Current candidate:** 2.2.2 All-in-One (feature branch; not yet Homebrew
-published). **Backend:** 2.0.0. **Engine:** 0.1.4. **Xray:** 26.10.21 ARMv7.
+**Version:** 2.2.2 All-in-One. **Distribution:** free of charge; rooted LG only. **Backend:** 2.0.0. **Engine:** 0.1.4. **Xray:** 26.10.21 ARMv7.
 
 [Website](https://cvpn.su) · [Security](docs/SECURITY.md) ·
 [Hardware acceptance](docs/QA_ACCEPTANCE_2.2.2.md) ·
@@ -45,13 +48,13 @@ loss, cold boot/power loss, uninstall/upgrade behavior, root-service mappings
 across other Homebrew versions, and the publishing/security checklist need
 separate evidence. See [2.2.2 QA evidence](docs/QA_ACCEPTANCE_2.2.2.md).
 
-## Intended installation (for supported hardware)
+## Installation (for supported hardware)
 
 1. Owner obtains working **root** and installs a compatible **Homebrew Channel**.
 2. Install the single All-in-One IPK using supported webOS installation tools.
 3. Open **CVPN webOS** on the TV. See the short, staged preparation screen.
 4. Scan the TV's QR code to open **CVPN Connect** on a phone on the same LAN.
-5. Add a VLESS/Reality configuration or HTTPS subscription and choose a server.
+5. Add a compatible VLESS/Reality configuration or HTTPS subscription **from any provider** and choose a server. No CVPN account or paid subscription is required.
 6. Connect, verify playback, and confirm the trial into persistent mode.
 
 On the tested clean LG, the first-run preparation required **no manual SSH,
@@ -119,7 +122,7 @@ Homebrew publication, manifest creation and third-party licensing must be
 reviewed before tagging a public release. See
 [LICENSE-PUBLISHING-REVIEW.md](LICENSE-PUBLISHING-REVIEW.md).
 
-## Release gates before publication
+## Release and platform compatibility
 
 The fresh-TV functional acceptance passed. Follow **[QA_ACCEPTANCE_2.2.2.md](docs/QA_ACCEPTANCE_2.2.2.md)** for remaining checks:
 
@@ -131,5 +134,8 @@ The fresh-TV functional acceptance passed. Follow **[QA_ACCEPTANCE_2.2.2.md](doc
 - Uninstall/reinstall lifecycle, software permissions and LAN isolation
 
 **A CI-green build is not a guarantee of production readiness on LG hardware.**
-Do not merge this candidate into stable/main or publish a tag until the remaining
-publication gates have been reviewed and approved.
+Free distribution does not automatically mean the project is open-source. Until
+an explicit source license is adopted, the Homebrew listing uses `pool: non-free`
+(the catalog's classification for apps without an open-source license),
+**not** an indication of a purchase price. Third-party components retain
+their own licenses and notices.
