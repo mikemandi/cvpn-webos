@@ -1,116 +1,163 @@
 <div align="center">
-  <img src="assets/icon160.png" width="112" height="112" alt="CVPN webOS app icon" />
+  <img src="assets/icon160.png" width="112" height="112" alt="CVPN webOS app icon">
   <h1>CVPN webOS</h1>
   <p><strong>PRIVATE NETWORK · VPN for LG webOS</strong></p>
-  <p>A free, independent VPN client for rooted LG televisions.<br />
-  Import compatible VLESS/Reality profiles or HTTPS subscriptions <strong>from any provider</strong>.</p>
-  <p><strong>No CVPN subscription or account required.</strong><br />
-  CVPN is an optional recommended service.</p>
+  <p>Run a VPN on a compatible rooted LG TV. Control it securely from your phone on your home network.<br>
+  One IPK. Local pairing. Your choice of VPN provider.</p>
+  <p><strong>Free to use · No CVPN account required · English & Russian</strong></p>
   <p>
-    <a href="https://github.com/mikemandi/cvpn-webos/releases/latest"><strong>Download IPK</strong></a>
-    &nbsp;·&nbsp; <a href="#getting-started">Installation</a>
+    <a href="https://github.com/mikemandi/cvpn-webos/releases/tag/v2.2.5"><strong>Download v2.2.5 IPK</strong></a>
+    &nbsp;·&nbsp; <a href="#installation">Installation</a>
     &nbsp;·&nbsp; <a href="#compatibility">Compatibility</a>
-    &nbsp;·&nbsp; <a href="docs/SECURITY.md">Security</a>
+    &nbsp;·&nbsp; <a href="#troubleshooting">Help</a>
     &nbsp;·&nbsp; <a href="CHANGELOG.md">Changelog</a>
   </p>
 </div>
 
 ---
 
-## Simple setup, full control
+## Overview
+
+**CVPN webOS** is an independent VPN client for compatible **rooted LG webOS TVs**. The TV runs a VPN engine and a local control panel; your phone acts as the remote control. Pair on the same trusted home network, import a compatible configuration and connect.
+
+- **All-in-One:** TV launcher, ARMv7 backend, Xray-core and recovery scripts in a single IPK. Nothing else needs downloading during TV setup.
+- **Bring your own provider:** supported VLESS/Reality profiles, compatible HTTPS subscriptions and supported Xray configuration imports. CVPN is optional.
+- **TV pairing:** open the app on LG, scan the QR and enter a short-lived PIN if prompted.
+- **Simple control:** English/Russian interface, server selection, subscription import, device access and diagnostics from your browser.
+- **Recovery-focused:** checks and safeguards around system prerequisites, component upgrades and VPN sessions.
+
+> [!IMPORTANT]
+> The app is free, but **you need a compatible VPN endpoint or configuration to connect**. You do **not** need a CVPN subscription. Root and a compatible Homebrew installation are required; this is **not** an LG Content Store app.
+
+## Screenshots
+
+<div align="center">
+  <img src="assets/screenshots/tv-setup.png" alt="English CVPN webOS TV component preparation screen" width="770">
+  <p><sub><strong>TV setup:</strong> automatic component preparation with a simple progress view.</sub></p>
+  <img src="assets/screenshots/tv-pairing-demo.png" alt="English TV QR pairing screen using a non-functional example PIN" width="770">
+  <p><sub><strong>TV pairing:</strong> scan QR or use the PIN from the local network.</sub></p>
+</div>
 
 <table>
-<tr>
-<td width="50%" align="center"><img src="assets/ru-dashboard.png" alt="CVPN Connect home and server selection" width="100%"></td>
-<td width="50%" align="center"><img src="assets/ru-settings.png" alt="CVPN Connect settings" width="100%"></td>
-</tr>
-<tr><td align="center"><sub><b>Servers & VPN controls</b></sub></td><td align="center"><sub><b>Settings & diagnostics</b></sub></td></tr>
+  <tr>
+    <td align="center" width="50%"><img src="assets/screenshots/phone-home-empty.png" alt="English dashboard with no VPN configurations" width="340"></td>
+    <td align="center" width="50%"><img src="assets/screenshots/phone-subscriptions-empty.png" alt="English subscription page with no imported profiles" width="340"></td>
+  </tr>
+  <tr><td align="center"><sub><b>Home · No VPN configured</b></sub></td><td align="center"><sub><b>Subscriptions · Empty state</b></sub></td></tr>
+  <tr>
+    <td align="center"><img src="assets/screenshots/phone-import-empty.png" alt="English configuration import with an empty text field" width="340"></td>
+    <td align="center"><img src="assets/screenshots/phone-settings.png" alt="English settings without personal information" width="340"></td>
+  </tr>
+  <tr><td align="center"><sub><b>Import · Blank input</b></sub></td><td align="center"><sub><b>Settings · Local controls</b></sub></td></tr>
 </table>
 
-CVPN webOS installs from a **single All-in-One IPK**. On supported rooted TVs,
-the app prepares its bundled backend and Xray automatically. Pair a phone
-using the TV's QR code to manage connections, profiles, subscriptions and
-server selection from the trusted local network.
+<sub>These screenshots use the **actual application markup, styling and bundled icons**, rendered in a deterministic offline demo state. No real VPN sessions, saved configurations, accounts, keys or private addresses are included. The pairing image uses a **non-functional example code and RFC 5737 reserved TEST-NET IP**, not a live TV pairing session. See <a href="scripts/capture-docs-screenshots.cjs">screenshot capture script</a>.</sub>
 
-| | |
+## Installation
+
+### Requirements
+
+- An LG TV with **root** and a compatible **Homebrew Channel root service**.
+- **ARMv7-compatible 32-bit userspace**, including supported aarch64 kernels running a compatible 32-bit userspace.
+- A functional **/dev/net/tun**, sufficient application storage, and working home networking.
+- A phone/computer on the **same trusted LAN**.
+
+### Steps
+
+1. Download **<a href="https://github.com/mikemandi/cvpn-webos/releases/tag/v2.2.5">su.cvpn.webos_2.2.5_all.ipk</a>** and check it against the release's SHA256SUMS.
+2. Install the IPK on your rooted LG TV with your Homebrew/IPK installation tool.
+3. Launch **CVPN webOS**. The app automatically checks and prepares its bundled components on first run.
+4. Open the TV pairing screen, scan the QR from your phone and enter the temporary PIN if needed. Your phone and TV must be on the same trusted network.
+5. In **CVPN Connect** on your phone, go to **Subscriptions → Add configuration**. Import your compatible HTTPS subscription, VLESS/Reality link or supported Xray configuration.
+6. Select your server, connect and confirm the connection if a confirmation window appears.
+
+**Upgrading:** disconnect VPN before installing the new IPK over the old app. Keep your existing backend data directory: it stores local profiles and pairing settings. The installer refuses to replace binaries while VPN routes, TUN or related processes are active.
+
+## How it works
+
+| Component | Responsibility |
 |---|---|
-| **App version** | `2.2.5 RC` — Refined TV UI, remote controls and RU/EN |
-| **Backend / Engine** | 2.0.0 / 0.1.4 |
-| **Xray-core** | 26.10.21 ARMv7, included and checksum-verified |
-| **Language** | Russian on Russian-language LG; English otherwise; manual RU/EN choice in CVPN Connect |
-| **Price** | Free to use; no mandatory subscription |
-| **Supported VPN input** | VLESS/Reality and compatible HTTPS subscriptions (including third-party services) |
-| **Installation** | Root + Homebrew Channel required |
+| **TV launcher 2.2.5** | Preparation, progress/errors and QR pairing |
+| **CVPN Connect** | Local browser control for VPN, profiles, settings and devices |
+| **VPN Engine 0.1.4** | TUN/network setup and connection lifecycle |
+| **Xray-core 26.10.21** | Bundled ARMv7 VPN transport engine |
+| **Backend 2.0.0** | Local API, pairing and session management |
 
-## Getting started
-
-1. Ensure your LG TV has **root**, **Homebrew Channel** and TUN support.
-2. Download and install `su.cvpn.webos_2.2.5_all.ipk` from the [release page](https://github.com/mikemandi/cvpn-webos/releases/latest) **once v2.2.5 is published after hardware acceptance**. Until then, v2.2.3 remains the stable public release.
-3. Open CVPN webOS and let it prepare the **locally bundled** components.
-4. Scan the TV's QR code with a phone connected to the same trusted LAN.
-5. Import a supported provider configuration or subscription and connect.
-6. Confirm the initial trial-style connection to maintain a persistent VPN session.
-
-**No separate backend or Xray download on the TV** is necessary. Existing
-private configurations are preserved during an app upgrade. Disconnect VPN
-normally before installing an updated IPK; the installer refuses to replace
-active Engine/Xray binaries.
-
-## Why CVPN webOS?
-
-- **Universal client:** compatible providers and self-hosted endpoints work without a CVPN account.
-- **TV-native onboarding:** compact matching QR and preparation screens with clear progress and nonblocking recovery.
-- **RU / EN:** automatic locale choice plus persistent manual preference in CVPN Connect.
-- **Recovery-focused:** integrity checks, automatic local setup, engine preflight,
-  fail-safe route and DNS restoration, and no automatic VPN connection at boot.
-- **LAN pairing:** temporary QR/PIN access and per-device revocation.
+The control panel uses **HTTP port 8765** for **trusted private LAN access only**. Do not forward it in your router or expose it publicly.
 
 ## Compatibility
 
-CVPN webOS is built for **rooted LG webOS TVs with 32-bit ARMv7 userspace**,
-a working `/dev/net/tun` and a compatible Homebrew root execution service.
-It is **not** an LG Content Store app and will not provide system-wide VPN
-connectivity on unrooted TVs.
+The All-in-One app was tested on **LG 55UK6450PLC (webOS 4.4.3-22)**, including first-time installation, Netherlands VPN exit IP, YouTube, disconnect/reconnect and normal power off/on. Earlier development also covered **LG 55UQ76003LD (webOS 22 / 7.6.0)** following documented first-import and BusyBox compatibility fixes.
 
-**Real hardware acceptance:** the owner tested All-in-One v2.2.2 on
-**LG 55UK6450PLC (webOS 4.4.3-22, firmware 05.50.70)**, including clean
-installation, external Netherlands IP, YouTube playback, disconnect/reconnect
-and normal power off/on. v2.2.3 changed app icons only. **v2.2.5 UI and
-localization require separate physical LG verification before broad claims.**
-See the [hardware QA record](docs/QA_ACCEPTANCE_2.2.2.md).
+**Version 2.2.5:** updated TV layout and remote-focus behavior were also checked on a real LG TV by the project owner. This does **not** guarantee compatibility with every webOS version, firmware or LG model.
+
+See [tested devices](docs/TESTED_DEVICES.md), [hardware QA](docs/QA_ACCEPTANCE_2.2.2.md) and [technical limitations](docs/RELEASE_LIMITATIONS.md).
 
 ## Security & limitations
 
-| Feature | Current behavior |
+| Topic | Current behavior |
 |---|---|
-| VPN routing | IPv4 only; connection is refused when an active IPv6 default route is present |
-| Kill switch | No universal kill switch; errors restore ordinary internet |
-| Autostart | No automatic VPN connection after reboot |
-| Local panel | HTTP port 8765 — **trusted private LAN only**, never forward publicly |
-| Certificates | Readiness checks verify TLS certificates |
-| Subscriptions | Stored locally; never include token URLs or keys in public bug reports |
+| Root | Required for TV-wide VPN; unrooted LG TVs are unsupported |
+| IP routing | IPv4-only; active IPv6 default routes cause the VPN connection to be refused |
+| Kill switch | No universal kill switch; ordinary internet is restored after disconnect/failure |
+| TV restart | VPN does **not** autoconnect on boot |
+| Local panel | HTTP on the trusted LAN only — no public port forwarding |
+| Secrets | Never publish subscription URLs, UUIDs, pairing tokens or raw support logs |
+| Protocol support | A valid imported profile may still depend on provider/server/network compatibility |
 
-[Security considerations](docs/SECURITY.md) ·
-[Compatibility details](docs/RELEASE_LIMITATIONS.md) ·
-[Hardware testing](docs/QA_ACCEPTANCE_2.2.2.md)
+For full details, read [Security](docs/SECURITY.md) and [Limitations](docs/RELEASE_LIMITATIONS.md).
 
-## Development
+## Troubleshooting
 
-The project's CI builds the ARMv7 Go backend, verifies the pinned Xray asset,
-creates the All-in-One IPK, then runs offline Go, launcher, installer,
-packaging and rollback tests.
+<details>
+<summary><strong>Preparation fails or keeps checking</strong></summary>
 
-```bash
+Verify root, Homebrew Channel, 32-bit ARMv7 compatibility and TUN. Disconnect an active VPN before an update. If an installer is already working, leave it to finish instead of starting another.
+
+</details>
+<details>
+<summary><strong>The QR does not open on my phone</strong></summary>
+
+Check that both devices are on the same trusted LAN, and that guest/client isolation is disabled. You can type the local address displayed on the TV manually. Pairing codes expire and are one-time use; open the TV app again to obtain a fresh one.
+
+</details>
+<details>
+<summary><strong>There are no servers in the app</strong></summary>
+
+This is normal on a fresh installation. Go to **Subscriptions → Add configuration** and import a compatible VPN configuration or subscription from the provider of your choice. No default subscription is included.
+
+</details>
+<details>
+<summary><strong>VPN is connected, but an app does not load</strong></summary>
+
+Try another compatible server, fully restart the affected TV app, or check **Settings → Diagnostics**. Review IPv6 and DNS requirements and follow safe network recovery guidance. Do not send raw logs containing tokens or UUIDs.
+
+</details>
+
+[Security guide](docs/SECURITY.md) · [Known limitations](docs/RELEASE_LIMITATIONS.md) · [Report an issue](https://github.com/mikemandi/cvpn-webos/issues)
+
+## Build & test
+
+For Linux Bash, with the Go version and Linux dependencies specified in [CI](.github/workflows/ci.yml):
+
+~~~bash
 bash scripts/build-release.sh
 bash tests/run_offline.sh
-```
+~~~
 
-The public source is **not automatically an open-source license**. Until a
-license is explicitly adopted, the Homebrew catalog classifies the listing as
-`pool: non-free`; this is a licensing category, **not a purchase price**.
-Bundled third-party components retain their own licenses. AI assistance was
-used in development and testing; the project owner reviewed and tested real LG
-hardware.
+For Windows, run the same scripts inside WSL:
 
-[Release & Homebrew submission instructions](docs/HOMEBREW_SUBMISSION.md) ·
-[Third-party licensing review](LICENSE-PUBLISHING-REVIEW.md)
+~~~powershell
+wsl bash scripts/build-release.sh
+wsl bash tests/run_offline.sh
+~~~
+
+The All-in-One IPK is created in the **dist/** directory. CI checks the ARMv7 build, packaging, tests, launcher and installer safeguards.
+
+## Source license and publication
+
+**CVPN webOS is free to use**, but its publicly viewable CVPN-authored code does not currently have an OSI-approved open-source license. Do not assume permission to redistribute or reuse it. The Homebrew catalog classification **non-free** refers to source licensing, **not** a purchase fee. Bundled third-party components retain their respective notices and licenses.
+
+Development involved AI-assisted implementation and testing, followed by project-owner review and real LG testing. Inclusion in the Homebrew Channel catalog is subject to a separate upstream maintainer submission and approval.
+
+[Homebrew submission](docs/HOMEBREW_SUBMISSION.md) · [Third-party licensing](LICENSE-PUBLISHING-REVIEW.md)
