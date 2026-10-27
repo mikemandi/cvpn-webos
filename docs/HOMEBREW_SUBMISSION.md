@@ -1,9 +1,9 @@
-# Publish CVPN webOS 2.2.3 to webOS Homebrew Channel
+# Publish CVPN webOS 2.2.4 to webOS Homebrew Channel
 
 **As of 2026-10-28: Homebrew listing not yet approved.** The 2.2.2 All-in-One IPK has
 passed offline CI and the core fresh-TV functional flow on one LG
 55UK6450PLC / webOS 4.4.3-22 / firmware 05.50.70 (owner-reported).
-Version 2.2.3 changes only the rounded app icon PNG assets; the tested VPN components are unchanged. The user did **not** manually install Xray/backend: the Homebrew root
+v2.2.4 updates TV UI and backend's loopback-only localization endpoint; independent TV UI validation remains necessary. The user did **not** manually install Xray/backend: the Homebrew root
 service prepared bundled components on first app launch. The owner also
 confirmed a Netherlands exit address, YouTube playback, VPN disconnect,
 reconnect and ordinary television off/on.
@@ -39,11 +39,11 @@ fault-injection work on every model**. See
 
 1. Merge the verified candidate PR into `main` through normal review;
    do not change working deployed LG televisions in the process.
-2. Create an **immutable new** release tag `v2.2.3` on the reviewed commit.
+2. Create an **immutable new** release tag `v2.2.4` on the reviewed commit.
    `.github/workflows/release.yml` builds and tests the IPK and creates
    GitHub Release assets.
 3. Inspect the release's
-   `su.cvpn.webos_2.2.3_all.ipk`, `su.cvpn.webos.manifest.json`, and
+   `su.cvpn.webos_2.2.4_all.ipk`, `su.cvpn.webos.manifest.json`, and
    `SHA256SUMS`. Verify SHA-256, manifest URL, icon URL and release download
    all resolve correctly; verify no credentials and no separate root ZIP.
 4. Generate `dist/su.cvpn.webos.yml` with
