@@ -1,0 +1,56 @@
+name: Generate sanitized English screenshots
+
+on:
+  push:
+    branches:
+      - docs/readme-english-empty-state-v2.2.5
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  screenshots:
+    if: github.event_name == 'workflow_dispatch' || github.event.head_commit.message != 'docs: update generated English screenshots'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install isolated screenshot tooling
+        run: |
+          npm install --no-save --no-package-lock playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Capture clean-state English UI
+        run: node scripts/capture-docs-screenshots.cjs
+      - name: Validate outputs and sensitive data
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import struct
+          root=Path('assets/screenshots')
+          names=['tv-setup.png','tv-pairing-demo.png','phone-home-empty.png','phone-subscriptions-empty.png','phone-settings.png','phone-import-empty.png']
+          for name in names:
+              data=(root/name).read_bytes()
+              assert data[:8]==bytes.fromhex('89504e470d0a1a0a'),name
+              w,h=struct.unpack('>II',data[16:24])
+              assert (w,h)==((1280,720) if name.startswith('tv-') else (860,1864)),(name,w,h)
+              assert len(data)>10000,(name,len(data))
+              print('PASS',name,w,h,len(data))
+          PY
+      - name: Commit screenshot assets to documentation branch
+        if: github.ref == 'refs/heads/docs/readme-english-empty-state-v2.2.5'
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add assets/screenshots/*.png
+          if git diff --cached --quiet; then
+            echo 'Screenshots unchanged'
+          else
+            git commit -m 'docs: update generated English screenshots'
+            git push origin HEAD:docs/readme-english-empty-state-v2.2.5
+          fi
