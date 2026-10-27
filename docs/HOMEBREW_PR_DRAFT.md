@@ -1,55 +1,29 @@
-# Homebrew listing PR — CVPN webOS v2.2.4
+# Draft Homebrew catalog PR — CVPN webOS v2.2.5
 
-**Title:** Add CVPN webOS — free VPN client for rooted LG televisions
+[English](HOMEBREW_PR_DRAFT.md) | [Русский](HOMEBREW_PR_DRAFT.ru.md)
 
-**Suggested PR body:**
+**Suggested title:** Add CVPN webOS — free provider-neutral VPN client for rooted LG televisions
 
-> CVPN webOS is a **free-of-charge** VPN client for rooted LG webOS TVs
-> with 32-bit ARMv7 userspace, working TUN and Homebrew Channel.
-> Users can import compatible VLESS/Reality configurations and HTTPS
-> subscriptions from **any provider**. A CVPN (cvpn.su) subscription is
-> optional, not a prerequisite and not a paywall.
->
-> The All-in-One IPK includes native Xray-core, Go web backend, TV
-> pairing UI and safety/recovery scripts. It prepares the components on
-> first launch using Homebrew's root execution service; it does **not**
-> download unknown executable payloads at runtime.
->
-> **Safety and limitations:** no universal kill switch; no VPN autostart;
-> the IPv4-only engine refuses connection with an IPv6 default route.
-> Admin/pairing UI listens on port 8765 over HTTP for trusted local LAN
-> use and must not be publicly exposed. Automatic recovery restores
-> ordinary routes/DNS instead of leaving the TV offline.
->
-> **Real hardware tests:** LG 55UK6450PLC, firmware 05.50.70,
-> webOS 4.4.3-22: clean single-IPK automatic first launch, QR/pairing,
-> VPN connection, a Netherlands exit IP via 2ip.io, YouTube playback,
-> disconnect/reconnect, ordinary TV off/on. Additional tests were
-> confirmed by the owner. Other models and firmware not guaranteed.
->
-> **Development disclosure:** This project used AI assistance in code,
-> interface design, packaging and tests. The project owner tested the
-> installation and VPN on real LG devices, reviewed the actual behavior,
-> and is responsible for releases and maintenance. This does not claim
-> an independent professional code audit.
->
-> **License and pricing:** The app is free of charge. CVPN-authored
-> source is publicly visible but has no OSI-approved redistribution
-> license, so this listing uses Homebrew `pool: non-free`. That does
-> **not** describe an app price. Bundled Xray-core retains its
-> MPL-2.0 license; QR library license and notices are bundled.
->
-> See https://github.com/mikemandi/cvpn-webos for installation and
-> security limitations. Public release:
-> https://github.com/mikemandi/cvpn-webos/releases/tag/v2.2.4
+**Suggested PR description (review and adapt before submitting):**
 
-**Required submission steps once release assets are visible:**
+> CVPN webOS is a **free-to-use VPN client for supported rooted LG webOS TVs** with ARMv7-compatible 32-bit userspace, working TUN and Homebrew Channel.
+>
+> Users can import supported VLESS/Reality configurations and compatible HTTPS subscriptions **from any provider**. No paid CVPN account or CVPN subscription is required.
+>
+> A single All-in-One IPK includes launcher, Xray-core, Go local panel and network recovery scripts. The root service prepares bundled components on first launch; it does not download extra executables on the television.
+>
+> **Network/security boundaries:** VPN routing is **IPv4-only**; an active IPv6 default route blocks VPN activation. There is **no universal kill switch and no VPN autostart**. The web control panel on **HTTP port 8765** is for **trusted LAN access only** and must never be publicly exposed.
+>
+> **Owner-reported hardware evidence:** LG 55UK6450PLC (webOS 4.4.3-22, firmware 05.50.70) was used for All-in-One baseline installation, QR, Netherlands VPN exit-IP, YouTube playback, reconnect and normal off/on. Version 2.2.5 TV layout and remote-control improvements were also confirmed on LG hardware. Other devices/firmware are not universally supported.
+>
+> **AI disclosure:** AI tools assisted implementation, UI, documentation and testing. The owner reviewed the code and tested the application on real devices; this is **not an independent security audit**. The submitter remains responsible for updates and bug reports.
+>
+> **Price/licensing:** free of charge. CVPN-authored source is publicly visible but has no declared open-source license, so catalog **pool: non-free** is requested (not a paid app). Bundled Xray-core uses **MPL-2.0**, and QR notices identify **MIT and Apache-2.0** components.
+>
+> Official release: https://github.com/mikemandi/cvpn-webos/releases/tag/v2.2.5
+>
+> Documentation: https://github.com/mikemandi/cvpn-webos
 
-1. Create a personal fork of `webosbrew/apps-repo` on GitHub.
-2. Put the generated `su.cvpn.webos.yml` in the fork under
-   `packages/su.cvpn.webos.yml`.
-3. If possible, add **actual screenshots** from the app, scrubbed of
-   private pairing PIN, subscription tokens, UUIDs and LAN addresses.
-   Do not substitute AI concept renders for real product screenshots.
-4. Open a pull request into `webosbrew/apps-repo:main` with the draft above.
-5. Respect maintainers' requests before claiming Homebrew listing approval.
+**Before sending:** check current [webOS Homebrew rules](https://github.com/webosbrew/apps-repo), approve the final text with the project owner, inspect packages/su.cvpn.webos.yml, verify official release file hashes, and attach sanitized real-UI screenshots already in assets/screenshots. Do not claim catalog inclusion before upstream merges the PR.
+
+[Submission guide](HOMEBREW_SUBMISSION.md) · [Licensing review](../LICENSE-PUBLISHING-REVIEW.md)

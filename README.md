@@ -12,6 +12,7 @@
     &nbsp;·&nbsp; <a href="#troubleshooting">Help</a>
     &nbsp;·&nbsp; <a href="CHANGELOG.md">Changelog</a>
   </p>
+  <p><strong>English</strong> · <a href="README.ru.md">Русский</a></p>
 </div>
 
 ---
@@ -160,4 +161,4 @@ The All-in-One IPK is created in the **dist/** directory. CI checks the ARMv7 bu
 
 Development involved AI-assisted implementation and testing, followed by project-owner review and real LG testing. Inclusion in the Homebrew Channel catalog is subject to a separate upstream maintainer submission and approval.
 
-[Homebrew submission](docs/HOMEBREW_SUBMISSION.md) · [Third-party licensing](LICENSE-PUBLISHING-REVIEW.md)
+[Homebrew submission](docs/HOMEBREW_SUBMISSION.md) · [Third-party licensing](LICENSE-PUBLISHING-REVIEW.md) · [Лицензии на русском](LICENSE-PUBLISHING-REVIEW.ru.md)
