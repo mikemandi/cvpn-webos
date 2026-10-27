@@ -1,59 +1,59 @@
-# CVPN webOS — security notes (2.2.0 candidate)
+# CVPN webOS — Security
 
-**Installation:** All-in-One IPK (TV Launcher + root backend + VPN Engine +
-pinned ARMv7 Xray). **Root:** obtained by the TV owner, never by CVPN.
-**Mobile control:** local HTTP on TCP/8765, not encrypted in transit.
+[English](SECURITY.md) | [Русский](SECURITY.ru.md)
 
-## Trust boundaries
+Last reviewed: **2026-10-28** · Published app: **2.2.5 Stable** · [Known limitations](RELEASE_LIMITATIONS.md)
 
-- TV with root/Homebrew is trusted by design. The `/exec` Luna endpoint
-  can run privileged code; the app requests `lunabus.query` and invokes
-  only hard-coded, package-owned `install.sh status` or `install.sh install`.
-  Do not pass user-originated filenames, URLs or other strings to root execution.
-- Homebrew root-service ACLs vary by firmware and Homebrew release. A request
-  made as root from SSH does not prove the browser application can call it.
-  Do not use system permission changes/elevation as an automatic workaround.
-- Bundled component SHA256 hashes are checked before installation. These
-  prevent corrupted payload usage but are **not** an independent signature
-  authenticating the publisher.
-- Existing access keys, profiles, subscription URLs and sessions remain local,
-  protected by 0600/0700 permissions and **not encrypted at rest**. No
-  credentials, unique TV IPs, private URLs or SSH keys may be included in IPK.
-- Local web-panel controls check LAN source, host, pairing PIN/QR, sessions and
-  CSRF, but client-server HTTP traffic remains observable on hostile networks.
-  Use only a **trusted private LAN**; NEVER port-forward TCP 8765 to the internet.
-- Do not open local-control URLs containing sensitive tokens on a shared or
-  untrusted network; redact QR/PIN/private server addresses before publishing logs.
+> CVPN webOS is an experimental root-dependent VPN client for supported LG TVs, **not a security-audited firewall or a general-purpose privacy guarantee**. Read the boundaries below before relying on it.
 
-## Network behavior and release risk
+## Threat model and prerequisites
 
-- Engine 0.1.4 protects IPv4 only. It rejects an existing IPv6 default route.
-- No system-wide kill switch; failures can restore ordinary internet rather
-  than block every connection. No automatic VPN startup at boot.
-- Startup verifies HTTPS by hostname through the active TUN with normal TLS
-  certificate validation, never `curl -k`. This does not guarantee encrypted
-  DNS transport, leak-proof behavior for all applications, UDP/QUIC or video.
-- Watchdog/expiry restore original DNS bind mount and routes. A release
-  candidate must pass physical rollback, Wi-Fi failure and reboot/standby
-  tests before being presented as production-ready.
-- Installer refuses network-active upgrades, keeps user data, backs up
-  binaries before replacement and attempts rollback after partial failure.
-  A timeout in the **UI** does not stop a potentially active installer;
-  repeated checking must not create overlapping root install processes.
-- Removing the IPK can leave persistent local backend/profile data. Agree on
-  an owner-controlled uninstall/removal policy prior to Homebrew publication.
+- **Trusted LG with root and Homebrew:** the owner enables root; CVPN neither roots the TV nor grants itself privileges. The launcher calls a Homebrew privileged Luna service for **package-owned, constant** status/install commands. Homebrew ACL and firmware compatibility vary by device.
+- **Trusted home LAN:** the local CVPN Connect control panel listens on **HTTP TCP/8765**. The connection between phone and TV is **not TLS-encrypted**. Other devices/users with access to an untrusted LAN may observe or attack traffic; pairing/session checks do not replace transport encryption. Never forward 8765 to the internet or expose it through a public proxy.
+- **Trusted VPN provider:** importing a provider configuration permits its servers to transport traffic covered by the VPN route. It does not establish provider trust. CVPN is an optional provider; no account or purchase is required to use another compatible service.
+- **No independent audit:** automated tests and owner hardware checks reduce risk but do not constitute a professional security audit or promise perfect isolation.
 
-## Publication requirements
+## Authentication, credentials and private files
 
-1. Reconcile code/artwork ownership and distribution licenses, Xray-core
-   license notices and QR library notices, and choose a valid CVPN license.
-2. Inspect artifact SHA256 digest and embedded files for secrets.
-3. Prove first-run bootstrap via IPK **without SSH** on a separate clean LG.
-4. Confirm frontend permission ACG and root-service behavior on the target webOS.
-5. Validate normal shutdown, standby, boot, DNS/route recovery and user-data
-   preservation; use `docs/QA_ACCEPTANCE_2.2.0.md`.
-6. Capture real TV and phone screenshots, removing identifiers.
-7. Satisfy Homebrew submission rules including disclosure requirements.
+The local panel has device pairing with a **short-lived, single-use TV PIN**, browser sessions and CSRF checks; panel access also has LAN/host/request validation. Do not assume these measures can secure traffic on a hostile LAN. Revoke old browser devices in **Settings → Devices and access**.
 
-Do not include `All.zip`, historic profiles, exported subscriptions,
-private keys or home-network diagnostics in public releases.
+Access keys, subscriptions and profile data are stored **locally on the TV**, with restrictive filesystem permissions (typically 0600/0700). They are **not encrypted at rest**: privileged TV users, root malware or offline access to storage can read them. Keep full subscription URLs, VLESS UUIDs, token-bearing QR codes, session cookies, local IP addresses, access keys and diagnostic logs out of public issues/screenshots.
+
+Release screenshots use only a reserved **192.0.2.0/24 TEST-NET** demo IP and a **nonfunctional example PIN**, never actual personal pairing details.
+
+## VPN, DNS and failure behavior
+
+| Topic | Security boundary |
+|---|---|
+| IPv4 | Engine 0.1.4 protects supported **IPv4 routes only** |
+| IPv6 | VPN activation is refused when an active IPv6 default route would bypass the tunnel; no IPv6 VPN tunneling |
+| Kill switch | **No universal kill switch**. VPN failure/disconnect may restore ordinary internet access |
+| Startup | VPN **does not automatically connect** when the TV starts |
+| DNS | Route/DNS recovery exists, but **encrypted DNS and zero leaks are not guaranteed** |
+| HTTPS readiness | Startup HTTPS probes validate certificates/hostnames; this does **not** prove all apps/protocols use the VPN |
+| TCP/UDP/apps | No guarantee for every app, UDP/QUIC transport, streaming provider or standby behavior |
+
+The watchdog and recovery logic attempt to restore the previous DNS and network routes. An interrupted session or failed update still requires user verification; do not assume a power loss or firmware update is always recoverable.
+
+## Root installation and updates
+
+The single **All-in-One IPK** contains the launcher, ARMv7 backend, VPN Engine and a pinned Xray binary. Component checksums detect corruption of bundled payloads; **SHA-256 is not a code-signing certificate or independent proof of the publisher's identity**. Download only from the project's official GitHub Releases and verify the published release checksums.
+
+The installer refuses to replace live Engine/Xray files when a VPN session, its network routes, TUN, DNS mount or lock is active. It backs up installed binaries and attempts rollback on partial failure; user profiles are not deliberately overwritten. A timed-out visual preparation screen does **not** necessarily mean root installation stopped; read-only polls should not launch overlapping installers.
+
+Uninstalling the IPK can leave app-owned local backend or profile files. Do not delete backend paths automatically unless you explicitly intend to erase locally stored configurations and paired devices.
+
+## Vulnerability reporting
+
+For a potentially exploitable security issue, **do not post secrets, live credentials or attack details in a public GitHub issue**. First contact the maintainer privately via [CVPN support](https://t.me/insightdev0); share a minimal, redacted description, affected app version and reproducible steps. Use a secure agreed channel for any sensitive evidence. General, nonsensitive problems can be reported via [GitHub Issues](https://github.com/mikemandi/cvpn-webos/issues).
+
+No guaranteed response time, bounty or formal coordinated-disclosure program is currently offered.
+
+## Before broad device/catalog distribution
+
+- Repeat first-run, standby, power-loss, network-loss, rollback and uninstall tests on additional LG firmware/Homebrew combinations.
+- Review LAN authentication, session/CSRF behavior, source-code ownership, QR notices and the Xray **MPL-2.0** source-availability obligations.
+- Keep private data out of the IPK, CI logs, README galleries and GitHub Releases.
+- Disclose AI-assisted development and perform meaningful owner review before submitting to the [Homebrew application catalog](https://github.com/webosbrew/apps-repo).
+
+[Licensing review](../LICENSE-PUBLISHING-REVIEW.md) · [Device evidence](TESTED_DEVICES.md) · [English README](../README.md) · [Русский README](../README.ru.md)
