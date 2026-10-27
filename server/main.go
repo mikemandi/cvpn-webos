@@ -1197,6 +1197,7 @@ func main() {
 	mux.HandleFunc("/tv", a.tvPairingPage)
 	mux.HandleFunc("/tv/notify", a.tvNativeNotify)
 	mux.HandleFunc("/tv/qr-data.js", a.tvQRData)
+	mux.HandleFunc("/tv/language.js", a.tvLanguageData)
 	fileserver := http.FileServer(http.FS(sub))
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		if !strings.HasPrefix(r.URL.Path, "/api/") {
