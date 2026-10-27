@@ -222,7 +222,13 @@ button:active { background:#B3CCFF; }
        retryStatusOnly=true;failSetup({stderrString:'REFUSED=installer_busy'});return;
      }
      if(retryStatusOnly){
-       failSetup({error:'HOMEBREW_SERVICE_TIMEOUT'});return;
+       // A status-only recheck found no active VPN/installer. Do not launch
+       // anything during the same retry; make the next install an explicit
+       // second user action so a slow earlier process cannot be duplicated.
+       retryStatusOnly=false;installing=false;
+       setupMessage('Можно продолжить','Проверка завершена. Нажмите «Продолжить», чтобы подготовить CVPN.',1,'checking',true,'Во время подготовки не выключайте телевизор.');
+       setupRetry.textContent='Продолжить';
+       return;
      }
      setupMessage('Подготавливаем CVPN','Подготавливаем необходимые компоненты для работы',1,'installing',false);
      invokeInstaller('install',function(installOK,info){
