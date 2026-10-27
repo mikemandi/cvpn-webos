@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 """Generate YAML for pull request to webosbrew/apps-repo; screenshots are deliberately omitted until verified."""
-import argparse,pathlib,re
+import argparse,json,pathlib,re
 p=argparse.ArgumentParser()
 p.add_argument('--repository',required=True,help='GitHub owner/repository')
 p.add_argument('--output',default='dist/su.cvpn.webos.yml')
 a=p.parse_args()
 if not re.fullmatch(r'[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+',a.repository):p.error('expected owner/repo')
 r=pathlib.Path(__file__).resolve().parent.parent
+version=json.loads((r/'launcher/appinfo.json').read_text())['version']
 raw=f'https://raw.githubusercontent.com/{a.repository}/main'
 s=f'''title: CVPN webOS
 iconUri: {raw}/assets/icon160.png
@@ -18,13 +19,15 @@ description: |
   Import your own supported VLESS configurations and HTTPS subscriptions from a phone,
   pair securely with a temporary QR/PIN and control the VPN on the TV.
 
-  **Important:** the CVPN webOS 2.1.0 IPK bundles its root backend, Xray-core,
+  **Important:** the CVPN webOS {version} IPK bundles its root backend, Xray-core,
   VPN Engine and recovery components. It configures them on first launch using
   Homebrew's root service. The app cannot run a system-wide VPN without root.
-  IPv6 is fail-closed;
+  An active IPv6 default route prevents VPN activation; there is no generic kill switch.
   do not expose the local HTTP control panel to untrusted networks.
 
-  Installation and device requirements: https://github.com/{a.repository}#installation
+  First-run via Homebrew root service was physically tested on LG 55UK6450PLC;
+  other firmware/Homebrew versions may vary. Root/Homebrew is a prerequisite.
+  Installation and device requirements: https://github.com/{a.repository}#intended-installation-for-supported-hardware
 # Add real, sanitized screenshots before submission; previews are not representative.
 '''
 output=r/a.output
