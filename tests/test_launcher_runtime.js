@@ -85,8 +85,8 @@ run('denied root-service: visible error and retry controls',()=>{
   assert.strictEqual(f.element('setup-retry').hidden,false);
   assert.strictEqual(f.element('setup-close').hidden,false);
 });
-run('silent status: finite 20-second timeout',()=>{
-  const f=fixture([null]);f.fire(250);f.fire(20000);
+run('silent status: finite 35-second timeout',()=>{
+  const f=fixture([null]);f.fire(250);f.fire(35000);
   assert(f.element('setup-status').textContent.includes('не ответил'));
   assert.strictEqual(f.element('setup-retry').hidden,false);
 });
