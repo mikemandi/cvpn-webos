@@ -20,6 +20,21 @@ power-on difficulties. Do not change either previously working LG.
 | Ordinary TV off/on / standby | No changes | Postpone due device power issue | **PASS, user-reported** |
 | Forced Wi-Fi loss / Ethernet switch / cold boot | No changes | Intermittent WLAN observed | **Not yet verified** |
 
+## Final owner confirmation — 2026-10-28
+
+The owner additionally reports that **all remaining practical tests performed on
+the clean LG completed successfully**, including the tests requested following
+the functional first-launch and reconnect acceptance. This is a **self-reported
+QA sign-off**, not a supplied step-by-step test transcript: individual
+power-loss, upgrade, component-corruption and uninstall/reinstall outcomes
+have not been separately documented or independently witnessed here.
+
+**Functional acceptance status: owner approved.** There are no reported
+remaining runtime defects on the tested TV. Public release still requires
+license/redistribution sign-off, real sanitized screenshots, reviewed release
+assets and (for Homebrew listing) maintainer approval. A successful
+user-reported test is not evidence that other LG firmware versions have no bugs.
+
 ## Hardware acceptance evidence — 2026-10-27
 
 **TV:** LG 55UK6450PLC, webOS 4.4.3-22, firmware 05.50.70,
