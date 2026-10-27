@@ -82,7 +82,10 @@ class PublicPackageTests(unittest.TestCase):
             self.assertEqual(result.returncode,0,result.stderr)
             yml=homebrew.read_text()
             current=json.loads((ROOT/'launcher/appinfo.json').read_text())['version']
-            self.assertIn('webOS '+current+' IPK',yml)
+            self.assertIn(current+' All-in-One IPK',yml)
+            self.assertIn('free-to-use VPN client',yml)
+            self.assertIn('any provider',yml)
+            self.assertIn('No CVPN subscription',yml)
             self.assertNotIn('2.1.0',yml)
             self.assertIn('pool: non-free',yml)
             self.assertIn('root',yml.lower())
