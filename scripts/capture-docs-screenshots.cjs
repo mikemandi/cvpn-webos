@@ -36,10 +36,10 @@ async function translate(page){
   document.getElementById('settings-panel-address').textContent='—';
  },translations);
 }
-async function preparePhone(page,tab){
+async function preparePhone(page,origin,tab){
  await page.route('**/app.js*',r=>r.fulfill({status:200,contentType:'application/javascript',body:''}));
  await page.route('**/i18n.js*',r=>r.fulfill({status:200,contentType:'application/javascript',body:''}));
- await page.goto('/',{waitUntil:'networkidle'});
+ await page.goto(origin+'/',{waitUntil:'networkidle'});
  await page.evaluate(name=>{
   const $=id=>document.getElementById(id);
   $('login').hidden=true;$('dashboard').hidden=false;
@@ -66,7 +66,7 @@ function assertEnglish(visible,screen){
 async function phone(browser,origin,tab,file,modal){
  const ctx=await browser.newContext({viewport:{width:430,height:932},deviceScaleFactor:2,isMobile:true,hasTouch:true,locale:'en-US',colorScheme:'dark',reducedMotion:'reduce'});
  const page=await ctx.newPage();
- await preparePhone(page,tab);
+ await preparePhone(page,origin,tab);
  if(modal){
   await page.evaluate(()=>{document.getElementById('modal-overlay').hidden=false;document.getElementById('import-view').hidden=false;document.getElementById('import-content').value='';});
   await translate(page);
