@@ -11,13 +11,13 @@ import unittest
 import zipfile
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-IPK = ROOT / 'dist/su.cvpn.webos_2.2.1_all.ipk'
+IPK = ROOT / 'dist/su.cvpn.webos_2.2.2_all.ipk'
 
 class PublicPackageTests(unittest.TestCase):
     def test_launcher_manifest(self):
         d = json.loads((ROOT / 'launcher/appinfo.json').read_text())
         self.assertEqual(d['id'], 'su.cvpn.webos')
-        self.assertEqual(d['version'], '2.2.1')
+        self.assertEqual(d['version'], '2.2.2')
         self.assertIn('lunabus.query', d['requiredPermissions'])
         for f in [d['main'],d['icon'],d['largeIcon']]:
             self.assertTrue((ROOT / 'launcher' / f).is_file())
