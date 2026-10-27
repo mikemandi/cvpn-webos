@@ -1,4 +1,4 @@
-# CVPN webOS 2.2.1 — hardware acceptance and regression plan
+# CVPN webOS 2.2.2 — hardware acceptance and regression plan
 
 ## Release decision
 
@@ -26,7 +26,7 @@ power-on difficulties. Do not change either previously working LG.
 ARMv7/TUN and stable LAN connection. No CVPN backend, binaries, private keys,
 subscriptions, or prior CVPN app installed.
 
-- Install **only** `su.cvpn.webos_2.2.1_all.ipk`.
+- Install **only** `su.cvpn.webos_2.2.2_all.ipk`.
 - Open CVPN from TV home screen (no SSH). Expect the centered preparation screen
   to show: checking device -> preparing components -> launching CVPN -> ready.
   The screen must never show internal filenames, root commands, Xray, or fake percentages.
