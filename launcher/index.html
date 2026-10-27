@@ -213,6 +213,8 @@ button:active { background:#B3CCFF; }
      if(!ok){failSetup(data);return;}
      var output=String(data.stdoutString||'');
      if(output.indexOf('BUNDLE_READY=YES')!==-1){retryStatusOnly=false;completedSetup(generation);return;}
+     // Unexpected/partial Luna response must never trigger a privileged install.
+     if(output.indexOf('BUNDLE_READY=NO')===-1){failSetup({error:'SERVICE_INVALID_RESPONSE'});return;}
      if(output.indexOf('UPGRADE_BLOCKED=VPN_RUNNING')!==-1){
        retryStatusOnly=true;failSetup({stderrString:'REFUSED=vpn_running_disconnect_first'});return;
      }
