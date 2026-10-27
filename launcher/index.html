@@ -222,7 +222,7 @@ button:active { background:#B3CCFF; }
  function invokeInstaller(mode,done){
    var command='/bin/sh /media/developer/apps/usr/palm/applications/su.cvpn.webos/payload/install.sh '+mode;
    var finished=false;
-   var maxWait=mode==='install'?90000:20000;
+   var maxWait=mode==='install'?90000:35000;
    var timeoutID=setTimeout(function(){
      complete(false,{error:'HOMEBREW_SERVICE_TIMEOUT'});
    },maxWait);
