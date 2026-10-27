@@ -34,7 +34,7 @@ server selection from the trusted local network.
 
 | | |
 |---|---|
-| **App version** | `2.2.4` — Unified TV UI & RU/EN localization |
+| **App version** | `2.2.5 RC` — Refined TV UI, remote controls and RU/EN |
 | **Backend / Engine** | 2.0.0 / 0.1.4 |
 | **Xray-core** | 26.10.21 ARMv7, included and checksum-verified |
 | **Language** | Russian on Russian-language LG; English otherwise; manual RU/EN choice in CVPN Connect |
@@ -45,7 +45,7 @@ server selection from the trusted local network.
 ## Getting started
 
 1. Ensure your LG TV has **root**, **Homebrew Channel** and TUN support.
-2. Download and install `su.cvpn.webos_2.2.4_all.ipk` from the [release page](https://github.com/mikemandi/cvpn-webos/releases/latest) **once v2.2.4 is published**. Until then, v2.2.3 remains the stable public release.
+2. Download and install `su.cvpn.webos_2.2.5_all.ipk` from the [release page](https://github.com/mikemandi/cvpn-webos/releases/latest) **once v2.2.5 is published after hardware acceptance**. Until then, v2.2.3 remains the stable public release.
 3. Open CVPN webOS and let it prepare the **locally bundled** components.
 4. Scan the TV's QR code with a phone connected to the same trusted LAN.
 5. Import a supported provider configuration or subscription and connect.
@@ -75,7 +75,7 @@ connectivity on unrooted TVs.
 **Real hardware acceptance:** the owner tested All-in-One v2.2.2 on
 **LG 55UK6450PLC (webOS 4.4.3-22, firmware 05.50.70)**, including clean
 installation, external Netherlands IP, YouTube playback, disconnect/reconnect
-and normal power off/on. v2.2.3 changed app icons only. **v2.2.4 UI and
+and normal power off/on. v2.2.3 changed app icons only. **v2.2.5 UI and
 localization require separate physical LG verification before broad claims.**
 See the [hardware QA record](docs/QA_ACCEPTANCE_2.2.2.md).
 
