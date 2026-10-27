@@ -51,7 +51,7 @@ class PublicPackageTests(unittest.TestCase):
             ('assets/icon160.png',160),
         ]:
             png=(ROOT/rel).read_bytes()
-            self.assertTrue(png.startswith(b'\\x89PNG\\r\\n\\x1a\\n'),rel)
+            self.assertTrue(png.startswith(bytes([137, 80, 78, 71, 13, 10, 26, 10])),rel)
             width,height,depth,ctype=struct.unpack('>IIBB',png[16:26])
             self.assertEqual((width,height,depth,ctype),(size,size,8,6),rel)
             pos=8
