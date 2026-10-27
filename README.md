@@ -26,18 +26,24 @@ published). **Backend:** 2.0.0. **Engine:** 0.1.4. **Xray:** 26.10.21 ARMv7.
 The **TV does not download Xray or the backend** on first launch. Its
 initialization screen prepares verified components already included in the IPK.
 
-## Status of 2.2.2
+## Hardware testing status (2026-10-27)
 
-The previous candidate **2.1.3** successfully connected and played YouTube on
-the third LG, including recovery of video after temporary Wi-Fi interruptions.
-On that TV, the initial installation had to be completed manually via root SSH;
-this is an *unresolved first-run acceptance issue*, not a shipping workflow.
+**Clean-device functional path PASSED on LG 55UK6450PLC** (webOS 4.4.3-22,
+firmware 05.50.70), as reported by the owner: one IPK installed successfully,
+Homebrew root service automatically prepared backend/Xray, the VPN connected,
+a Netherlands external IP appeared on 2ip.io, YouTube playback was stable,
+ordinary internet returned on VPN disconnect, reconnect succeeded, and
+TV power off/on preserved normal operation.
 
-This 2.2.2 candidate addresses it by declaring `lunabus.query`, correctly
-handling the Homebrew root-service callback, bounding the waiting UI, presenting
-clearer error states and preventing parallel installers on retry. **The
-improvement still requires validation on a fresh fourth LG** before a production
-release is justified. Existing stable TVs are not modified by building this branch.
+Previously, the 2.1.3 candidate played YouTube on a third LG, including
+recovery after intermittent Wi-Fi dropouts, but its initial root bootstrap
+needed SSH. The new 2.2.2 one-IPK flow no longer did on the tested clean TV.
+
+This is a **functional acceptance milestone, not a guarantee of zero bugs**
+or blanket LG model compatibility. Hardware failure paths, forced network
+loss, cold boot/power loss, uninstall/upgrade behavior, root-service mappings
+across other Homebrew versions, and the publishing/security checklist need
+separate evidence. See [2.2.2 QA evidence](docs/QA_ACCEPTANCE_2.2.2.md).
 
 ## Intended installation (for supported hardware)
 
@@ -48,8 +54,9 @@ release is justified. Existing stable TVs are not modified by building this bran
 5. Add a VLESS/Reality configuration or HTTPS subscription and choose a server.
 6. Connect, verify playback, and confirm the trial into persistent mode.
 
-End users should not have to use SSH, PowerShell, or fetch Xray manually.
-**That experience is a QA gate, not yet a hardware-certified claim.**
+On the tested clean LG, the first-run preparation required **no manual SSH,
+PowerShell or separate Xray/backend installation**. Other supported hardware
+and Homebrew versions may differ; the root/Homebrew prerequisite still applies.
 
 The preparation screen has three customer-facing stages (check device, prepare
 components, launch CVPN), modest CSS animation and no fake download percentage.
@@ -112,16 +119,17 @@ Homebrew publication, manifest creation and third-party licensing must be
 reviewed before tagging a public release. See
 [LICENSE-PUBLISHING-REVIEW.md](LICENSE-PUBLISHING-REVIEW.md).
 
-## Test the next fresh LG before release
+## Release gates before publication
 
-Follow **[QA_ACCEPTANCE_2.2.2.md](docs/QA_ACCEPTANCE_2.2.2.md)**, particularly:
+The fresh-TV functional acceptance passed. Follow **[QA_ACCEPTANCE_2.2.2.md](docs/QA_ACCEPTANCE_2.2.2.md)** for remaining checks:
 
-- Fresh TV and single IPK; **no command line or manual component installation**
-- Normal/QR launch, retry after permission denial or delay, repeated launch
+- Additional device or firmware compatibility, and failure UI when Homebrew is denied
+- Normal/QR launch, retry after delay and interrupted installs
 - QR pairing, profiles and subscriptions, VPN trial/persistent/stop/switch
 - DNS/HTTPS/YouTube, Wi-Fi drop/recovery, Ethernet, standby/reboot
 - Network restoration and preservation of access keys/secrets
 - Uninstall/reinstall lifecycle, software permissions and LAN isolation
 
 **A CI-green build is not a guarantee of production readiness on LG hardware.**
-Do not merge the candidate into stable/main before the hardware gates pass.
+Do not merge this candidate into stable/main or publish a tag until the remaining
+publication gates have been reviewed and approved.
