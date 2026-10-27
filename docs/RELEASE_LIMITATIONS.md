@@ -1,8 +1,8 @@
-# CVPN webOS 2.2.0 — supported devices and release gates
+# CVPN webOS 2.2.1 — supported devices and release gates
 
 **Status: Release candidate on the `feature/all-in-one-v2.1.0` branch, NOT a proven production release.**
 Do not merge into stable/main, publish to Homebrew, or promise one-click compatibility
-until a clean TV passes the hardware acceptance plan in `docs/QA_ACCEPTANCE_2.2.0.md`.
+until a clean TV passes the hardware acceptance plan in `docs/QA_ACCEPTANCE_2.2.1.md`.
 
 ## Supported platform
 
@@ -16,7 +16,7 @@ until a clean TV passes the hardware acceptance plan in `docs/QA_ACCEPTANCE_2.2.
   or patch system Luna permission files.
 - Native Xray v26.10.21 ARMv7 and the Go panel are shipped inside the same IPK;
   no first-run internet download, remote install script, or SSH is intended.
-- IPK package version 2.2.0 / backend 2.0.0 / VPN Engine 0.1.4.
+- IPK package version 2.2.1 / backend 2.0.0 / VPN Engine 0.1.4.
   The existing proven Engine routing/recovery code is retained.
 
 ## Network and security trade-offs
