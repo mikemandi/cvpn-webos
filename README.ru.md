@@ -159,4 +159,4 @@ CVPN webOS распространяется **бесплатно**, однако
 
 При разработке и тестировании использовались инструменты ИИ, а владелец самостоятельно проверял приложение на реальном телевизоре LG. Публикация в GitHub Releases **не означает автоматическое попадание в официальный каталог Homebrew Channel** — для этого нужно одобрение его сопровождающих.
 
-[Лицензирование и проверка прав](LICENSE-PUBLISHING-REVIEW.ru.md) · [Безопасность](docs/SECURITY.ru.md) · [Homebrew](docs/HOMEBREW_SUBMISSION.md) · [История версий](CHANGELOG.md)
+[Лицензирование и проверка прав](LICENSE-PUBLISHING-REVIEW.ru.md) · [Безопасность](docs/SECURITY.ru.md) · [Homebrew](docs/HOMEBREW_SUBMISSION.ru.md) · [История версий](CHANGELOG.ru.md)
