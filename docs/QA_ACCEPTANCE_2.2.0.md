@@ -1,4 +1,4 @@
-# CVPN webOS 2.2.0 — hardware acceptance and regression plan
+# CVPN webOS 2.2.1 — hardware acceptance and regression plan
 
 ## Release decision
 
@@ -26,7 +26,7 @@ power-on difficulties. Do not change either previously working LG.
 ARMv7/TUN and stable LAN connection. No CVPN backend, binaries, private keys,
 subscriptions, or prior CVPN app installed.
 
-- Install **only** `su.cvpn.webos_2.2.0_all.ipk`.
+- Install **only** `su.cvpn.webos_2.2.1_all.ipk`.
 - Open CVPN from TV home screen (no SSH). Expect the centered preparation screen
   to show: checking device -> preparing components -> launching CVPN -> ready.
   The screen must never show internal filenames, root commands, Xray, or fake percentages.
@@ -45,7 +45,7 @@ subscriptions, or prior CVPN app installed.
 ## 2. Setup UI and fault handling
 
 - Denied Homebrew permission: human-friendly message, Retry and Close; no spinner
-  after a 20-second status response deadline.
+  after a 35-second status response deadline.
 - Missing root, Homebrew, TUN, or unsupported CPU: actionable message; no
   attempted modification to network routes, DNS or system partitions.
 - Corrupt/modified IPK payload: installer refuses before copying any binaries.
