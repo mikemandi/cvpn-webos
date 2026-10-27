@@ -5,147 +5,118 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>CVPN webOS</title>
 <style>
-html, body { margin:0; width:100%; height:100%; overflow:hidden; background:transparent!important; color:#f3f7ff; font-family:Arial,Helvetica,sans-serif; }
-[hidden] { display:none!important; }
-/* With uiRevision:2, this overlay covers the full webOS compositor viewport. */
-#qr-screen { position:fixed; top:0; right:0; bottom:0; left:0; display:flex; align-items:center; justify-content:center; background:rgba(4,8,16,.54); }
-.panel { box-sizing:border-box; width:600px; max-width:calc(100% - 48px); max-height:calc(100% - 48px); overflow:auto; padding:30px 36px 28px; border-radius:20px; background:#111A29; border:1px solid #35465E; text-align:center; box-shadow:0 18px 54px rgba(0,0,0,.34); }
-h1 { font-size:32px; line-height:1.2; margin:0 0 8px; font-weight:700; }
-h1 span { color:#97B9FF; font-weight:400; }
-.subtitle { color:#9FAFCA; font-size:16px; letter-spacing:2.2px; margin:0 0 20px; }
-p { font-size:20px; line-height:1.35; color:#AFBFDA; margin:12px 0; }
-#qr-canvas { display:block; box-sizing:content-box; width:300px; height:300px; max-width:calc(100% - 32px); border:10px solid #FFF; border-radius:12px; margin:20px auto 18px; background:#FFF; image-rendering:pixelated; }
-#qr-address { font-size:22px; line-height:1.35; color:#E2EDFF; font-weight:600; overflow-wrap:anywhere; margin-top:16px; }
-#qr-code { color:#FFF; font-size:27px; letter-spacing:3px; font-weight:700; white-space:nowrap; }
-#qr-hint { font-size:17px; color:#A6B5CE; }
-button { display:inline-block; box-sizing:border-box; min-width:168px; min-height:52px; padding:12px 27px; margin-top:16px; border:1px solid #A5C3FF; border-radius:11px; background:#92B5FF; color:#0C1930; cursor:pointer; font:700 20px Arial,Helvetica,sans-serif; }
-button:focus { outline:2px solid #8DB5FF; outline-offset:3px; box-shadow:0 0 0 6px rgba(141,181,255,.13); }
-button:active { background:#B3CCFF; }
-@media (max-height:760px) { .panel{padding:20px 30px;} .subtitle{margin-bottom:8px;} #qr-canvas{width:255px;height:255px;margin:12px auto;} p{margin:8px 0;} }
-
-/* CVPN webOS / premium first-launch overlay: no remote assets or fake percentages.
-   Scales from 720p to 4K without depending on unsupported filter/backdrop CSS. */
-#setup-screen {position:fixed;inset:0;top:0;right:0;bottom:0;left:0;
- display:flex;align-items:center;justify-content:center;overflow:hidden;
- background:radial-gradient(ellipse 65% 70% at 50% 55%,#0d1b37 0%,#071226 65%,#040b19 100%); isolation:isolate}
-#setup-screen:before,#setup-screen:after {content:"";position:absolute;pointer-events:none;border-radius:50%;z-index:-1}
-#setup-screen:before {width:110vw;height:95vw;top:-77vw;left:-51vw;
- background:radial-gradient(ellipse at 65% 80%,#193769 0%,#102348 49%,#071229 78%);
- border:1px solid rgba(59,112,200,.16);box-shadow:0 0 95px rgba(26,63,135,.24)}
-#setup-screen:after {width:114vw;height:98vw;right:-80vw;bottom:-79vw;
- background:radial-gradient(ellipse at 28% 18%,#153365 0%,#0c2046 48%,#08162e 85%);
- border:1px solid rgba(45,106,221,.12);box-shadow:0 0 98px rgba(12,59,151,.18)}
-#setup-screen .panel {position:relative;box-sizing:border-box;width:900px;max-width:calc(100% - 72px);
- max-height:calc(100% - 68px);overflow:auto;margin:0;padding:30px 68px 0;border-radius:30px;
- border:1px solid rgba(109,158,232,.37);
- background:linear-gradient(130deg,rgba(19,35,64,.95),rgba(12,24,45,.97) 64%,rgba(14,28,52,.96));
- box-shadow:0 22px 80px rgba(0,0,0,.44),inset 0 1px 0 rgba(169,198,252,.07)}
-#setup-screen .panel:before {content:"";position:absolute;left:5%;top:0;width:90%;height:1px;
- background:linear-gradient(90deg,transparent,rgba(136,178,252,.42),transparent)}
-.setup-brand-row {display:flex;justify-content:center;align-items:center;gap:26px;margin-bottom:14px}
-.setup-app-icon {width:80px;height:80px;flex:0 0 80px;border-radius:20px;
- border:1px solid rgba(111,173,255,.55);background:#08172f url('icon.png') center/cover no-repeat;
- box-shadow:0 0 0 3px rgba(48,113,204,.08),0 10px 24px rgba(2,12,37,.5)}
-.setup-brand-text {text-align:left}
-.setup-brand-name {font-size:40px;line-height:1.1;font-weight:700;letter-spacing:-1px;color:#f5f8ff}
-.setup-brand-name b {font-weight:600;color:#a5b6ff}
-.setup-brand-caption {margin-top:11px;color:#9db9e4;font-size:13px;font-weight:500;letter-spacing:5px}
-.setup-loader {width:178px;height:178px;position:relative;margin:18px auto 20px;display:flex;align-items:center;justify-content:center}
-.setup-loader:before {content:"";position:absolute;inset:0;border-radius:50%;
- border:1px solid rgba(72,143,250,.28);background:radial-gradient(circle,rgba(17,39,84,.48),transparent 72%);
- box-shadow:0 0 25px rgba(42,117,255,.12)}
-.setup-loader:after {content:"";position:absolute;inset:11px;border-radius:50%;
- border:8px solid transparent;border-top-color:#21e0fb;border-right-color:#5382ff;border-bottom-color:#3385ff;
- transform:rotate(22deg);box-shadow:0 0 8px rgba(27,124,255,.18);
- animation:cvpn-orbit 2.4s linear infinite}
-.setup-loader-inner {position:relative;z-index:1;width:125px;height:125px;border-radius:50%;
- display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 35% 28%,#1a3970,#0a1b38 74%);
- border:1px solid #274c82;box-shadow:inset 0 0 16px rgba(39,110,230,.15)}
-.setup-tv-icon {width:74px;height:74px;stroke:#a8d6ff;stroke-width:3.2;fill:none;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 0 7px rgba(89,170,255,.38))}
-#setup-screen[data-phase="error"] .setup-loader:after {animation:none;border-top-color:#d77b91;border-right-color:#a14c71;border-bottom-color:#873960}
-#setup-screen[data-phase="ready"] .setup-loader:after {animation:none;border-color:#2dd1cc;transform:rotate(0deg)}
-#setup-title {font-size:38px;line-height:1.22;letter-spacing:-.6px;color:#f9fbff;font-weight:700;margin:0 0 10px}
-#setup-status {font-size:21px;line-height:1.4;min-height:30px;margin:0 auto;color:#91b1e5;overflow-wrap:break-word}
-.setup-steps {display:flex;flex-direction:column;text-align:left;width:468px;max-width:100%;
- margin:28px auto 24px;gap:0}
-.setup-step {position:relative;display:flex;align-items:center;min-height:73px;gap:26px;color:#788fb7;font-size:20px;line-height:1.3}
-.setup-step:not(:last-child):after {content:"";position:absolute;top:50px;left:24px;height:23px;width:2px;background:#25416f}
-.setup-step.is-done:not(:last-child):after {background:#51a4e4}
-.setup-step .mark {display:flex;justify-content:center;align-items:center;width:50px;height:50px;flex:0 0 50px;
- border-radius:50%;box-sizing:border-box;border:3px solid #2e446e;font-size:20px;font-weight:600;color:#6482b4;
- background:#101d36}
-.setup-step.is-active {color:#f0f6ff;font-weight:700}
-.setup-step.is-active .mark {border-color:#71caff;color:#fff;box-shadow:0 0 0 3px rgba(70,128,250,.15),0 0 20px rgba(57,144,255,.34)}
-.setup-step.is-done {color:#b9cae7}
-.setup-step.is-done .mark {border-color:#2b998d;color:#71ebd2;background:#0f3340;box-shadow:0 0 14px rgba(28,189,156,.14)}
-.setup-bottom {position:relative;border-top:1px solid rgba(109,146,208,.17);padding:18px 0 23px}
-#setup-hint {font-size:16px;line-height:1.4;margin:0 auto;color:#87a2cd}
-.setup-info-icon {display:inline-flex;align-items:center;justify-content:center;vertical-align:middle;
- font:700 14px Arial,sans-serif;width:19px;height:19px;border-radius:50%;
- border:1.6px solid #8dafdf;color:#8dafdf;margin-right:11px}
-#setup-actions {display:flex;justify-content:center;gap:14px;margin:10px auto 2px}
-#setup-retry,#setup-close {font-size:17px;min-width:160px;min-height:48px}
-#setup-close {background:transparent;color:#aebfdf;border-color:#506380}
-#setup-retry:disabled {opacity:.48;cursor:default}
-@keyframes cvpn-orbit {to{transform:rotate(382deg)}}
-@media (prefers-reduced-motion:reduce) {.setup-loader:after{animation:none}}
-@media (max-height:820px) {#setup-screen .panel{padding:20px 44px 0}
- .setup-brand-row{margin-bottom:4px}.setup-app-icon{width:62px;height:62px;flex-basis:62px}
- .setup-brand-name{font-size:32px}.setup-loader{width:130px;height:130px;margin:8px auto 14px}
- .setup-loader-inner{width:94px;height:94px}.setup-tv-icon{width:60px;height:60px}
- #setup-title{font-size:30px}#setup-status{font-size:18px}.setup-steps{margin:12px auto 8px}
- .setup-step{min-height:56px;font-size:17px}.setup-step .mark{width:38px;height:38px;flex-basis:38px;font-size:17px}
- .setup-step:not(:last-child):after{left:18px;top:40px;height:16px}.setup-bottom{padding:12px 0 15px}
- #setup-hint{font-size:13px}}
-@media (max-width:740px){#setup-screen .panel{max-width:calc(100% - 28px);padding:20px 20px 0}
- .setup-brand-row{gap:12px}.setup-brand-name{font-size:27px}.setup-brand-caption{font-size:10px;letter-spacing:3px}
- .setup-app-icon{width:58px;height:58px;flex-basis:58px}
- #setup-title{font-size:26px}.setup-steps{width:100%}.setup-step{gap:14px}}
+/* webOS 4.x Chromium-compatible UI: shared card layout, no remote assets. */
+html,body {margin:0;width:100%;height:100%;overflow:hidden;background:transparent!important;color:#f1f6ff;font-family:Arial,Helvetica,sans-serif}
+[hidden] {display:none!important}
+.overlay {position:fixed;top:0;right:0;bottom:0;left:0;display:flex;justify-content:center;align-items:center;box-sizing:border-box;background:rgba(4,9,20,.55)}
+.panel {box-sizing:border-box;position:relative;overflow:auto;width:528px;max-width:calc(100% - 48px);max-height:calc(100% - 48px);padding:28px 36px 30px;border-radius:19px;border:1px solid #354b6d;background:#0e1b30;text-align:center;box-shadow:0 20px 66px rgba(0,0,0,.42);animation:panel-in .25s ease-out}
+#setup-screen .panel {width:560px}
+.brand-row {display:flex;align-items:center;justify-content:center;gap:13px;margin:0 auto 23px}
+.brand-icon {width:62px;height:62px;flex:0 0 62px;object-fit:contain}
+.brand-copy {text-align:left}
+.brand-name {font-size:30px;line-height:1.12;font-weight:700;letter-spacing:-.65px;white-space:nowrap;color:#f5f8ff}
+.brand-name span {color:#98b4fa;font-weight:500}
+.brand-caption {margin-top:6px;letter-spacing:3px;font-size:11px;font-weight:600;color:#9fb2d4}
+h1 {color:#f6f9ff;font-size:28px;letter-spacing:-.3px;line-height:1.25;margin:0 0 10px;font-weight:700}
+p {color:#a5badb;font-size:17px;line-height:1.45;margin:0}
+#qr-instruction {margin:0 0 18px}
+#qr-canvas {display:block;box-sizing:content-box;width:260px;height:260px;max-width:calc(100% - 24px);margin:0 auto 19px;border:9px solid #fff;border-radius:11px;background:#fff;image-rendering:pixelated}
+#qr-address {font-size:18px;font-weight:600;line-height:1.5;color:#d8e6ff;overflow-wrap:anywhere;margin-bottom:11px}
+#qr-code-label {font-size:17px;color:#a5badb}
+#qr-code {font-size:23px;letter-spacing:2px;color:#f8fbff;font-weight:700;white-space:nowrap}
+#qr-hint {font-size:14px;min-height:21px;margin:12px auto 0;color:#8da7ce}
+button {display:inline-block;box-sizing:border-box;padding:12px 26px;min-width:152px;min-height:47px;font:700 17px Arial,Helvetica,sans-serif;border:1px solid #90b7fc;border-radius:10px;color:#0c1930;background:#91b6fa;cursor:pointer}
+button:focus {outline:2px solid #b4ceff;outline-offset:3px;box-shadow:0 0 0 6px rgba(117,170,255,.16)}
+button:active {background:#aecaff}
+#close-qr {margin-top:20px}
+.setup-loader {position:relative;display:flex;align-items:center;justify-content:center;box-sizing:border-box;width:114px;height:114px;margin:8px auto 22px}
+.setup-loader:before {content:"";position:absolute;top:1px;left:1px;right:1px;bottom:1px;border:2px solid #243f68;border-radius:50%}
+.setup-loader:after {content:"";position:absolute;top:1px;left:1px;right:1px;bottom:1px;border:3px solid transparent;border-top-color:#6ac7ff;border-right-color:#518efa;border-radius:50%;animation:cvpn-turn 1.8s linear infinite}
+.setup-loader-inner {display:flex;align-items:center;justify-content:center;width:86px;height:86px;border-radius:50%;border:1px solid #254e85;background:radial-gradient(circle at 30% 25%,#183861,#0c203f 85%);box-shadow:inset 0 0 22px rgba(83,142,243,.07)}
+.setup-tv-icon {width:55px;height:55px;stroke:#a5cfff;fill:none;stroke-width:3.1;stroke-linecap:round;stroke-linejoin:round}
+#setup-screen[data-phase="ready"] .setup-loader:after {border-color:#55cbbf;animation:none}
+#setup-screen[data-phase="error"] .setup-loader:after {border-top-color:#ed99a6;border-right-color:#c85e80;animation:none}
+#setup-status {max-width:460px;margin:0 auto;min-height:25px;font-size:16px}
+.setup-steps {width:352px;max-width:100%;margin:20px auto 21px;text-align:left}
+.setup-step {position:relative;display:flex;align-items:center;gap:18px;box-sizing:border-box;min-height:57px;font-size:16px;line-height:1.3;color:#7990b5}
+.setup-step:not(:last-child):after {content:"";position:absolute;left:18px;top:43px;bottom:-14px;width:2px;background:#314b70}
+.setup-step.is-done:not(:last-child):after {background:#378baf}
+.setup-step .mark {box-sizing:border-box;display:flex;justify-content:center;align-items:center;flex:0 0 38px;width:38px;height:38px;border-radius:50%;border:2px solid #37517b;background:#142442;color:#879ec6;font-size:15px;font-weight:600}
+.setup-step.is-active {color:#f4f8ff;font-weight:700}
+.setup-step.is-active .mark {color:#e7f2ff;border-color:#73c5ff;box-shadow:0 0 0 4px rgba(96,161,251,.09),0 0 16px rgba(78,152,255,.19);animation:step-breathe 2.8s ease-in-out infinite}
+.setup-step.is-done {color:#b8d2e6}
+.setup-step.is-done .mark {background:#143b40;border-color:#388e85;color:#86e1c6}
+.setup-bottom {border-top:1px solid #253856;padding-top:17px;margin-top:2px}
+#setup-hint {display:flex;align-items:center;justify-content:center;gap:10px;color:#839bbf;font-size:13px;line-height:1.45}
+.setup-info-icon {flex:0 0 18px;box-sizing:border-box;width:18px;height:18px;border-radius:50%;border:1.5px solid #819fcf;display:flex;align-items:center;justify-content:center;color:#819fcf;font:bold 12px Arial}
+#setup-actions {display:flex;align-items:center;justify-content:center;gap:12px;margin-top:4px}
+#setup-actions button {margin-top:17px}
+#setup-close {border-color:#547199;background:transparent;color:#adc5e9}
+#setup-retry:disabled {opacity:.5}
+@keyframes cvpn-turn {to{transform:rotate(360deg)}}
+@keyframes step-breathe {50%{box-shadow:0 0 0 6px rgba(96,161,251,.11),0 0 18px rgba(78,152,255,.24)}}
+@keyframes panel-in {from{opacity:.68;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
+@media (prefers-reduced-motion:reduce) {.panel,.setup-loader:after,.setup-step.is-active .mark{animation:none}}
+@media (max-height:760px) {
+ .panel {padding:20px 28px 22px}
+ .brand-row {margin-bottom:14px}.brand-icon{width:50px;height:50px;flex-basis:50px}
+ .brand-name{font-size:25px}.brand-caption{font-size:10px;letter-spacing:2.5px}
+ #qr-canvas{width:224px;height:224px;margin-bottom:11px}
+ #qr-instruction{margin-bottom:11px}
+ #close-qr{margin-top:12px}
+ .setup-loader{width:88px;height:88px;margin:0 auto 12px}
+ .setup-loader-inner{width:65px;height:65px}.setup-tv-icon{width:45px;height:45px}
+ h1{font-size:24px}
+ .setup-steps{margin:13px auto}.setup-step{min-height:48px;font-size:15px}
+ .setup-step:not(:last-child):after{top:38px;bottom:-12px}
+ .setup-bottom{padding-top:12px}
+}
+@media (max-width:620px) {
+ .panel {max-width:calc(100% - 24px);padding-left:20px;padding-right:20px}
+ .brand-row{gap:9px}.brand-icon{width:48px;height:48px;flex-basis:48px}
+ .brand-name{font-size:24px}.brand-caption{letter-spacing:2px;font-size:9px}
+ .setup-steps{width:100%}
+}
 </style>
 </head>
 <body>
-<div id="qr-screen" hidden>
- <main class="panel">
-  <h1>CVPN <span>webOS</span></h1>
-  <div class="subtitle">PRIVATE NETWORK</div>
-  <p>Наведите камеру телефона на QR-код</p>
+<div id="qr-screen" class="overlay" hidden>
+ <main class="panel" role="dialog" aria-labelledby="qr-heading">
+  <div class="brand-row">
+   <img class="brand-icon" src="icon.png" alt="">
+   <div class="brand-copy"><div class="brand-name">CVPN <span>webOS</span></div><div class="brand-caption">PRIVATE NETWORK</div></div>
+  </div>
+  <p id="qr-instruction">Наведите камеру телефона на QR-код</p>
   <canvas id="qr-canvas" width="512" height="512" aria-label="QR-код для подключения смартфона"></canvas>
   <div id="qr-address"></div>
-  <p>Код подключения: <strong id="qr-code">—</strong></p>
+  <p id="qr-code-label">Код подключения: <strong id="qr-code">—</strong></p>
   <p id="qr-hint">Действует 3 минуты · Только домашняя сеть</p>
   <button id="close-qr" type="button">Закрыть</button>
  </main>
 </div>
-<div id="setup-screen" data-phase="checking" hidden>
+<div id="setup-screen" class="overlay" data-phase="checking" hidden>
  <main class="panel" role="status" aria-live="polite">
-  <div class="setup-brand-row">
-   <div class="setup-app-icon" aria-hidden="true"></div>
-   <div class="setup-brand-text">
-    <div class="setup-brand-name">CVPN <b>webOS</b></div>
-    <div class="setup-brand-caption">PRIVATE NETWORK</div>
-   </div>
+  <div class="brand-row">
+   <img class="brand-icon" src="icon.png" alt="">
+   <div class="brand-copy"><div class="brand-name">CVPN <span>webOS</span></div><div class="brand-caption">PRIVATE NETWORK</div></div>
   </div>
   <div class="setup-loader" aria-hidden="true"><div class="setup-loader-inner">
    <svg class="setup-tv-icon" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
     <rect x="9" y="15" width="62" height="44" rx="5"/>
-    <path d="M32 66h16 M40 59v7"/>
-    <path d="M27 35q13-13 26 0 M32 40q8-8 16 0"/>
-    <circle cx="40" cy="46" r="2" fill="#a8d6ff" stroke="none"/>
+    <path d="M32 66h16 M40 59v7"/><path d="M27 35q13-13 26 0 M32 40q8-8 16 0"/>
+    <circle cx="40" cy="46" r="2" fill="#a5cfff" stroke="none"/>
    </svg>
   </div></div>
   <h1 id="setup-title">Подготавливаем CVPN</h1>
-  <p id="setup-status">Подготавливаем необходимые компоненты для работы</p>
-  <div class="setup-steps" id="setup-steps" aria-label="Этапы подготовки">
-   <div class="setup-step is-active" data-step="0"><span class="mark">1</span><span>Проверяем устройство</span></div>
-   <div class="setup-step" data-step="1"><span class="mark">2</span><span>Подготавливаем компоненты</span></div>
-   <div class="setup-step" data-step="2"><span class="mark">3</span><span>Запускаем CVPN</span></div>
+  <p id="setup-status">Проверяем необходимые компоненты для работы</p>
+  <div class="setup-steps" aria-label="Этапы подготовки">
+   <div class="setup-step is-active" data-step="0"><span class="mark">1</span><span class="step-name">Проверяем устройство</span></div>
+   <div class="setup-step" data-step="1"><span class="mark">2</span><span class="step-name">Подготавливаем компоненты</span></div>
+   <div class="setup-step" data-step="2"><span class="mark">3</span><span class="step-name">Запускаем CVPN</span></div>
   </div>
   <div class="setup-bottom">
    <p id="setup-hint"><span class="setup-info-icon" aria-hidden="true">i</span><span id="setup-hint-text">Пожалуйста, не выключайте телевизор во время подготовки</span></p>
-   <div id="setup-actions">
-    <button id="setup-retry" type="button" hidden>Повторить</button>
-    <button id="setup-close" type="button" hidden>Закрыть</button>
-   </div>
+   <div id="setup-actions"><button id="setup-retry" type="button" hidden>Повторить</button><button id="setup-close" type="button" hidden>Закрыть</button></div>
   </div>
  </main>
 </div>
