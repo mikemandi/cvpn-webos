@@ -1,8 +1,11 @@
 # CVPN webOS 2.2.2 — supported devices and release gates
 
-**Status: Release candidate on the `feature/all-in-one-v2.1.0` branch, NOT a proven production release.**
-Do not merge into stable/main, publish to Homebrew, or promise one-click compatibility
-until a clean TV passes the hardware acceptance plan in `docs/QA_ACCEPTANCE_2.2.2.md`.
+**Status: hardware-tested release candidate on the `feature/all-in-one-v2.1.0` branch.**
+One-IPK first-run, VPN, exit-IP, YouTube, disconnect/reconnect and ordinary
+power off/on **passed on LG 55UK6450PLC**, as reported by the owner.
+Do not merge into stable/main, tag a public release or submit to Homebrew
+until the remaining QA, licensing, uninstall and publication gates are closed.
+See `docs/QA_ACCEPTANCE_2.2.2.md`.
 
 ## Supported platform
 
@@ -40,10 +43,12 @@ until a clean TV passes the hardware acceptance plan in `docs/QA_ACCEPTANCE_2.2.
 
 1. CI succeeds: Go tests, race detector, Go vet, installer rollback, offline
    launcher behavior, integrity and IPK inspection.
-2. Fresh installation on a fourth untouched rooted/Homebrew TV with **no SSH or
-   manual Engine installation**, including proper `lunabus.query` mapping.
-3. First-launch/second-launch, QR pairing, profile import, connection (trial then
-   persistent), actual video playback, disconnect and rollback.
+2. **Passed on one clean LG:** single IPK installed and root service performed
+   preparation with no manual backend/Xray installation. Verify other firmware
+   and Homebrew versions separately.
+3. **Passed in owner-reported functional test:** pairing/connect, Netherlands
+   external exit, actual YouTube playback, disconnect/reconnect and ordinary
+   TV power off/on. Profile corner cases and fault-injection remain open.
 4. Wi-Fi flaps, standby/return, unplanned process death, corrupted file scenarios,
    no hanging preparation UI, and recovery after reboot on that test TV.
 5. No personal secrets/TV IPs in the IPK; review permissions, CVE/dependencies
