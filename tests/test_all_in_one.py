@@ -171,6 +171,28 @@ class AllInOneInstaller(unittest.TestCase):
         self.assertIn('REFUSED=engine_busy',res.stderr)
         self.assertEqual((lock/'pid').read_text(),str(os.getpid()))
 
+    def test_backup_retention_is_bounded_after_upgrades(self):
+        self.assertEqual(self.run_it('install').returncode,0)
+        for n in range(4):
+            (self.payload/'bin/engine').write_text('#!/bin/sh\\necho ver%d\\n'%n)
+            self.regenerate_sums()
+            res=self.run_it('install')
+            self.assertEqual(res.returncode,0,res.stderr+res.stdout)
+            backups=list((self.base/'webui/state').glob('backup-allinone-*'))
+            self.assertLessEqual(len(backups),2)
+        self.assertEqual((self.base/'config').is_dir(),True)
+
+    def test_orphan_xray_refuses_binary_replacement(self):
+        self.assertEqual(self.run_it('install').returncode,0)
+        (self.payload/'bin/engine').write_text('#!/bin/sh\\necho changed\\n')
+        self.regenerate_sums()
+        pidof=self.fakebin/'pidof'
+        pidof.write_text('#!/bin/sh\\n[ "$1" = xray ] && echo 4242\\n')
+        pidof.chmod(0o755)
+        res=self.run_it('install')
+        self.assertNotEqual(res.returncode,0)
+        self.assertIn('REFUSED=vpn_xray_present',res.stderr)
+
     def test_root_required(self):
         (self.fakebin/'id').write_text('#!/bin/sh\necho 1000\n')
         res=self.run_it('install')
