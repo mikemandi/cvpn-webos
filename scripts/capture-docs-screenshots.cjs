@@ -9,7 +9,9 @@ const root=path.resolve(__dirname,'..');
 const publicDir=path.join(root,'server/public');
 const launcherDir=path.join(root,'launcher');
 const outDir=path.join(root,'assets/screenshots');
-const translations=JSON.parse(fs.readFileSync(path.join(publicDir,'translations.json'),'utf8'));
+const language=process.argv.includes('--lang=ru')?'ru':'en';
+const isRU=language==='ru';
+function screenshotName(name){return isRU?name.replace(/\.png$/,'-ru.png'):name;}
 const types={'.html':'text/html; charset=utf-8','.css':'text/css; charset=utf-8','.js':'text/javascript; charset=utf-8','.png':'image/png'};
 const server=http.createServer((req,res)=>{
  let u=new URL(req.url,'http://localhost').pathname;
@@ -23,24 +25,25 @@ async function translate(page){
  // Use the app's OWN i18n.js, not a separate screenshot translation table.
  await page.evaluate(()=>{
   if(!window.CVPNLocale)throw new Error('Real app localization did not load');
-  window.CVPNLocale.set('en');
+  window.CVPNLocale.set(document.documentElement.dataset.docsLanguage||'en');
   window.CVPNLocale.refresh();
   // Closed language dropdown: use English for its inaccessible off-screen option.
-  document.querySelector('#settings-language option[value=ru]').textContent='Russian';
+  if(document.documentElement.dataset.docsLanguage==='en')document.querySelector('#settings-language option[value=ru]').textContent='Russian';
   document.getElementById('settings-panel-address').textContent='—';
  });
 }
 async function preparePhone(page,origin,tab){
  await page.route('**/app.js*',r=>r.fulfill({status:200,contentType:'application/javascript',body:''}));
- await page.addInitScript(()=>localStorage.setItem('cvpn_webos_language','en'));
+ await page.addInitScript(lang=>{localStorage.setItem('cvpn_webos_language',lang);document.addEventListener('DOMContentLoaded',()=>{document.documentElement.dataset.docsLanguage=lang;});},language);
  await page.goto(origin+'/',{waitUntil:'networkidle'});
- await page.evaluate(name=>{
+ await page.evaluate(({name,lang})=>{
   const $=id=>document.getElementById(id);
   $('login').hidden=true;$('dashboard').hidden=false;
-  $('panel-health').textContent='Local panel';
-  $('connection-state').textContent='VPN disconnected';
-  $('connection-detail').textContent='Choose a server to connect';
-  $('profiles').innerHTML='<div class="empty-state"><strong>Add your first configuration</strong><p>No configurations yet. Add your own link or get started with CVPN.</p></div>';
+  const ru=lang==='ru';
+  $('panel-health').textContent=ru?'Локальная панель':'Local panel';
+  $('connection-state').textContent=ru?'VPN отключён':'VPN disconnected';
+  $('connection-detail').textContent=ru?'Выберите сервер для подключения':'Choose a server to connect';
+  $('profiles').innerHTML='<div class="empty-state"><strong>'+(ru?'Добавьте свою первую конфигурацию':'Add your first configuration')+'</strong><p>'+(ru?'Конфигураций пока нет. Добавьте свою ссылку либо начните с CVPN.':'No configurations yet. Add your own link or get started with CVPN.')+'</p></div>';
   $('add-toggle').disabled=false;$('subs-add').disabled=false;
   $('home-empty-promo').hidden=true;$('subs-promo').hidden=true;
   for(const key of ['home','subscriptions','settings']){
@@ -49,12 +52,13 @@ async function preparePhone(page,origin,tab){
    if(name===key)$('nav-'+key).setAttribute('aria-current','page');
    else $('nav-'+key).removeAttribute('aria-current');
   }
-  $('subscription-list').innerHTML='<div class="empty-state"><strong>No configurations yet</strong><p>Import your own HTTPS subscription, VLESS link or JSON configuration.</p></div>';
+  $('subscription-list').innerHTML='<div class="empty-state"><strong>'+(ru?'Конфигураций пока нет':'No configurations yet')+'</strong><p>'+(ru?'Добавьте свою ссылку подписки HTTPS, VLESS или JSON.':'Import your own HTTPS subscription, VLESS link or JSON configuration.')+'</p></div>';
   window.scrollTo(0,0);
- },tab);
+ },{name:tab,lang:language});
  await translate(page);
 }
-function assertEnglish(visible,screen){
+function assertLanguage(visible,screen){
+ if(isRU){assert(/[А-Яа-яЁё]/.test(visible),'No Russian text visible on '+screen);return;}
  assert(!/[А-Яа-яЁё]/.test(visible),'Non-English visible text on '+screen+': '+(visible.match(/.{0,25}[А-Яа-яЁё].{0,25}/)||[])[0]);
 }
 async function phone(browser,origin,tab,file,modal){
@@ -65,8 +69,8 @@ async function phone(browser,origin,tab,file,modal){
   await page.evaluate(()=>{document.getElementById('modal-overlay').hidden=false;document.getElementById('import-view').hidden=false;document.getElementById('import-content').value='';});
   await translate(page);
  }
- assertEnglish(await page.locator('body').innerText(),file);
- await page.screenshot({path:path.join(outDir,file),animations:'disabled'});
+ assertLanguage(await page.locator('body').innerText(),file);
+ await page.screenshot({path:path.join(outDir,screenshotName(file)),animations:'disabled'});
  await ctx.close();
 }
 async function tv(browser,origin,mode,file){
@@ -76,9 +80,9 @@ async function tv(browser,origin,mode,file){
  await page.addInitScript(()=>{window.PalmServiceBridge=function(){this.call=function(){};};});
  await page.route('http://127.0.0.1:8765/**',r=>r.fulfill({status:200,contentType:'text/javascript',body:''}));
  await page.goto(origin+'/tv-launcher',{waitUntil:'domcontentloaded'});
- await page.evaluate(mode=>{
+ await page.evaluate(({mode,lang})=>{
   document.body.style.setProperty('background','linear-gradient(115deg,#1b2941,#0a1527 72%)','important');
-  window.cvpnLanguageInfo({localePreference:'en',resolvedTVLocale:'en'});
+  window.cvpnLanguageInfo({localePreference:lang,resolvedTVLocale:lang});
   if(mode==='setup'){
    // Let the real launcher set every translated title, step and footer.
    document.dispatchEvent(new CustomEvent('webOSLaunch',{detail:{mode:'normal'}}));
@@ -87,11 +91,11 @@ async function tv(browser,origin,mode,file){
    // Example address reserved by RFC 5737, non-functional sample code.
    window.cvpnQRInfo({ok:true,code:'000000',address:'http://192.0.2.10:8765',
      pairURL:'http://192.0.2.10:8765/#pair=000000',
-     localePreference:'en',resolvedTVLocale:'en',
+     localePreference:lang,resolvedTVLocale:lang,
      expires:new Date(Date.now()+180000).toISOString()});
   }
- },mode);
- assertEnglish(await page.locator('body').innerText(),file);
+ },{mode,lang:language});
+ assertLanguage(await page.locator('body').innerText(),file);
  await page.screenshot({path:path.join(outDir,file),animations:'disabled'});
  await ctx.close();
 }
@@ -107,6 +111,6 @@ async function tv(browser,origin,mode,file){
   await phone(browser,origin,'home','phone-import-empty.png',true);
   await tv(browser,origin,'setup','tv-setup.png');
   await tv(browser,origin,'qr','tv-pairing-demo.png');
-  for(const file of fs.readdirSync(outDir))if(file.endsWith('.png'))console.log(file,fs.statSync(path.join(outDir,file)).size,'bytes');
+  for(const file of fs.readdirSync(outDir))if(file.endsWith('.png')&&file.endsWith(isRU?'-ru.png':'.png'))console.log(file,fs.statSync(path.join(outDir,file)).size,'bytes');
  } finally {await browser.close();server.close();}
 })().catch(e=>{console.error(e);server.close();process.exitCode=1;});
