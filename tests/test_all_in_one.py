@@ -137,11 +137,39 @@ class AllInOneInstaller(unittest.TestCase):
         self.regenerate_sums()
         lock=self.base/'state/lock'
         lock.mkdir()
-        (lock/'pid').write_text('12345')
+        (lock/'pid').write_text(str(os.getpid()))
         res=self.run_it('status')
         self.assertEqual(res.returncode,0,res.stderr)
         self.assertIn('BUNDLE_READY=NO',res.stdout)
         self.assertIn('INSTALL_IN_PROGRESS=YES',res.stdout)
+
+    def test_safe_stale_lock_recovery_before_install(self):
+        self.assertEqual(self.run_it('install').returncode,0)
+        old=(self.base/'bin/cvpn.sh').read_text()
+        (self.payload/'bin/engine').write_text('#!/bin/sh\\necho changed\\n')
+        self.regenerate_sums()
+        lock=self.base/'state/lock'
+        lock.mkdir()
+        (lock/'pid').write_text('99999999')
+        res=self.run_it('status')
+        self.assertIn('STALE_LOCK_RECOVERABLE=YES',res.stdout)
+        self.assertNotIn('INSTALL_IN_PROGRESS=YES',res.stdout)
+        res=self.run_it('install')
+        self.assertEqual(res.returncode,0,res.stderr+res.stdout)
+        self.assertNotEqual((self.base/'bin/cvpn.sh').read_text(),old)
+        self.assertFalse(lock.exists())
+
+    def test_refuse_to_remove_live_lock(self):
+        self.assertEqual(self.run_it('install').returncode,0)
+        (self.payload/'bin/engine').write_text('#!/bin/sh\\necho changed\\n')
+        self.regenerate_sums()
+        lock=self.base/'state/lock'
+        lock.mkdir()
+        (lock/'pid').write_text(str(os.getpid()))
+        res=self.run_it('install')
+        self.assertNotEqual(res.returncode,0)
+        self.assertIn('REFUSED=engine_busy',res.stderr)
+        self.assertEqual((lock/'pid').read_text(),str(os.getpid()))
 
     def test_root_required(self):
         (self.fakebin/'id').write_text('#!/bin/sh\necho 1000\n')
