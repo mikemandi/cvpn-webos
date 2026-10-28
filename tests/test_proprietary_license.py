@@ -11,7 +11,7 @@ class ProprietaryLicenseTests(unittest.TestCase):
 
     def test_license_and_translations_exist(self):
         for path in (
-            "LICENSE", "LICENSE.ru.md", "BRAND_POLICY.md", "BRAND_POLICY.ru.md",
+            "LICENSE", "docs/legal/CVPN_TERMS_RU.md", "BRAND_POLICY.md", "BRAND_POLICY.ru.md",
             "THIRD_PARTY_NOTICES.md", "THIRD_PARTY_NOTICES.ru.md",
         ):
             with self.subTest(path=path):
@@ -19,7 +19,7 @@ class ProprietaryLicenseTests(unittest.TestCase):
 
     def test_free_use_cannot_be_misread_as_redistribution(self):
         en = self.text("LICENSE")
-        ru = self.text("LICENSE.ru.md")
+        ru = self.text("docs/legal/CVPN_TERMS_RU.md")
         for phrase in (
             "royalty-free", "download, install, run",
             "third-party components", "MPL-2.0",
@@ -61,7 +61,7 @@ class ProprietaryLicenseTests(unittest.TestCase):
             for path in ("LICENSE", "BRAND_POLICY", "THIRD_PARTY_NOTICES"):
                 self.assertIn(path, doc)
             self.assertIn("pool: non-free", doc)
-        for review in ("LICENSE-PUBLISHING-REVIEW.md", "LICENSE-PUBLISHING-REVIEW.ru.md"):
+        for review in ("docs/legal/LICENSING_REVIEW.md", "docs/legal/LICENSING_REVIEW.ru.md"):
             self.assertNotIn("has no declared project-wide license", self.text(review))
             self.assertNotIn("пока не выбрана общая лицензия", self.text(review))
 
