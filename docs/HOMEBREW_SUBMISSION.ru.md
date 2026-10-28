@@ -1,5 +1,7 @@
 # CVPN webOS 2.2.5 — Публикация в Homebrew Channel
 
+**Готовая заявка:** [карточка Homebrew](../homebrew/su.cvpn.webos.yml) · [текст Pull Request](../homebrew/HOMEBREW_PR_BODY.md) · [пошаговая инструкция](../homebrew/README.ru.md). Публикация в официальном каталоге произойдёт только после принятия PR сопровождающими.
+
 [Русский](HOMEBREW_SUBMISSION.ru.md) | [English](HOMEBREW_SUBMISSION.md)
 
 **На 28 октября 2026 года:** [2.2.5 Stable](https://github.com/mikemandi/cvpn-webos/releases/tag/v2.2.5) опубликована в GitHub Releases вместе с IPK, SHA256SUMS и YAML для Homebrew. **Релиз на GitHub не означает, что приложение уже добавлено в официальный каталог Homebrew Channel.** Одобрение сопровождающих каталога ещё необходимо.
