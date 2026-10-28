@@ -14,13 +14,13 @@ import zipfile
 import zlib
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-IPK = ROOT / 'dist/su.cvpn.webos_2.2.5_all.ipk'
+IPK = ROOT / 'dist/su.cvpn.webos_2.2.6_all.ipk'
 
 class PublicPackageTests(unittest.TestCase):
     def test_launcher_manifest(self):
         d = json.loads((ROOT / 'launcher/appinfo.json').read_text())
         self.assertEqual(d['id'], 'su.cvpn.webos')
-        self.assertEqual(d['version'], '2.2.5')
+        self.assertEqual(d['version'], '2.2.6')
         self.assertIn('lunabus.query', d['requiredPermissions'])
         for f in [d['main'],d['icon'],d['largeIcon']]:
             self.assertTrue((ROOT / 'launcher' / f).is_file())
@@ -43,6 +43,8 @@ class PublicPackageTests(unittest.TestCase):
             self.assertTrue(any(n.endswith('/payload/SHA256SUMS') for n in paths))
             self.assertTrue(any(n.endswith('/payload/XRAY-LICENSE.txt') for n in paths))
             self.assertTrue(any(n.endswith('/payload/install.sh') for n in paths))
+            self.assertIn('usr/palm/applications/su.cvpn.webos/CVPN-LICENSE.txt',paths)
+            self.assertIn('usr/palm/applications/su.cvpn.webos/THIRD_PARTY_NOTICES.md',paths)
 
     def test_app_icons_have_real_transparent_corners(self):
         # Decode PNG row 0 using only stdlib; no Pillow needed in main CI.
