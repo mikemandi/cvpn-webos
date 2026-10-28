@@ -18,7 +18,7 @@ class HomebrewSubmissionTests(unittest.TestCase):
             "manifestUrl: https://github.com/mikemandi/cvpn-webos/releases/latest/download/su.cvpn.webos.manifest.json",
             "category: utility",
             "pool: non-free",
-            "webosRelease: '>=4.0'",
+            "webosRelease: '>=4.4'",
             "shortDescription: Xray/VLESS for rooted LG TVs - TCP, XHTTP and gRPC",
             "TCP, XHTTP or gRPC",
             "Xray JSON",
