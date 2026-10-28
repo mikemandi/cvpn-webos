@@ -1,6 +1,6 @@
 # CVPN webOS — Правила использования названия и фирменных материалов
 
-[Русский](BRAND_POLICY.ru.md) · [English](BRAND_POLICY.md) · [Лицензия](LICENSE.ru.md)
+[Русский](BRAND_POLICY.ru.md) · [English](BRAND_POLICY.md) · [Лицензия](docs/legal/CVPN_TERMS_RU.md)
 
 Правила распространяются на названия **CVPN, CVPN webOS, CVPN Connect,
 PRIVATE NETWORK**, оригинальные логотипы, иконки, фирменные элементы
