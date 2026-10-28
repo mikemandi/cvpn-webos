@@ -57,4 +57,4 @@
 - Отсутствие приватных данных в сборке, CI, релизах и скриншотах.
 - Реальную проверку кода владельцем и раскрытие использования ИИ при подаче в каталог Homebrew.
 
-[Лицензия CVPN](../LICENSE.ru.md) · [Сторонние лицензии](../THIRD_PARTY_NOTICES.ru.md) · [Лицензионный обзор](../LICENSE-PUBLISHING-REVIEW.ru.md) · [Проверенные модели](TESTED_DEVICES.ru.md) · [Русский README](../README.ru.md)
+[Лицензия CVPN](../docs/legal/CVPN_TERMS_RU.md) · [Сторонние лицензии](../THIRD_PARTY_NOTICES.ru.md) · [Лицензионный обзор](../docs/legal/LICENSING_REVIEW.ru.md) · [Проверенные модели](TESTED_DEVICES.ru.md) · [Русский README](../README.ru.md)
