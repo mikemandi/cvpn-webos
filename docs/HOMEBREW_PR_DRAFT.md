@@ -14,7 +14,7 @@
 >
 > **Network/security boundaries:** VPN routing is **IPv4-only**; an active IPv6 default route blocks VPN activation. There is **no universal kill switch and no VPN autostart**. The web control panel on **HTTP port 8765** is for **trusted LAN access only** and must never be publicly exposed.
 >
-> **Owner-reported hardware evidence:** LG 55UK6450PLC (webOS 4.4.3-22, firmware 05.50.70) was used for All-in-One baseline installation, QR, Netherlands VPN exit-IP, YouTube playback, reconnect and normal off/on. Version 2.2.5 TV layout and remote-control improvements were also confirmed on LG hardware. Other devices/firmware are not universally supported.
+> **Owner-tested LG models:** **55UK6450PLC (webOS 4.4.3-22)**, **65UK6710PLB (4.4.3-22)**, **86NANO906NA (5.6.2)** and **55UQ76003LD (webOS 22 / 7.6.0-1901)**. Logs document clean All-in-One/YouTube/reconnect on 55UK6450PLC, VLESS/Reality/XHTTP and TUN on 86NANO906NA, and functional VPN after initial compatibility fixes on 55UQ76003LD. The 65UK6710PLB is owner-confirmed without retained detailed logs. Oldest documented build: **4.4.3-22**; catalog requires **4.4+**. No guarantee for all firmware.
 >
 > **AI disclosure:** AI tools assisted implementation, UI, documentation and testing. The owner reviewed the code and tested the application on real devices; this is **not an independent security audit**. The submitter remains responsible for updates and bug reports.
 >
