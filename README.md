@@ -1,9 +1,9 @@
 <div align="center">
   <img src="assets/icon160.png" width="112" height="112" alt="CVPN webOS app icon">
   <h1>CVPN webOS</h1>
-  <p><strong>PRIVATE NETWORK · VPN for LG webOS</strong></p>
-  <p>Run a VPN on a compatible rooted LG TV. Control it securely from your phone on your home network.<br>
-  One IPK. Local pairing. Your choice of VPN provider.</p>
+  <p><strong>Xray / VLESS VPN for rooted LG webOS TVs</strong></p>
+  <p><strong>Import Xray configs. Connect with TCP, XHTTP or gRPC.</strong><br>
+  VLESS links, HTTPS subscriptions and supported Xray JSON — managed from your phone.</p>
   <p><strong>Free to use · No CVPN account required · English & Russian</strong></p>
   <p>
     <a href="https://github.com/mikemandi/cvpn-webos/releases/tag/v2.2.5"><strong>Download v2.2.5 IPK</strong></a>
@@ -19,10 +19,11 @@
 
 ## Overview
 
-**CVPN webOS** is an independent VPN client for compatible **rooted LG webOS TVs**. The TV runs a VPN engine and a local control panel; your phone acts as the remote control. Pair on the same trusted home network, import a compatible configuration and connect.
+**CVPN webOS** is an **Xray/VLESS VPN client for rooted LG webOS TVs**. Import your compatible Xray configuration, choose **TCP, XHTTP or gRPC**, and control the connection from your phone over your trusted home network. The VPN engine runs on the TV itself. **TCP, XHTTP and gRPC are Xray transports, not three separate VPN protocols.**
 
 - **All-in-One:** TV launcher, ARMv7 backend, Xray-core and recovery scripts in a single IPK. Nothing else needs downloading during TV setup.
-- **Bring your own provider:** supported VLESS/Reality profiles, compatible HTTPS subscriptions and supported Xray configuration imports. CVPN is optional.
+- **Xray transport support:** **TCP · XHTTP · gRPC** for compatible VLESS configurations. Reality is supported; gRPC also supports TLS. Transport and security settings must match your server.
+- **Your Xray configs:** import `vless://` links, compatible HTTPS subscriptions or supported Xray JSON configurations. Bring your own provider — a CVPN subscription is optional.
 - **TV pairing:** open the app on LG, scan the QR and enter a short-lived PIN if prompted.
 - **Simple control:** English/Russian interface, server selection, subscription import, device access and diagnostics from your browser.
 - **Recovery-focused:** checks and safeguards around system prerequisites, component upgrades and VPN sessions.
