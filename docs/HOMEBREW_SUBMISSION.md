@@ -32,4 +32,4 @@ Useful references: [Homebrew submission rules](https://repo.webosbrew.org/submit
 
 CVPN webOS installs as a single All-in-One IPK **after** the TV already has root/Homebrew. Its Xray, Go backend and VPN Engine are inside the package and prepared automatically. No account or paid CVPN subscription is required to import compatible third-party configurations.
 
-**Do not publish a root bypass or alter firmware ACLs as a quick compatibility fix.** For safety details read [Security](SECURITY.md), [Release limitations](RELEASE_LIMITATIONS.md) and [Licensing review](../LICENSE-PUBLISHING-REVIEW.md).
+**Do not publish a root bypass or alter firmware ACLs as a quick compatibility fix.** For safety details read [Security](SECURITY.md), [Release limitations](RELEASE_LIMITATIONS.md) and [Licensing review](../docs/legal/LICENSING_REVIEW.md).

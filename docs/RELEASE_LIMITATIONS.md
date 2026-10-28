@@ -47,4 +47,4 @@ Physical tests across additional LG models and firmware, fault injection, standb
 
 **Stop and report immediately** if routes/DNS cannot be restored, existing private profiles are unexpectedly erased, the TV loses normal network access, or an installation requires privilege bypasses or exposed secrets.
 
-[Security](SECURITY.md) · [Licensing review](../LICENSE-PUBLISHING-REVIEW.md) · [English README](../README.md) · [Русский README](../README.ru.md)
+[Security](SECURITY.md) · [Licensing review](../docs/legal/LICENSING_REVIEW.md) · [English README](../README.md) · [Русский README](../README.ru.md)

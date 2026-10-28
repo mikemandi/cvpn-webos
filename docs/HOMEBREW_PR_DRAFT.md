@@ -26,4 +26,4 @@
 
 **Before sending:** check current [webOS Homebrew rules](https://github.com/webosbrew/apps-repo), approve the final text with the project owner, inspect packages/su.cvpn.webos.yml, verify official release file hashes, and attach sanitized real-UI screenshots already in assets/screenshots. Do not claim catalog inclusion before upstream merges the PR.
 
-[Submission guide](HOMEBREW_SUBMISSION.md) · [Licensing review](../LICENSE-PUBLISHING-REVIEW.md)
+[Submission guide](HOMEBREW_SUBMISSION.md) · [Licensing review](../docs/legal/LICENSING_REVIEW.md)
