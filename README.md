@@ -13,6 +13,7 @@
     &nbsp;·&nbsp; <a href="CHANGELOG.md">Changelog</a>
   </p>
   <p><strong>English</strong> · <a href="README.ru.md">Русский</a></p>
+  <p><strong>Official guide:</strong> <a href="https://cvpn.su/en/guides/lg-webos/">English installation guide</a> · <a href="https://cvpn.su/guides/lg-webos/">Русская инструкция</a></p>
 </div>
 
 ---
