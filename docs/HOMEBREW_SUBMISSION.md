@@ -1,5 +1,7 @@
 # CVPN webOS 2.2.5 — Homebrew Channel submission guide
 
+**Ready-to-submit files:** [reviewed catalog entry](../homebrew/su.cvpn.webos.yml) · [PR description](../homebrew/HOMEBREW_PR_BODY.md) · [Russian step-by-step guide](../homebrew/README.ru.md). This project is **not** listed in the official Homebrew catalog until the upstream PR is accepted.
+
 [English](HOMEBREW_SUBMISSION.md) | [Русский](HOMEBREW_SUBMISSION.ru.md)
 
 **Current status, 2026-10-28:** [v2.2.5 Stable](https://github.com/mikemandi/cvpn-webos/releases/tag/v2.2.5) is published on GitHub with IPK, SHA256SUMS, manifest and Homebrew YAML. **A GitHub Release does not mean inclusion in the official webOS Homebrew Channel catalog.** No maintainer approval is asserted here.
