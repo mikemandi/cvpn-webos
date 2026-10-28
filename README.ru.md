@@ -12,6 +12,7 @@
     &nbsp;·&nbsp; <a href="#частые-вопросы-и-ошибки">Помощь</a>
   </p>
   <p><strong>Русский</strong> · <a href="README.md">English</a></p>
+  <p><strong>Инструкции на сайте:</strong> <a href="https://cvpn.su/guides/lg-webos/">Русская инструкция</a> · <a href="https://cvpn.su/en/guides/lg-webos/">English installation guide</a></p>
 </div>
 
 ---
