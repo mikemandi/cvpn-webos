@@ -20,7 +20,7 @@ class DocumentationLocalizationTests(unittest.TestCase):
             'docs/RELEASE_LIMITATIONS.md', 'docs/RELEASE_LIMITATIONS.ru.md',
             'docs/TESTED_DEVICES.md', 'docs/TESTED_DEVICES.ru.md',
             'docs/HOMEBREW_SUBMISSION.md', 'docs/HOMEBREW_SUBMISSION.ru.md',
-            'LICENSE-PUBLISHING-REVIEW.md', 'LICENSE-PUBLISHING-REVIEW.ru.md',
+            'docs/legal/LICENSING_REVIEW.md', 'docs/legal/LICENSING_REVIEW.ru.md',
         ):
             with self.subTest(document=name):
                 self.assertTrue((ROOT / name).is_file(), name)
@@ -55,8 +55,8 @@ class DocumentationLocalizationTests(unittest.TestCase):
         # Validate links in the bilingual entry points and safety/rights docs.
         paths = (
             'README.md', 'README.ru.md', 'docs/SECURITY.md',
-            'docs/SECURITY.ru.md', 'LICENSE-PUBLISHING-REVIEW.md',
-            'LICENSE-PUBLISHING-REVIEW.ru.md', 'CHANGELOG.ru.md',
+            'docs/SECURITY.ru.md', 'docs/legal/LICENSING_REVIEW.md',
+            'docs/legal/LICENSING_REVIEW.ru.md', 'CHANGELOG.ru.md',
         )
         for name in paths:
             file = ROOT / name
@@ -76,8 +76,8 @@ class DocumentationLocalizationTests(unittest.TestCase):
         docs = (
             (ROOT / 'docs/SECURITY.md').read_text(encoding='utf-8'),
             (ROOT / 'docs/SECURITY.ru.md').read_text(encoding='utf-8'),
-            (ROOT / 'LICENSE-PUBLISHING-REVIEW.md').read_text(encoding='utf-8'),
-            (ROOT / 'LICENSE-PUBLISHING-REVIEW.ru.md').read_text(encoding='utf-8'),
+            (ROOT / 'docs/legal/LICENSING_REVIEW.md').read_text(encoding='utf-8'),
+            (ROOT / 'docs/legal/LICENSING_REVIEW.ru.md').read_text(encoding='utf-8'),
         )
         for doc in docs:
             self.assertIn('MPL-2.0', doc)
