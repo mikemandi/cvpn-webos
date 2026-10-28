@@ -1,0 +1,159 @@
+CVPN webOS — PROPRIETARY SOFTWARE LICENSE
+Version 1.0 — 28 October 2026
+
+Copyright © 2026 CVPN webOS project authors and other applicable rightsholders.
+All rights reserved except for the express permissions below.
+
+IMPORTANT: This is a custom, source-available proprietary license, NOT an
+open-source license. It applies only to material for which the CVPN webOS
+rightsholders actually have authority to grant a license. Third-party software
+and other independently licensed material retain their own terms.
+
+1. DEFINITIONS AND SCOPE
+
+"Project" means the CVPN webOS application, including CVPN-authored launcher,
+backend, VPN orchestration code, user interface, documentation, and original
+visual assets that are controlled by the project's rightsholders.
+
+"Project-owned Material" means only the copyrightable elements of the Project
+that the applicable CVPN webOS rightsholders own or are legally authorized to
+license under these terms. No ownership of independently licensed third-party
+code, names, artwork, or other materials is claimed.
+
+"Licensor" means the applicable owner(s) of the Project-owned Material.
+"User" means an individual or organization exercising the permission below.
+
+This license covers Project-owned Material in publicly released versions of
+CVPN webOS made available with this license. It does not override existing
+third-party licenses, rights granted by applicable law, or rights already
+validly granted under separate agreements.
+
+2. FREE USE LICENSE
+
+Subject to compliance with this license, the Licensor grants the User a
+non-exclusive, worldwide, royalty-free, non-sublicensable permission to:
+
+(a) download, install, run, and update official CVPN webOS software on devices
+    that the User owns or is authorized to administer, for personal or internal
+    organizational use, without a fee for the application itself;
+
+(b) keep a reasonable number of backup copies of official distributions for
+    the User's own recovery and reinstallations;
+
+(c) read and study the publicly available source, and compile or privately
+    modify Project-owned Material solely for the User's own devices and
+    internal testing, security review, or accessibility needs, without making
+    modified or compiled copies available to third parties; and
+
+(d) use the application with compatible configurations from any provider.
+    A CVPN account, paid CVPN subscription, or CVPN server is not required
+    simply to use the application.
+
+This permission does not include commercial redistribution rights. It is
+effective for the covered version while these terms are followed. A user's
+existing, compliant copies do not lose the permission solely because a new
+license is published for a later version.
+
+3. RESTRICTIONS ON PROJECT-OWNED MATERIAL
+
+Except with the Licensor's prior explicit written permission or where the
+applicable law requires otherwise, Users may not:
+
+(a) sell, sublicense, publicly redistribute, mirror, republish, or offer
+    Project-owned Material or a modified/rebranded build to other parties;
+
+(b) incorporate Project-owned Material into another distributed software
+    product, paid service, white-label client, or competing VPN application;
+
+(c) represent themselves as the creator, copyright holder, or official
+    publisher of the Project-owned Material;
+
+(d) remove or falsify original authorship, copyright, licensing, or
+    third-party attribution notices; or
+
+(e) use the Project's brand elements in a way that falsely suggests an
+    official, approved, or affiliated product.
+
+These restrictions apply only to Project-owned Material. They do NOT prevent
+any action separately permitted for third-party components, including
+reproduction, modification, distribution, or source access under their own
+licenses. They do not prohibit legitimate quotation, security research, or
+other activities protected by mandatory law.
+
+4. PUBLIC GITHUB REPOSITORY
+
+When the Project's source is publicly hosted on GitHub, the right to view
+and fork repository content through GitHub's service, as described in GitHub's
+Terms of Service, remains intact. Such a GitHub fork does not, by itself,
+grant permission to redistribute Project-owned code outside the permitted
+GitHub functionality, build a competing publicly distributed product, or
+use the CVPN marks to imply official affiliation.
+
+5. APP CATALOGS AND INFORMATIONAL USE
+
+The operators of the webOS Homebrew Channel catalog and other app directories
+may link to official CVPN webOS releases, index and display accurate application
+metadata, and reproduce official screenshots and icons as reasonably required
+to identify the unmodified application in a catalog or review. This limited
+permission does not authorize rebranding, sublicensing or hosting modified
+versions. Hosting a separate public binary mirror requires explicit written
+authorization for any Project-owned portions, subject always to the separate
+rights in third-party components.
+
+Anyone may truthfully identify or discuss CVPN webOS and link to its official
+website/repository, including in reviews and compatibility reports, without
+implying sponsorship or endorsement.
+
+6. CVPN NAME, LOGOS, AND TRADEMARKS
+
+No general license to use the CVPN, CVPN webOS, CVPN Connect, PRIVATE NETWORK
+branding, original app icons, or related identifying designs is granted
+except for normal display within the installed application and the narrow
+catalog, commentary, and identification uses permitted in Section 5.
+See BRAND_POLICY.md. Nothing here represents that any mark is registered.
+
+7. THIRD-PARTY SOFTWARE AND ASSETS
+
+Xray-core is distributed under Mozilla Public License 2.0 (MPL-2.0).
+The included QR implementation carries applicable MIT and Apache-2.0
+licenses and attribution notices. Third-party files may also carry other
+terms. Their grants take precedence for their respective covered material.
+
+The Project's proprietary conditions do not limit rights recipients have
+under MPL-2.0, MIT, Apache-2.0, or other applicable third-party licenses.
+Recipients of Xray-core executable code must be informed how to obtain the
+corresponding MPL-covered source and license. Refer to THIRD_PARTY_NOTICES.md,
+launcher/QR-NOTICE.txt, launcher/QR-THIRD-PARTY-LICENSE.txt and the
+payload/XRAY-LICENSE.txt shipped in the All-in-One IPK.
+
+8. NO WARRANTY; SAFETY AND LEGAL RIGHTS
+
+To the maximum extent allowed by applicable law, the Project-owned Material is
+provided "AS IS" without warranties of uninterrupted operation, compatibility,
+security, fitness for a particular purpose, or absence of network leaks. This
+software changes networking on rooted televisions: read docs/SECURITY.md and
+docs/RELEASE_LIMITATIONS.md before use and keep backups of important settings.
+
+To the maximum extent allowed by applicable law, the Licensor is not liable
+for indirect or consequential losses resulting from use of the software.
+This paragraph does not exclude or restrict statutory consumer rights,
+liability that cannot legally be excluded, or the separate obligations
+applicable to third-party components.
+
+9. VIOLATIONS AND TERMINATION
+
+A material breach of these terms ends the proprietary permission if not
+remedied within 30 days after the User becomes aware of the breach or
+receives notice of it. Rights expressly granted by independently licensed
+third-party components are unaffected. Sections reserving ownership and
+preserving third-party rights remain effective.
+
+10. PERMISSIONS AND CONTACT
+
+For redistribution, branding partnerships, alternate distribution, or
+licensing questions, contact the project maintainer through:
+https://github.com/mikemandi/cvpn-webos
+https://t.me/insightdev0
+
+The English text in this file is the controlling project-owned license.
+A convenience Russian translation is available in LICENSE.ru.md.
