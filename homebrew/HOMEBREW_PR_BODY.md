@@ -18,7 +18,7 @@ The app uses a local web UI paired via a temporary TV PIN. VPN connection is exp
 
 ## Tested hardware and limitations
 
-The owner tested the All-in-One first-run, local pairing, Netherlands VPN exit IP, YouTube playback, disconnect/reconnect and ordinary power off/on on **LG 55UK6450PLC (webOS 4.4.3-22)**. Additional earlier tests were performed on LG 55UQ76003LD after compatibility fixes. The revised 2.2.5 TV dialogs and LG remote error-focus behavior were also tested on hardware. These reports are **not** a guarantee for every LG model/firmware.
+The owner confirms CVPN webOS works on **four LG models**: **55UK6450PLC (webOS 4.4.3-22)**, **65UK6710PLB (4.4.3-22)**, **86NANO906NA (5.6.2)** and **55UQ76003LD (webOS 22 / 7.6.0-1901)**. Earlier logs document All-in-One setup, VPN exit-IP, YouTube and reconnect tests on 55UK6450PLC; VLESS/Reality/XHTTP, TUN and routing tests on 86NANO906NA; and functional VPN after first-import/BusyBox/DNS fixes on 55UQ76003LD. For 65UK6710PLB, operation is owner-reported without retained detailed network logs. Version 2.2.5 dialogs and remote focus were also accepted on LG hardware. **The oldest verified webOS build is 4.4.3-22; the catalog requests 4.4+, not untested 4.0–4.3.** These results are not a universal LG compatibility guarantee.
 
 The VPN currently handles **IPv4 only** and refuses connection when an active IPv6 default route would bypass it. There is **no universal kill switch**, no automatic VPN connection after boot and no assurance of leak-free behavior for all TV apps. The control panel uses **HTTP on the private LAN, port 8765**; it must never be exposed publicly. Persistent local profiles and secrets are stored with restrictive permissions but **not encrypted at rest**.
 
