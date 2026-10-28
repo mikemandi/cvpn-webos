@@ -5,17 +5,17 @@ on:
       - 'v*'
     # A one-time, owner-approved publication branch. The connected GitHub
     # integration cannot create Git tags; this branch uses the SAME tested
-    # release job and action-gh-release to create immutable v2.2.5 assets.
+    # release job and action-gh-release to create immutable v2.2.6 assets.
     branches:
-      - 'publish/v2.2.5'
+      - 'publish/v2.2.6'
 permissions:
   contents: write
 jobs:
   release:
-    if: github.ref == 'refs/heads/publish/v2.2.5' || startsWith(github.ref, 'refs/tags/v')
+    if: github.ref == 'refs/heads/publish/v2.2.6' || startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-24.04
     env:
-      RELEASE_TAG: ${{ github.ref_type == 'tag' && github.ref_name || 'v2.2.5' }}
+      RELEASE_TAG: ${{ github.ref_type == 'tag' && github.ref_name || 'v2.2.6' }}
     steps:
       - uses: actions/checkout@v6
       - name: Validate the approved release tag and version
@@ -25,7 +25,7 @@ jobs:
           VERSION="$(python3 -c 'import json; print(json.load(open("launcher/appinfo.json"))["version"])')"
           test "$RELEASE_TAG" = "v$VERSION" || { echo "Tag/version mismatch"; exit 1; }
           if [[ "$GITHUB_REF" == refs/heads/* ]]; then
-            test "$GITHUB_REF" = 'refs/heads/publish/v2.2.5'
+            test "$GITHUB_REF" = 'refs/heads/publish/v2.2.6'
             if git ls-remote --exit-code --tags origin "refs/tags/$RELEASE_TAG" >/dev/null 2>&1; then
               echo "Release tag already exists; refusing to overwrite existing assets"
               exit 1
@@ -54,28 +54,36 @@ jobs:
           target_commitish: ${{ github.sha }}
           name: CVPN webOS ${{ env.RELEASE_TAG }} Stable
           body: |
-            **Free VPN client for compatible rooted LG webOS televisions.**
-            Supports VLESS/Reality profiles and HTTPS subscriptions from any provider.
-            **A subscription to CVPN (cvpn.su) is entirely optional.**
-            
-            This All-in-One IPK contains the launcher, ARMv7 backend, Xray-core,
-            network safety/recovery logic and Homebrew setup payload.
-            
-            **Prerequisites:** root, compatible Homebrew Channel, ARMv7 32-bit
-            userspace, TUN, and a trusted home network. Not compatible with
-            unrooted LG TVs or the LG Content Store.
-            
-            **Limitations:** IPv4-only VPN; refuses connection with an active
-            IPv6 default route; no universal kill switch or VPN autostart.
-            The local management page uses HTTP and must not be exposed to
-            untrusted or public networks.
-            
-            First-run, DNS/HTTPS, external IP, YouTube, disconnect/reconnect and
-            ordinary power off/on were tested on LG 55UK6450PLC (webOS 4.4.3-22).
-            Compatibility with other webOS/firmware versions is not guaranteed.
-            
-            Developed with AI assistance and reviewed/tested on real LG hardware.
-            See README, third-party notices and security documentation in source.
+            ## CVPN webOS 2.2.6 — Homebrew packaging compatibility
+
+            **Xray/VLESS VPN for rooted LG webOS TVs** supporting TCP, XHTTP
+            and gRPC transports. Import compatible VLESS links, HTTPS
+            subscriptions and Xray JSON from any provider.
+            A CVPN subscription is optional; the app is free to use.
+
+            ### Changes from v2.2.5
+            - Homebrew-compatible IPK control/data member paths and installed size.
+            - Included CVPN proprietary license and third-party notices in IPK.
+            - Updated English app description and release metadata.
+            - No changes to VPN Engine, Xray, root installation, user settings,
+              subscriptions, or TV user interface.
+
+            ### Compatibility and precautions
+            Root, Homebrew Channel root service, compatible 32-bit ARMv7
+            userspace, and TUN are required. Oldest verified webOS: 4.4.3-22.
+            Owner reports working CVPN on LG 55UK6450PLC, 65UK6710PLB,
+            86NANO906NA and 55UQ76003LD. Previous real-TV validation
+            covered earlier builds; v2.2.6 changes packaging only.
+
+            IPv4 VPN only; no universal kill switch or VPN autoconnect.
+            Use port 8765 over a trusted private LAN only.
+            Disconnect VPN before installing the new IPK.
+            Verify its integrity using the published SHA256SUMS.
+
+            Xray-core remains MPL-2.0; QR libraries retain MIT/Apache-2.0.
+            CVPN-authored code is proprietary but free to use.
+            AI-assisted development was iterated and tested on LG hardware.
+
           files: |
             dist/*.ipk
             dist/*.manifest.json
