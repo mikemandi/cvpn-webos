@@ -2,13 +2,13 @@
 
 [English](HOMEBREW_PR_DRAFT.md) | [Русский](HOMEBREW_PR_DRAFT.ru.md)
 
-**Suggested title:** Add CVPN webOS — free provider-neutral VPN client for rooted LG televisions
+**Suggested title:** Add CVPN webOS — Xray/VLESS client with TCP, XHTTP and gRPC for rooted LG TVs
 
 **Suggested PR description (review and adapt before submitting):**
 
-> CVPN webOS is a **free-to-use VPN client for supported rooted LG webOS TVs** with ARMv7-compatible 32-bit userspace, working TUN and Homebrew Channel.
+> CVPN webOS is a **free Xray/VLESS VPN client for rooted LG webOS TVs**, featuring **TCP, XHTTP and gRPC transports**. It requires ARMv7-compatible 32-bit userspace, working TUN and Homebrew Channel.
 >
-> Users can import supported VLESS/Reality configurations and compatible HTTPS subscriptions **from any provider**. No paid CVPN account or CVPN subscription is required.
+> Users can import supported `vless://` links, VLESS/Reality configurations, compatible HTTPS subscriptions or Xray JSON **from any provider**. gRPC also supports TLS. TCP, XHTTP and gRPC are transports (not independent VPN protocols). No CVPN account or subscription is required.
 >
 > A single All-in-One IPK includes launcher, Xray-core, Go local panel and network recovery scripts. The root service prepares bundled components on first launch; it does not download extra executables on the television.
 >
