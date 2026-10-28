@@ -30,8 +30,8 @@ class DocumentationLocalizationTests(unittest.TestCase):
         ru = (ROOT / 'README.ru.md').read_text(encoding='utf-8')
         self.assertIn('README.ru.md', en)
         self.assertIn('README.md', ru)
-        self.assertIn('releases/tag/v2.2.5', en)
-        self.assertIn('releases/tag/v2.2.5', ru)
+        self.assertIn('releases/tag/v2.2.6', en)
+        self.assertIn('releases/tag/v2.2.6', ru)
         self.assertIn('Homebrew', ru)
 
     def test_images_real_and_in_both_languages(self):
