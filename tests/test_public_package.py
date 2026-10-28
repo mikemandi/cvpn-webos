@@ -30,11 +30,13 @@ class PublicPackageTests(unittest.TestCase):
         control = subprocess.check_output(['ar','p',str(IPK),'control.tar.gz'])
         data = subprocess.check_output(['ar','p',str(IPK),'data.tar.gz'])
         with tarfile.open(fileobj=io.BytesIO(control),mode='r:gz') as t:
-            c = t.extractfile(next(m for m in t.getmembers() if m.name.endswith('/control') or m.name=='./control')).read().decode()
+            c = t.extractfile(t.getmember('control')).read().decode()
             self.assertIn('Package: su.cvpn.webos',c)
+            self.assertIn('Installed-Size: ', c)
         with tarfile.open(fileobj=io.BytesIO(data),mode='r:gz') as t:
             paths=[m.name for m in t.getmembers()]
-            self.assertTrue(any(n.endswith('/su.cvpn.webos/appinfo.json') for n in paths))
+            self.assertIn('usr/palm/applications/su.cvpn.webos/appinfo.json',paths)
+            self.assertFalse(any(n.startswith('./') for n in paths))
             self.assertFalse(any('access.key' in n or '/secrets/' in n or 'client.json' in n for n in paths))
             self.assertTrue(any(n.endswith('/payload/bin/xray') for n in paths))
             self.assertTrue(any(n.endswith('/payload/bin/panel') for n in paths))

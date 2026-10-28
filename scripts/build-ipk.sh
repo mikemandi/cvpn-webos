@@ -29,6 +29,7 @@ p=json.load(open(sys.argv[1]))
 with open(sys.argv[2],'w') as f: json.dump({'id':p['id'],'version':p['version'],'app':p['id']},f,indent=2)
 PY
 VERSION="$(python3 -c 'import json,sys;print(json.load(open(sys.argv[1]))["version"])' "$ROOT/launcher/appinfo.json")"
+INSTALLED_KIB="$(du -sk "$TMP/usr" | awk '{print $1}')"
 cat > "$TMP/DEBIAN/control" <<EOF
 Package: su.cvpn.webos
 Version: $VERSION
@@ -36,6 +37,7 @@ Section: misc
 Priority: optional
 Architecture: all
 Maintainer: CVPN Project
+Installed-Size: $INSTALLED_KIB
 Description: CVPN webOS All-in-One: launcher, root VPN backend and Xray-core.
 webOS-Package-Format-Version: 2
 webOS-Packager-Version: custom-debian2
@@ -43,6 +45,7 @@ EOF
 chmod -R go-w "$TMP"
 OUT="$ROOT/dist/su.cvpn.webos_${VERSION}_all.ipk"
 dpkg-deb -Zgzip --build --root-owner-group "$TMP" "$OUT" >/dev/null
+python3 "$ROOT/scripts/normalize-webos-ipk.py" "$OUT"
 printf 'IPK_CREATED=%s\n' "$OUT"
 sha256sum "$OUT"
 dpkg-deb --info "$OUT" | head -n 20
