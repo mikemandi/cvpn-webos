@@ -1,5 +1,5 @@
 title: CVPN webOS
-shortDescription: Free VPN for rooted LG TVs, with your own compatible VPN profiles
+shortDescription: Xray/VLESS for rooted LG TVs - TCP, XHTTP and gRPC
 iconUri: https://raw.githubusercontent.com/mikemandi/cvpn-webos/main/assets/icon160.png
 detailIconUri: https://raw.githubusercontent.com/mikemandi/cvpn-webos/main/launcher/icon-400.png
 manifestUrl: https://github.com/mikemandi/cvpn-webos/releases/latest/download/su.cvpn.webos.manifest.json
@@ -8,14 +8,20 @@ pool: non-free
 requirements:
   webosRelease: '>=4.0'
 description: |
-  **CVPN webOS** is a free VPN client for compatible **rooted LG webOS TVs**.
-  Run the VPN on the television and manage it from a phone or computer on the
-  same trusted home network.
+  **CVPN webOS** brings **Xray/VLESS configurations to rooted LG webOS TVs**.
+  Import your own VLESS links, HTTPS subscriptions or supported Xray JSON,
+  then connect with **TCP, XHTTP or gRPC**. The VPN runs on the TV, while
+  your phone manages it through the local CVPN Connect panel.
+
+  **TCP, XHTTP and gRPC are Xray transport modes, not separate VPN protocols.**
+  Compatible VLESS/Reality setups are supported; gRPC also supports TLS.
 
   **Features**
 
-  - Import compatible VLESS/Reality profiles, HTTPS subscriptions or supported
-    Xray configurations from **any provider**. A CVPN subscription is optional.
+  - **TCP / XHTTP / gRPC transports** for supported Xray VLESS configurations.
+    Use compatible Reality settings, or TLS with gRPC.
+  - Import `vless://` links, compatible HTTPS subscriptions or supported
+    Xray JSON from **any provider**. A CVPN subscription is optional.
   - Connect, disconnect, select a server, refresh subscriptions and check status
     from the local **CVPN Connect** browser interface.
   - Pair a phone by scanning the QR code shown on the TV and using a temporary PIN.

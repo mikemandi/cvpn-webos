@@ -19,7 +19,9 @@ class HomebrewSubmissionTests(unittest.TestCase):
             "category: utility",
             "pool: non-free",
             "webosRelease: '>=4.0'",
-            "shortDescription:",
+            "shortDescription: Xray/VLESS for rooted LG TVs - TCP, XHTTP and gRPC",
+            "TCP, XHTTP or gRPC",
+            "Xray JSON",
             "detailIconUri:",
             "screenshots:",
             "root",
@@ -32,7 +34,8 @@ class HomebrewSubmissionTests(unittest.TestCase):
                 self.assertIn(field.lower(), text.lower())
         self.assertEqual(text.count("  - url: https://"), 5)
         self.assertNotIn("192.168.", text)
-        self.assertNotIn("vless://", text)
+        self.assertIn("`vless://`", text)  # Document the link format, not a real user configuration.
+        self.assertNotRegex(text, r"vless://[A-Fa-f0-9-]{32,}@[A-Za-z0-9.-]+")
 
     def test_documented_images_are_bundled_in_repo(self):
         text = YAML.read_text(encoding="utf-8")

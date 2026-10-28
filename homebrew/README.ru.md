@@ -11,7 +11,7 @@
 3. Назови файл **packages/su.cvpn.webos.yml**. Вставь содержимое [готовой карточки](su.cvpn.webos.yml) без дополнительных обёрток, Markdown или обратных кавычек. Эта карточка использует реальные английские скриншоты без подписок и отдельные оригинальные иконки CVPN.
 4. Сохрани изменение через **Commit changes** (удобно в ветке `add-cvpn-webos`). Не меняй название package-файла или поле `pool: non-free`.
 5. Нажми **Contribute → Open pull request** на своём Fork, проверь направление **base: webosbrew/apps-repo:main**, **compare: mikemandi/apps-repo:add-cvpn-webos**.
-6. В качестве заголовка укажи **Add CVPN webOS — a free VPN client for rooted LG TVs**, а в описание скопируй [готовый текст заявки](HOMEBREW_PR_BODY.md). Он содержит сведения о тестах, ограничениях и честное раскрытие использования ИИ.
+6. В качестве заголовка укажи **Add CVPN webOS — Xray/VLESS client with TCP, XHTTP and gRPC for rooted LG TVs**, а в описание скопируй [готовый текст заявки](HOMEBREW_PR_BODY.md). Он содержит сведения о тестах, ограничениях и честное раскрытие использования ИИ.
 7. Создай PR. Дождись автоматических **Package Lint / Compatibility Check**, посмотри их отчёт и ответь сопровождающим. Только принятие PR сопровождающими Homebrew означает публикацию приложения в каталоге.
 
 Если интерфейс GitHub показывает только ветку `main` в твоём Fork, можно сохранить файл туда и выбрать её как compare-ветку.

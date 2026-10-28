@@ -4,6 +4,8 @@
 
 [Русский](HOMEBREW_SUBMISSION.ru.md) | [English](HOMEBREW_SUBMISSION.md)
 
+**Продукт:** CVPN webOS — бесплатный **Xray/VLESS-клиент для телевизоров LG с root**, поддерживающий транспорты **TCP, XHTTP и gRPC**. Можно импортировать `vless://`-ссылки, HTTPS-подписки и совместимый Xray JSON. gRPC также поддерживает TLS; параметры должны совпадать с сервером.
+
 **На 28 октября 2026 года:** [2.2.5 Stable](https://github.com/mikemandi/cvpn-webos/releases/tag/v2.2.5) опубликована в GitHub Releases вместе с IPK, SHA256SUMS и YAML для Homebrew. **Релиз на GitHub не означает, что приложение уже добавлено в официальный каталог Homebrew Channel.** Одобрение сопровождающих каталога ещё необходимо.
 
 ## Что проверить перед подачей заявки
