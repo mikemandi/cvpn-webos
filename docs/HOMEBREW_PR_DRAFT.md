@@ -18,7 +18,7 @@
 >
 > **AI disclosure:** AI tools assisted implementation, UI, documentation and testing. The owner reviewed the code and tested the application on real devices; this is **not an independent security audit**. The submitter remains responsible for updates and bug reports.
 >
-> **Price/licensing:** free of charge. CVPN-authored source is publicly visible but has no declared open-source license, so catalog **pool: non-free** is requested (not a paid app). Bundled Xray-core uses **MPL-2.0**, and QR notices identify **MIT and Apache-2.0** components.
+> **Price/licensing:** free of charge. CVPN-authored code is offered under a **custom proprietary license with free end-user use**, so catalog **pool: non-free** is requested (not a paid app). Bundled Xray-core uses **MPL-2.0**, and QR notices identify **MIT and Apache-2.0** components. The proprietary terms do not restrict those third-party rights. License: https://github.com/mikemandi/cvpn-webos/blob/main/LICENSE
 >
 > Official release: https://github.com/mikemandi/cvpn-webos/releases/tag/v2.2.5
 >

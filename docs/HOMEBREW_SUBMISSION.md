@@ -8,7 +8,7 @@
 
 ## Before requesting catalog inclusion
 
-1. **Rights:** verify CVPN-authored code/artwork ownership and third-party license compliance. No open-source license is currently assigned to CVPN-authored code. Keep **pool: non-free** rather than main until an appropriate source license is explicitly adopted. This refers to source redistribution terms, **not the price**; the app is free.
+1. **Rights:** verify CVPN-authored code/artwork ownership and third-party license compliance. CVPN-authored material is offered under the custom, free-use [proprietary license](../LICENSE). Keep **pool: non-free** rather than main unless the project's licensing model changes to an appropriate open-source license. This refers to source redistribution terms, **not the price**; the app is free.
 2. **Third parties:** Xray-core **MPL-2.0** and QR **MIT / Apache-2.0** license notices must remain bundled. Verify corresponding-source availability and attribution.
 3. **Privacy:** use real-UI empty-state screenshots with no subscriptions, UUIDs, real PINs, private LAN addresses or credentials. Sanitized English images: [screenshots](../assets/screenshots). Russian screenshots are also available.
 4. **Safety:** document root/Homebrew requirements, IPv4-only routing, active IPv6 route refusal, absence of universal kill switch and autostart, and HTTP-only trusted-LAN control on TCP/8765.

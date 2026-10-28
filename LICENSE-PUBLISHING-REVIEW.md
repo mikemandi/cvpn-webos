@@ -2,47 +2,36 @@
 
 [English](LICENSE-PUBLISHING-REVIEW.md) | [Русский](LICENSE-PUBLISHING-REVIEW.ru.md)
 
-Reviewed: **2026-10-28** · Published application: **v2.2.5**
+Reviewed: **2026-10-28** · Published binary: **v2.2.5**
 
-## Current licensing status
+## Chosen license
 
-**The CVPN-authored source and artwork have no declared project-wide license.** There is no root LICENSE file granting open-source reuse rights. Public GitHub source visibility and a free-to-use IPK **do not authorize redistribution, modification or reuse of proprietary CVPN code/artwork by default**.
+CVPN webOS now uses a **custom proprietary license with free end-user use**, documented in [LICENSE](LICENSE) ([Russian translation](LICENSE.ru.md)).
 
-The project owner must explicitly decide and document the intended licensing model. This review **does not grant new rights, select a license, or change the terms of third-party components**.
+Users may download, install, update and run official distributions at no cost, keep private backups, and inspect/build the published CVPN-owned code for their own devices. They may use **any compatible VPN provider** without purchasing a CVPN subscription. Public redistribution, rebranding or resale of CVPN-owned portions requires written authorization. Valid GitHub forks, accurate reviews and official catalog imagery are allowed within the stated limits.
 
-**Price and license are separate:**
-- CVPN webOS is **free of charge** to install and use.
-- Users can import **third-party VPN configurations**; a CVPN account/subscription is optional.
-- The webOS Homebrew catalog uses **pool: non-free** for software not published under a declared open-source license, **even if it costs nothing**.
-- Choose **pool: main** only **after** the owner adopts an appropriate open-source license and verifies licensing rights.
+**The project's own code is not OSI open source. Homebrew should retain `pool: non-free`, which does not mean the app costs money.** See [brand policy](BRAND_POLICY.md) and [third-party notices](THIRD_PARTY_NOTICES.md).
 
-## Third-party components in the All-in-One IPK
+This grant applies **only to content that the relevant CVPN rightsholders lawfully control**. GitHub visibility and choosing a license do not establish exclusive rights in contributions, third-party material, generated content or all images. Contributor and asset provenance still need confirmation.
 
-| Component | Rights / included notices | Action |
+## Components with independent licenses
+
+| Component | Terms | Required preservation |
 |---|---|---|
-| **Xray-core 26.10.21 ARMv7** | XTLS/Xray-core uses **Mozilla Public License 2.0 (MPL-2.0)**. The build fetches the pinned upstream binary and license, and packs payload/XRAY-LICENSE.txt. | Preserve license and copyright notices, keep an accessible link to the corresponding tagged source, and verify MPL-2.0 source availability obligations when distributing its binary. |
-| **QR rendering library** | launcher/QR-NOTICE.txt identifies Kazuhiko Arase's original **MIT-licensed** QRCode for JavaScript and an adapted **Apache-2.0-licensed** qrcode-terminal distribution. launcher/QR-THIRD-PARTY-LICENSE.txt includes the relevant license text/notices. | Retain both applicable attributions/notices. Do not incorrectly describe the entire QR implementation as Apache-only. |
-| **CVPN app/backend/icons** | Ownership and any upstream-derived assets or contributions require review. | Confirm every source/artwork contribution is licensed or owned and record the owner's final licensing decision. |
+| Xray-core **v26.10.21** | **MPL-2.0** — https://github.com/XTLS/Xray-core/tree/v26.10.21 | Keep source access, license and notices for the MPL-covered Xray code; CVPN proprietary terms cannot limit MPL rights |
+| QRCode for JavaScript © 2009 Kazuhiko Arase | **MIT** | Copyright and complete MIT permission text |
+| qrcode-terminal 0.12.0 adaptation | **Apache-2.0** and MIT upstream notices | Apache and MIT notices in launcher/QR-THIRD-PARTY-LICENSE.txt |
+| Go standard library in compiled backend | Go standard-library license: https://go.dev/LICENSE | Verify required notices in redistributed binaries |
+| CVPN-owned original files/icons | **Custom proprietary LICENSE** and brand policy | Free use and narrow catalog permission; public rebranding/redistribution restricted |
 
-Upstream Xray project: https://github.com/XTLS/Xray-core/tree/v26.10.21
+The IPK's existing payload includes Xray's XRAY-LICENSE.txt and both QR notice files. The repository QR notice now also includes the full MIT permission text. This licensing review does **not** assert a complete independent code/asset audit. Mozilla's [MPL FAQ](https://www.mozilla.org/en-US/MPL/2.0/FAQ/) explains corresponding-source obligations and combination with separate proprietary code.
 
-QR licensing source: [QR notice](launcher/QR-NOTICE.txt) and [bundled third-party license](launcher/QR-THIRD-PARTY-LICENSE.txt).
+## Catalog, releases and remaining action
 
-## What a final LICENSE would require
+The official **v2.2.5 IPK was published before this project LICENSE and updated QR notice were added**. Updating the repository does **not** replace or alter that historical binary. A subsequent IPK should visibly bundle the applicable proprietary and third-party notices; review Go standard-library notices as part of that packaging change.
 
-1. **Owner decision:** license CVPN-authored code under an identified OSI-approved license (if open source is intended), or publish explicit proprietary distribution/usage terms. Do not select a license automatically.
-2. **Scope:** make clear which source code, UI artwork, logos, screenshots and names are covered; third-party code retains its own terms.
-3. **Rights:** review contributors, generated/third-party assets, imported snippets and external dependencies before licensing them onward.
-4. **Redistribution:** ensure any final policy agrees with public IPK releases, the Homebrew catalog, derivative works and third-party license notices.
-5. **MPL-2.0:** provide a reliable way for recipients to obtain corresponding Xray-core source for the exact binary version distributed (and retain its license and required notices).
-6. **Review before Homebrew submission:** check current [Homebrew rules](https://github.com/webosbrew/apps-repo), pricing text, catalog pool, owner review and screenshot hygiene.
+Homebrew can display accurate CVPN icons/screenshots and link to official releases under [LICENSE](LICENSE), while source/code rebranding remains restricted. The brand policy does not claim a registered trademark. Public GitHub forks remain allowed through the service under GitHub's Terms.
 
-**Do not simply copy Xray's MPL-2.0 into a root LICENSE file**: that would falsely imply the same license has been chosen for all CVPN-authored files.
+Before any broader distribution: verify who owns each authored contribution, artwork, and any AI-assisted/third-party material; maintain exact-version Xray source availability; keep Homebrew at non-free; prevent secrets from entering builds or screenshots; seek qualified legal review when necessary.
 
-## Public release privacy checklist
-
-No IPK or source release should include live access.key, SSH keys, VLESS UUIDs, provider subscription URLs, account tokens, pairing codes, private network inventories or raw logs. README screenshots must be **empty-state captures** with nonfunctional TEST-NET demo data.
-
-A passing build and a published GitHub Release do **not** certify independent security auditing, license compliance or acceptance to the Homebrew Channel catalog.
-
-[Security](docs/SECURITY.md) · [Release limitations](docs/RELEASE_LIMITATIONS.md) · [README](README.md) · [Русский README](README.ru.md)
+[README](README.md) · [Security](docs/SECURITY.md) · [Homebrew submission](docs/HOMEBREW_SUBMISSION.md)

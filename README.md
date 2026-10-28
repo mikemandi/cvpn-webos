@@ -157,8 +157,8 @@ The All-in-One IPK is created in the **dist/** directory. CI checks the ARMv7 bu
 
 ## Source license and publication
 
-**CVPN webOS is free to use**, but its publicly viewable CVPN-authored code does not currently have an OSI-approved open-source license. Do not assume permission to redistribute or reuse it. The Homebrew catalog classification **non-free** refers to source licensing, **not** a purchase fee. Bundled third-party components retain their respective notices and licenses.
+**CVPN webOS is free to install and use** under the [CVPN proprietary license](LICENSE) ([Russian translation](LICENSE.ru.md)). You may run the app with any compatible provider, keep personal backups and privately examine/build the project code, but you may not publicly redistribute or rebrand CVPN-owned code without permission. The [brand policy](BRAND_POLICY.md) protects original names and icons while allowing factual reviews and official Homebrew listings. The app is **not open-source**; Homebrew uses **`pool: non-free`**, which refers to licensing, not price. Xray-core (MPL-2.0) and QR libraries (MIT/Apache-2.0) retain their separate rights; see [third-party notices](THIRD_PARTY_NOTICES.md). The already published v2.2.5 IPK predates this new license file, which does not silently modify that release.
 
 Development involved AI-assisted implementation and testing, followed by project-owner review and real LG testing. Inclusion in the Homebrew Channel catalog is subject to a separate upstream maintainer submission and approval.
 
-[Homebrew submission](docs/HOMEBREW_SUBMISSION.md) · [Third-party licensing](LICENSE-PUBLISHING-REVIEW.md) · [Лицензии на русском](LICENSE-PUBLISHING-REVIEW.ru.md)
+[Homebrew submission](docs/HOMEBREW_SUBMISSION.md) · [Licensing review](LICENSE-PUBLISHING-REVIEW.md) · [LICENSE](LICENSE) · [Brand policy](BRAND_POLICY.md) · [Third-party notices](THIRD_PARTY_NOTICES.md) · [Лицензия на русском](LICENSE.ru.md)

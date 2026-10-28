@@ -24,7 +24,7 @@ The VPN currently handles **IPv4 only** and refuses connection when an active IP
 
 ## Licensing / price
 
-CVPN webOS is **free of charge**. `pool: non-free` is used because the CVPN-authored source does not currently have a declared open-source license; this **does not** indicate that a subscription or payment is necessary. Bundled Xray-core retains its **MPL-2.0** license; QR components contain **MIT / Apache-2.0** notices. See the repository's licensing review.
+CVPN webOS is **free of charge**. `pool: non-free` is used because CVPN-authored portions use a **custom proprietary license with free end-user use**; this **does not** indicate that a subscription or payment is necessary. Bundled Xray-core retains its **MPL-2.0** license; QR components contain **MIT / Apache-2.0** notices. See [LICENSE](https://github.com/mikemandi/cvpn-webos/blob/main/LICENSE), [Brand policy](https://github.com/mikemandi/cvpn-webos/blob/main/BRAND_POLICY.md) and [third-party notices](https://github.com/mikemandi/cvpn-webos/blob/main/THIRD_PARTY_NOTICES.md). The v2.2.5 binary predates the new project LICENSE file; the next package should include the updated notices.
 
 ## AI-assisted development disclosure
 

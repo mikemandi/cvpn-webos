@@ -38,8 +38,9 @@ description: |
   - Compatibility depends on the TV firmware and Homebrew permissions. The
     core All-in-One flow has been tested on LG 55UK6450PLC (webOS 4.4.3-22).
   - The application is **free to use**; `non-free` refers to the CVPN-authored
-    source license status, not to an app price or required CVPN payment.
+    proprietary free-use license, not to an app price or CVPN payment.
 
+  **License (free use; proprietary source):** https://github.com/mikemandi/cvpn-webos/blob/main/LICENSE
   **Documentation:** https://github.com/mikemandi/cvpn-webos
   **Russian guide:** https://github.com/mikemandi/cvpn-webos/blob/main/README.ru.md
   **Releases:** https://github.com/mikemandi/cvpn-webos/releases

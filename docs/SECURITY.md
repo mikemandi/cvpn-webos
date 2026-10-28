@@ -56,4 +56,4 @@ No guaranteed response time, bounty or formal coordinated-disclosure program is 
 - Keep private data out of the IPK, CI logs, README galleries and GitHub Releases.
 - Disclose AI-assisted development and perform meaningful owner review before submitting to the [Homebrew application catalog](https://github.com/webosbrew/apps-repo).
 
-[Licensing review](../LICENSE-PUBLISHING-REVIEW.md) · [Device evidence](TESTED_DEVICES.md) · [English README](../README.md) · [Русский README](../README.ru.md)
+[Project license](../LICENSE) · [Third-party notices](../THIRD_PARTY_NOTICES.md) · [Licensing review](../LICENSE-PUBLISHING-REVIEW.md) · [Device evidence](TESTED_DEVICES.md) · [English README](../README.md) · [Русский README](../README.ru.md)
