@@ -119,10 +119,18 @@ class PublicPackageTests(unittest.TestCase):
                 ['python3', str(ROOT/'scripts/make-homebrew-entry.py'),
                  '--repository', 'mikemandi/cvpn-webos', '--output', str(homebrew)],
                 text=True, capture_output=True, timeout=15)
-            self.assertEqual(result.returncode,0,result.stderr)
-            yml=homebrew.read_text()
-            current=json.loads((ROOT/'launcher/appinfo.json').read_text())['version']
-            self.assertRegex(current, r'^\\d+\\.\\d+\\.\\d+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            yml = homebrew.read_text()
+            current = json.loads((ROOT/'launcher/appinfo.json').read_text())['version']
+            self.assertEqual(len(current.split('.')), 3)
+            self.assertIn('releases/latest/download/su.cvpn.webos.manifest.json', yml)
+            self.assertIn('One All-in-One IPK', yml)
+            self.assertIn('free VPN client', yml)
+            self.assertIn('from **any provider**', yml)
+            self.assertIn('A CVPN subscription is optional', yml)
+            self.assertIn('screenshots:', yml)
+            self.assertIn('pool: non-free', yml)
+            self.assertIn('root', yml.lower())
 
     def test_manifest_default_release_tag_matches_app(self):
         with tempfile.TemporaryDirectory() as d:
