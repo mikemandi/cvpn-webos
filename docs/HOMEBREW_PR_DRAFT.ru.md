@@ -20,4 +20,4 @@
 
 **Перед подачей:** проверить правила [webosbrew/apps-repo](https://github.com/webosbrew/apps-repo), безопасность пакета, лицензии и права автора, выбранную категорию и реальные обезличенные скриншоты. Подавай PR только после окончательного одобрения владельцем. Не заявляй о наличии CVPN в каталоге Homebrew до объединения PR его сопровождающими.
 
-[Как опубликовать](HOMEBREW_SUBMISSION.ru.md) · [Лицензирование](../LICENSE-PUBLISHING-REVIEW.ru.md)
+[Как опубликовать](HOMEBREW_SUBMISSION.ru.md) · [Лицензирование](../docs/legal/LICENSING_REVIEW.ru.md)
