@@ -1,45 +1,41 @@
-# CVPN webOS — tested hardware & compatibility
+# CVPN webOS — tested LG devices and compatibility
 
-Updated: 2026-10-28 · Current TV app: **2.2.5**
+[English](TESTED_DEVICES.md) | [Русский](TESTED_DEVICES.ru.md)
 
-This is an evidence log, **not a list of guaranteed supported LG TVs**. Rooting, Homebrew versions, firmware updates, userspace architecture and TUN availability can affect compatibility.
+Updated: **2026-10-28** · Current release: **2.2.5 Stable**
 
-## Hardware evidence
+The project owner reports **CVPN webOS working on four LG TVs**. Older device logs have different levels of detail: a working installation reported by the owner is not necessarily a documented full clean-install and recovery test of the latest IPK on that model.
 
-| Television | Software / architecture | Verified | Important limits |
+## Owner-tested devices
+
+| TV model | webOS version | Evidence and results | Scope |
 |---|---|---|---|
-| **LG 55UK6450PLC** | webOS 4.4.3-22, firmware 05.50.70; rooted Homebrew, ARMv7-compatible system | All-in-One **2.2.2** first-run preparation, QR and local panel; Netherlands VPN exit IP; YouTube, disconnect/reconnect and normal power off/on | Verified functional baseline; 2.2.3 only changed the app icon |
-| **LG 55UQ76003LD (2022)** | webOS 22 / 7.6.0-1901, rooted; aarch64 kernel with **32-bit userspace** | Fresh bootstrap and ARMv7 Xray 26.10.21, first import and VPN connection after sequential first-import/BusyBox fixes | This test used hotfixes; it does **not** prove every firmware supports a clean 2.2.5 install |
-| **Owner's LG test device for 2.2.5** | Exact model not separately recorded against the 2.2.5 visual acceptance | Owner confirmed the refined English/Russian setup and QR UI and remote-focused error dialog work on real LG hardware | A UI acceptance report; not a new cross-model network certification |
+| **LG 55UK6450PLC** | **4.4.3-22**, firmware **05.50.70** | All-in-One **2.2.2** clean setup, QR panel, VPN connection with Netherlands exit IP, YouTube playback, disconnect/reconnect, normal off/on; earlier sessions also verified VPN routes and HTTPS | Detailed device logs for previous builds; owner confirms continued operation |
+| **LG 65UK6710PLB** | **4.4.3-22** | Model and webOS version recorded during earlier root/Homebrew discussions; **owner now confirms CVPN works** | No retained step-by-step clean-install, transport or DNS evidence for this device; do not claim one |
+| **LG 86NANO906NA** | **5.6.2** | Root/SSH, ARMv7 userspace, TUN, Xray/VLESS/Reality/**XHTTP** and changed exit IP were tested; YouTube/HTTPS connectivity and route restoration were checked during development | One later protected-DNS experiment rolled back safely; the owner now reports working CVPN. Not a documented clean install of 2.2.5 |
+| **LG 55UQ76003LD** | **webOS 22 / 7.6.0-1901**, LG software **04.06.91** | Root/Homebrew, aarch64 kernel with **32-bit ARMv7-compatible userspace**, Xray 26.10.21, TUN, VLESS import and VPN connection after first-import/BusyBox/DNS fixes | Functional test on this firmware after iterative fixes, not a verified one-pass 2.2.5 clean install |
 
-Earlier TV tests used Ethernet and Wi-Fi; no universal compatibility claim is made for either.
+**Version 2.2.5**: the owner separately confirmed updated QR/preparation dialog layout, RU/EN interface and remote navigation between **Retry** and **Close** on real LG hardware. The model for that specific UI acceptance run was not independently recorded.
 
-## What changed since the earlier release
+## Minimum version for Homebrew metadata
 
-- **2.2.2:** self-contained All-in-One IPK with locally bundled backend, Xray, launcher, rollback and root service safeguards.
-- **2.2.3:** transparent rounded app icon only.
-- **2.2.4:** matched floating TV preparation/QR screens, RU/EN locale selection, bounded component checks and automatic completion polling.
-- **2.2.5:** corrected Flexbox spacing for older LG Chromium, centered text-only TV wordmark and explicit remote navigation between **Retry** and **Close**. VPN Engine and Xray transport remained unchanged.
+- **Oldest directly recorded successful webOS build:** **4.4.3-22** (on two UK-series models, with differing levels of evidence).
+- **Catalog requirement:** `webosRelease: '>=4.4'` to avoid claiming all of webOS 4.0–4.3 were tested.
+- This requirement is a **conservative catalog filter, not a guarantee that every webOS 4.4.x build works**. The owner-tested baseline is **4.4.3-22**. Later versions also require compatible root, Homebrew root service, 32-bit ARMv7-compatible userspace and TUN.
+- No successful test is documented for webOS **4.0–4.3**, unrooted TVs or ordinary LG Content Store installations.
 
-The consolidated package also contains previous repairs for ARMv7-compatible 32-bit userspace running under aarch64 kernels, the first validated import and portable BusyBox DNS-probe timeout.
+## App features and limits
 
-## Compatibility prerequisites
+**CVPN webOS** imports compatible **Xray/VLESS** profiles and subscriptions using **TCP, XHTTP and gRPC** transport options. gRPC/TLS and compatible Reality configurations are supported; these transports are not separate VPN protocols. The All-in-One IPK bundles Xray-core, the local backend and recovery scripts.
 
-A testable installation requires:
+The VPN routes supported **IPv4** traffic. Active default IPv6 routes prevent activation; there is **no universal kill switch** and no automatic VPN connection after boot. CVPN Connect uses **unencrypted local HTTP** on TCP/8765 and must be kept on a trusted private LAN. A CVPN subscription is optional.
 
-1. Rooted LG webOS TV with a functioning Homebrew root service.
-2. ARMv7-compatible **32-bit** userspace and working **/dev/net/tun**.
-3. Sufficient app storage, a trusted LAN and a phone/browser to pair with the TV.
-4. A supported VPN provider profile or configuration for an actual connection.
+## Evidence still needed for wider support claims
 
-Unrooted TVs and standard LG Content Store installations are not supported. VPN traffic is IPv4-only; connection is refused when an active IPv6 default route would bypass it. There is no universal kill switch or automatic VPN connection after a reboot.
+- Repeat a fully clean **2.2.5** install, reboot, VPN tests and uninstall/reinstall on every named model if claiming model-specific production certification.
+- Record release, firmware, root/Homebrew, 32-bit userspace, TUN and result for any new LG model.
+- Verify sleep/power loss, network loss, rollback and uninstallation on more firmware versions.
 
-## What still needs testing
-
-- One-pass installation of the current IPK on additional untouched rooted LG models.
-- Firmware-specific Homebrew root-service compatibility and rollback behavior.
-- Repeated standby/cold-boot cycles and uninstall/reinstall scenarios on new TV hardware.
-
-Keep bug reports anonymized. Never include subscription URLs, VLESS UUIDs, tokens, pairing codes, local access keys or private TV IP addresses.
+Do not post real subscription links, VLESS UUIDs, access tokens, pairing PINs or local TV IPs in public issues.
 
 [README](../README.md) · [Security](SECURITY.md) · [Release limitations](RELEASE_LIMITATIONS.md)

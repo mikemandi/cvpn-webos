@@ -18,7 +18,7 @@ class HomebrewSubmissionTests(unittest.TestCase):
             "manifestUrl: https://github.com/mikemandi/cvpn-webos/releases/latest/download/su.cvpn.webos.manifest.json",
             "category: utility",
             "pool: non-free",
-            "webosRelease: '>=4.0'",
+            "webosRelease: '>=4.4'",
             "shortDescription: Xray/VLESS for rooted LG TVs - TCP, XHTTP and gRPC",
             "TCP, XHTTP or gRPC",
             "Xray JSON",
@@ -36,6 +36,28 @@ class HomebrewSubmissionTests(unittest.TestCase):
         self.assertNotIn("192.168.", text)
         self.assertIn("`vless://`", text)  # Document the link format, not a real user configuration.
         self.assertNotRegex(text, r"vless://[A-Fa-f0-9-]{32,}@[A-Za-z0-9.-]+")
+
+    def test_all_four_tested_lg_models_documented(self):
+        models = (
+            ("55UK6450PLC", "4.4.3-22"),
+            ("65UK6710PLB", "4.4.3-22"),
+            ("86NANO906NA", "5.6.2"),
+            ("55UQ76003LD", "7.6.0-1901"),
+        )
+        files = (
+            "README.md", "README.ru.md",
+            "docs/TESTED_DEVICES.md", "docs/TESTED_DEVICES.ru.md",
+            "homebrew/su.cvpn.webos.yml", "homebrew/HOMEBREW_PR_BODY.md",
+        )
+        for file in files:
+            content = (ROOT / file).read_text(encoding="utf-8")
+            for model, version in models:
+                with self.subTest(document=file, model=model):
+                    self.assertIn(model, content)
+                    self.assertIn(version, content)
+        package = YAML.read_text(encoding="utf-8")
+        self.assertIn("webosRelease: '>=4.4'", package)
+        self.assertNotIn("webosRelease: '>=4.0'", package)
 
     def test_documented_images_are_bundled_in_repo(self):
         text = YAML.read_text(encoding="utf-8")

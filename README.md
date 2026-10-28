@@ -89,9 +89,9 @@ The control panel uses **HTTP port 8765** for **trusted private LAN access only*
 
 ## Compatibility
 
-The All-in-One app was tested on **LG 55UK6450PLC (webOS 4.4.3-22)**, including first-time installation, Netherlands VPN exit IP, YouTube, disconnect/reconnect and normal power off/on. Earlier development also covered **LG 55UQ76003LD (webOS 22 / 7.6.0)** following documented first-import and BusyBox compatibility fixes.
+**Owner-tested on four LG TVs:** **55UK6450PLC (webOS 4.4.3-22)**, **65UK6710PLB (4.4.3-22)**, **86NANO906NA (5.6.2)** and **55UQ76003LD (webOS 22 / 7.6.0-1901)**. Earlier logs detail successful VPN connectivity, Xray/TUN and DNS/route checks on several models; the owner confirms CVPN works on all four. The degree of documented testing differs by model — see the [device evidence table](docs/TESTED_DEVICES.md).
 
-**Version 2.2.5:** updated TV layout and remote-focus behavior were also checked on a real LG TV by the project owner. This does **not** guarantee compatibility with every webOS version, firmware or LG model.
+**Earliest tested webOS build: 4.4.3-22.** The Homebrew catalog is limited to webOS **4.4+** as a conservative filter; it does not certify every 4.4.x release. **Version 2.2.5** TV layout and remote navigation were additionally confirmed on LG hardware. Root, Homebrew service, 32-bit userspace and TUN remain mandatory.
 
 See [tested devices](docs/TESTED_DEVICES.md), [hardware QA](docs/QA_ACCEPTANCE_2.2.2.md) and [technical limitations](docs/RELEASE_LIMITATIONS.md).
 

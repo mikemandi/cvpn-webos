@@ -6,6 +6,8 @@
 
 **Product:** CVPN webOS is a free **Xray/VLESS VPN client for rooted LG TVs**, supporting **TCP, XHTTP and gRPC transports** for compatible configurations. Import `vless://` links, HTTPS subscriptions or supported Xray JSON. gRPC also supports TLS; transport settings must match the server.
 
+**Hardware evidence:** The owner confirms CVPN webOS works on LG **55UK6450PLC (webOS 4.4.3-22)**, **65UK6710PLB (4.4.3-22)**, **86NANO906NA (5.6.2)**, and **55UQ76003LD (webOS 22 / 7.6.0-1901)**. See [test detail and evidence limits](TESTED_DEVICES.md). The Homebrew package requires **4.4+**, reflecting the oldest tested **4.4.3-22**, not a claim for 4.0–4.3.
+
 **Current status, 2026-10-28:** [v2.2.5 Stable](https://github.com/mikemandi/cvpn-webos/releases/tag/v2.2.5) is published on GitHub with IPK, SHA256SUMS, manifest and Homebrew YAML. **A GitHub Release does not mean inclusion in the official webOS Homebrew Channel catalog.** No maintainer approval is asserted here.
 
 ## Before requesting catalog inclusion
