@@ -4,17 +4,18 @@ import argparse,hashlib,json,pathlib,re
 p=argparse.ArgumentParser()
 p.add_argument('--repository',required=True,help='GitHub owner/repository')
 p.add_argument('--tag',default=None,help='release tag; default v<appinfo version>')
-p.add_argument('--ipk',default='dist/su.cvpn.webos_2.2.5_all.ipk')
+p.add_argument('--ipk',default=None)
 p.add_argument('--out',default='dist/su.cvpn.webos.manifest.json')
 a=p.parse_args()
 if not re.fullmatch(r'[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+',a.repository):p.error('repository must be owner/repo')
 root=pathlib.Path(__file__).resolve().parent.parent
-ipk=root/a.ipk
+appinfo=json.loads((root/'launcher/appinfo.json').read_text(encoding='utf-8'))
+version=appinfo['version']
+ipk=root/(a.ipk or f'dist/su.cvpn.webos_{version}_all.ipk')
 if not ipk.is_file():p.error('IPK missing: '+str(ipk))
-version=json.loads((root/'launcher/appinfo.json').read_text())['version']
 tag=a.tag or ('v'+version)
 base=f'https://github.com/{a.repository}/releases/download/{tag}'
-data={'id':'su.cvpn.webos','version':version,'type':'web','title':'CVPN webOS','appDescription':'CVPN Connect — private network on rooted LG TVs',
+data={'id':'su.cvpn.webos','version':version,'type':'web','title':'CVPN webOS','appDescription':appinfo.get('appDescription','CVPN webOS for rooted LG TVs'),
       'iconUri':f'https://raw.githubusercontent.com/{a.repository}/main/assets/icon160.png',
       'sourceUrl':f'https://github.com/{a.repository}', 'rootRequired':True,
       'ipkUrl':f'{base}/{ipk.name}',
