@@ -30,7 +30,7 @@ by MPL-2.0. A license for CVPN-owned code cannot narrow these rights.
 - launcher/qr-bundle.js embeds/derives QR rendering code.
 - Original **QRCode for JavaScript**, © 2009 Kazuhiko Arase:
   **MIT** (as identified in launcher/QR-NOTICE.txt).
-- Adapted **qrcode-terminal 0.12.0**: **Apache License 2.0** with its retained
+- Adapted **qrcode-terminal 0.12.0**: **Apache License 2.0 (Apache-2.0)** with its retained
   original notices identifying the included MIT-licensed work.
 - The QR attribution and license notices are stored in
   launcher/QR-NOTICE.txt and launcher/QR-THIRD-PARTY-LICENSE.txt, and
