@@ -17,6 +17,17 @@ class ProprietaryLicenseTests(unittest.TestCase):
             with self.subTest(path=path):
                 self.assertTrue((ROOT / path).is_file())
 
+    def test_only_one_canonical_license_in_repository_root(self):
+        """GitHub should show only the binding LICENSE, not translation/review."""
+        discovered = sorted(
+            item.name for item in ROOT.iterdir()
+            if item.is_file() and item.name.upper().startswith(("LICENSE", "LICENCE"))
+        )
+        self.assertEqual(discovered, ["LICENSE"])
+        self.assertTrue((ROOT / "docs/legal/CVPN_TERMS_RU.md").is_file())
+        self.assertTrue((ROOT / "docs/legal/LICENSING_REVIEW.md").is_file())
+        self.assertTrue((ROOT / "docs/legal/LICENSING_REVIEW.ru.md").is_file())
+
     def test_free_use_cannot_be_misread_as_redistribution(self):
         en = self.text("LICENSE")
         ru = self.text("docs/legal/CVPN_TERMS_RU.md")
