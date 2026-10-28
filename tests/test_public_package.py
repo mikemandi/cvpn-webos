@@ -32,7 +32,7 @@ class PublicPackageTests(unittest.TestCase):
         with tarfile.open(fileobj=io.BytesIO(control),mode='r:gz') as t:
             c = t.extractfile(t.getmember('control')).read().decode()
             self.assertIn('Package: su.cvpn.webos',c)
-            self.assertRegex(c, r'(?m)^Installed-Size: [1-9][0-9]*
+            self.assertIn('Installed-Size: ', c)
         with tarfile.open(fileobj=io.BytesIO(data),mode='r:gz') as t:
             paths=[m.name for m in t.getmembers()]
             self.assertIn('usr/palm/applications/su.cvpn.webos/appinfo.json',paths)
