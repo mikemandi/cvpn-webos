@@ -22,7 +22,7 @@ jobs:
       - name: IPK inspection
         run: |
           dpkg-deb --info dist/su.cvpn.webos_2.2.5_all.ipk
-          dpkg-deb --contents dist/su.cvpn.webos_2.2.5_all.ipk | grep /usr/palm/applications/su.cvpn.webos/appinfo.json
+          dpkg-deb --contents dist/su.cvpn.webos_2.2.5_all.ipk | grep 'usr/palm/applications/su.cvpn.webos/appinfo.json'
       - uses: actions/upload-artifact@v4
         with:
           name: cvpn-webos-preview
