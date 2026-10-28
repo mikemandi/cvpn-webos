@@ -36,10 +36,12 @@ The All-in-One IPK contains the **TV launcher 2.2.5, backend 2.0.0, VPN Engine 0
 ## Actual acceptance evidence
 
 - **LG 55UK6450PLC, webOS 4.4.3-22 / firmware 05.50.70:** owner-reported All-in-One 2.2.2 first run, QR/pairing, Netherlands VPN exit IP, YouTube playback, disconnect/reconnect and normal off/on.
-- **LG 55UQ76003LD, webOS 22:** earlier fresh bootstrap and VPN after first-import/BusyBox fixes; this is **not** a one-pass v2.2.5 clean-install certification.
+- **LG 55UQ76003LD, webOS 22 / 7.6.0-1901, LG software 04.06.91:** VPN and Xray after first-import/BusyBox/DNS fixes, with aarch64 kernel and compatible 32-bit ARM userspace; not a one-pass 2.2.5 certification.
+- **LG 86NANO906NA, webOS 5.6.2:** root/SSH, ARMv7, TUN, VLESS/Reality/XHTTP and connectivity/route restoration checked in development; an isolated protected-DNS test rolled back safely. Owner currently confirms working CVPN.
+- **LG 65UK6710PLB, webOS 4.4.3-22:** owner currently confirms working CVPN; retained detailed clean-install/VPN logs unavailable.
 - **v2.2.5 UI on LG:** the owner confirmed that refined TV dialogs, Russian/English interface and error-dialog remote focus work on hardware; do not infer additional model-specific network testing.
 
-See [tested hardware](TESTED_DEVICES.md) and [2.2.2 QA evidence](QA_ACCEPTANCE_2.2.2.md).
+**The oldest directly tested build is webOS 4.4.3-22.** Homebrew metadata uses **4.4+** conservatively; it does not certify all firmware from that range. See [tested hardware](TESTED_DEVICES.md) and [2.2.2 QA evidence](QA_ACCEPTANCE_2.2.2.md).
 
 ## Known gaps and future validation
 
