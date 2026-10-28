@@ -5,7 +5,7 @@
 **CVPN webOS is an Xray/VLESS VPN client for rooted LG webOS TVs**, with support for **TCP, XHTTP and gRPC transports**. Import compatible `vless://` links, HTTPS subscriptions or Xray JSON from any provider and manage the TV's VPN from your phone. VLESS/Reality is supported; gRPC can also use TLS. These are transport options rather than different VPN protocols. The app is free to use, and a CVPN subscription is **not required**.
 
 - App ID: `su.cvpn.webos`
-- Official stable release: https://github.com/mikemandi/cvpn-webos/releases/tag/v2.2.5
+- Official stable release: https://github.com/mikemandi/cvpn-webos/releases/tag/v2.2.6
 - Project and source: https://github.com/mikemandi/cvpn-webos
 - International documentation: https://github.com/mikemandi/cvpn-webos/blob/main/README.md
 - Russian documentation: https://github.com/mikemandi/cvpn-webos/blob/main/README.ru.md
@@ -24,7 +24,7 @@ The VPN currently handles **IPv4 only** and refuses connection when an active IP
 
 ## Licensing / price
 
-CVPN webOS is **free of charge**. `pool: non-free` is used because CVPN-authored portions use a **custom proprietary license with free end-user use**; this **does not** indicate that a subscription or payment is necessary. Bundled Xray-core retains its **MPL-2.0** license; QR components contain **MIT / Apache-2.0** notices. See [LICENSE](https://github.com/mikemandi/cvpn-webos/blob/main/LICENSE), [Brand policy](https://github.com/mikemandi/cvpn-webos/blob/main/BRAND_POLICY.md) and [third-party notices](https://github.com/mikemandi/cvpn-webos/blob/main/THIRD_PARTY_NOTICES.md). The v2.2.5 binary predates the new project LICENSE file; the next package should include the updated notices.
+CVPN webOS is **free of charge**. `pool: non-free` is used because CVPN-authored portions use a **custom proprietary license with free end-user use**; this **does not** indicate that a subscription or payment is necessary. Bundled Xray-core retains its **MPL-2.0** license; QR components contain **MIT / Apache-2.0** notices. See [LICENSE](https://github.com/mikemandi/cvpn-webos/blob/main/LICENSE), [Brand policy](https://github.com/mikemandi/cvpn-webos/blob/main/BRAND_POLICY.md) and [third-party notices](https://github.com/mikemandi/cvpn-webos/blob/main/THIRD_PARTY_NOTICES.md). The v2.2.6 IPK includes the CVPN proprietary license and third-party attribution. It also uses Homebrew-compatible IPK archive paths and includes Installed-Size metadata. Earlier v2.2.5 assets remain unchanged.
 
 ## AI-assisted development disclosure
 

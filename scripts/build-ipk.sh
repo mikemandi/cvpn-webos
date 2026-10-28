@@ -23,6 +23,8 @@ cp -a "$ROOT/dist/payload" "$APP/payload"
 for f in appinfo.json index.html icon.png largeicon.png icon-400.png qr-bundle.js QR-NOTICE.txt QR-THIRD-PARTY-LICENSE.txt; do
   cp "$ROOT/launcher/$f" "$APP/$f"
 done
+cp "$ROOT/LICENSE" "$APP/CVPN-LICENSE.txt"
+cp "$ROOT/THIRD_PARTY_NOTICES.md" "$APP/THIRD_PARTY_NOTICES.md"
 python3 - "$ROOT/launcher/appinfo.json" "$PKG/packageinfo.json" <<'PY'
 import json,sys
 p=json.load(open(sys.argv[1]))

@@ -6,7 +6,7 @@
   VLESS links, HTTPS subscriptions and supported Xray JSON — managed from your phone.</p>
   <p><strong>Free to use · No CVPN account required · English & Russian</strong></p>
   <p>
-    <a href="https://github.com/mikemandi/cvpn-webos/releases/tag/v2.2.5"><strong>Download v2.2.5 IPK</strong></a>
+    <a href="https://github.com/mikemandi/cvpn-webos/releases/tag/v2.2.6"><strong>Download v2.2.6 IPK</strong></a>
     &nbsp;·&nbsp; <a href="#installation">Installation</a>
     &nbsp;·&nbsp; <a href="#compatibility">Compatibility</a>
     &nbsp;·&nbsp; <a href="#troubleshooting">Help</a>
@@ -66,7 +66,7 @@
 
 ### Steps
 
-1. Download **<a href="https://github.com/mikemandi/cvpn-webos/releases/tag/v2.2.5">su.cvpn.webos_2.2.5_all.ipk</a>** and check it against the release's SHA256SUMS.
+1. Download **<a href="https://github.com/mikemandi/cvpn-webos/releases/tag/v2.2.6">su.cvpn.webos_2.2.6_all.ipk</a>** and check it against the release's SHA256SUMS.
 2. Install the IPK on your rooted LG TV with your Homebrew/IPK installation tool.
 3. Launch **CVPN webOS**. The app automatically checks and prepares its bundled components on first run.
 4. Open the TV pairing screen, scan the QR from your phone and enter the temporary PIN if needed. Your phone and TV must be on the same trusted network.
@@ -79,7 +79,7 @@
 
 | Component | Responsibility |
 |---|---|
-| **TV launcher 2.2.5** | Preparation, progress/errors and QR pairing |
+| **TV launcher 2.2.6** | Preparation, progress/errors and QR pairing |
 | **CVPN Connect** | Local browser control for VPN, profiles, settings and devices |
 | **VPN Engine 0.1.4** | TUN/network setup and connection lifecycle |
 | **Xray-core 26.10.21** | Bundled ARMv7 VPN transport engine |
@@ -158,7 +158,7 @@ The All-in-One IPK is created in the **dist/** directory. CI checks the ARMv7 bu
 
 ## Source license and publication
 
-**CVPN webOS is free to install and use** under the [CVPN proprietary license](LICENSE) ([Russian translation](docs/legal/CVPN_TERMS_RU.md)). You may run the app with any compatible provider, keep personal backups and privately examine/build the project code, but you may not publicly redistribute or rebrand CVPN-owned code without permission. The [brand policy](BRAND_POLICY.md) protects original names and icons while allowing factual reviews and official Homebrew listings. The app is **not open-source**; Homebrew uses **`pool: non-free`**, which refers to licensing, not price. Xray-core (MPL-2.0) and QR libraries (MIT/Apache-2.0) retain their separate rights; see [third-party notices](THIRD_PARTY_NOTICES.md). The already published v2.2.5 IPK predates this new license file, which does not silently modify that release.
+**CVPN webOS is free to install and use** under the [CVPN proprietary license](LICENSE) ([Russian translation](docs/legal/CVPN_TERMS_RU.md)). You may run the app with any compatible provider, keep personal backups and privately examine/build the project code, but you may not publicly redistribute or rebrand CVPN-owned code without permission. The [brand policy](BRAND_POLICY.md) protects original names and icons while allowing factual reviews and official Homebrew listings. The app is **not open-source**; Homebrew uses **`pool: non-free`**, which refers to licensing, not price. Xray-core (MPL-2.0) and QR libraries (MIT/Apache-2.0) retain their separate rights; see [third-party notices](THIRD_PARTY_NOTICES.md). The v2.2.6 IPK includes the CVPN proprietary license and third-party notices. Earlier v2.2.5 release assets remain unchanged.
 
 Development involved AI-assisted implementation and testing, followed by project-owner review and real LG testing. Inclusion in the Homebrew Channel catalog is subject to a separate upstream maintainer submission and approval.
 

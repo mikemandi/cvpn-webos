@@ -1,8 +1,8 @@
-# CVPN webOS 2.2.5 — compatibility and release limitations
+# CVPN webOS 2.2.6 — compatibility and release limitations
 
 [English](RELEASE_LIMITATIONS.md) | [Русский](RELEASE_LIMITATIONS.ru.md)
 
-**Current public release:** [v2.2.5 Stable](https://github.com/mikemandi/cvpn-webos/releases/tag/v2.2.5) (2026-10-28). Stable means a publicly published, owner-accepted build; it **does not** assert comprehensive firmware support, an independent security audit or Homebrew Channel catalog approval.
+**Current public release:** [v2.2.6 Stable](https://github.com/mikemandi/cvpn-webos/releases/tag/v2.2.6) (2026-10-28). Stable means a publicly published, owner-accepted build; it **does not** assert comprehensive firmware support, an independent security audit or Homebrew Channel catalog approval.
 
 ## Supported environment
 
@@ -14,7 +14,7 @@
 
 Not compatible with unrooted TVs or official LG Content Store installation. Firmware, Homebrew service permissions and available Linux tools vary by LG model.
 
-The All-in-One IPK contains the **TV launcher 2.2.5, backend 2.0.0, VPN Engine 0.1.4 and Xray-core 26.10.21 ARMv7**. The initial setup does **not** require separate downloads of Xray/backend on the TV.
+The Homebrew-compatible 2.2.6 IPK includes the CVPN license and third-party notices; no VPN behavior changed from 2.2.5. The All-in-One IPK contains the **TV launcher 2.2.6, backend 2.0.0, VPN Engine 0.1.4 and Xray-core 26.10.21 ARMv7**. The initial setup does **not** require separate downloads of Xray/backend on the TV.
 
 ## VPN and security trade-offs
 

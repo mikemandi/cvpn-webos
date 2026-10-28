@@ -2,9 +2,9 @@
 
 [English](TESTED_DEVICES.md) | [Русский](TESTED_DEVICES.ru.md)
 
-Updated: **2026-10-28** · Current release: **2.2.5 Stable**
+Updated: **2026-10-28** · Current release: **2.2.6 Stable**
 
-The project owner reports **CVPN webOS working on four LG TVs**. Older device logs have different levels of detail: a working installation reported by the owner is not necessarily a documented full clean-install and recovery test of the latest IPK on that model.
+The project owner reports **CVPN webOS working on four LG TVs**. The new 2.2.6 release is a package-layout and documentation update; it has not been independently re-tested on every device. Older device logs have different levels of detail: a working installation reported by the owner is not necessarily a documented full clean-install and recovery test of the latest IPK on that model.
 
 ## Owner-tested devices
 
