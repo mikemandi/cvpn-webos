@@ -28,7 +28,7 @@
 
 - launcher/qr-bundle.js включает/использует производный QR-код.
 - Исходный **QRCode for JavaScript**, © 2009 Kazuhiko Arase — **MIT**.
-- Адаптированный **qrcode-terminal 0.12.0** — **Apache License 2.0**.
+- Адаптированный **qrcode-terminal 0.12.0** — **Apache License 2.0 (Apache-2.0)**.
 - Исходные уведомления: launcher/QR-NOTICE.txt и
   launcher/QR-THIRD-PARTY-LICENSE.txt; оба файла включаются в IPK.
 
