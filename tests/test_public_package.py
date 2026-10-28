@@ -154,35 +154,3 @@ class PublicPackageTests(unittest.TestCase):
         self.assertNotIn('curl -k',installer)
 
 if __name__ == '__main__': unittest.main()
-)
-            self.assertIn('releases/latest/download/su.cvpn.webos.manifest.json',yml)
-            self.assertIn('One All-in-One IPK',yml)
-            self.assertIn('free VPN client',yml)
-            self.assertIn('from **any provider**',yml)
-            self.assertIn('A CVPN subscription is optional',yml)
-            self.assertIn('screenshots:',yml)
-            self.assertIn('pool: non-free',yml)
-            self.assertIn('root',yml.lower())
-
-    def test_manifest_default_release_tag_matches_app(self):
-        with tempfile.TemporaryDirectory() as d:
-            manifest = pathlib.Path(d)/'su.cvpn.webos.manifest.json'
-            result = subprocess.run(
-                ['python3', str(ROOT/'scripts/make-manifest.py'),
-                 '--repository', 'mikemandi/cvpn-webos', '--out', str(manifest)],
-                text=True, capture_output=True, timeout=15)
-            self.assertEqual(result.returncode,0,result.stderr)
-            data=json.loads(manifest.read_text())
-            current=json.loads((ROOT/'launcher/appinfo.json').read_text())['version']
-            self.assertEqual(data['version'],current)
-            self.assertIn('/releases/download/v'+current+'/',data['ipkUrl'])
-            self.assertTrue(data['ipkUrl'].endswith('su.cvpn.webos_'+current+'_all.ipk'))
-
-    def test_boot_hook_target_and_no_auto_vpn(self):
-        installer=(ROOT/'scripts/install-root.sh').read_text()
-        self.assertIn('/var/lib/webosbrew/init.d/90-cvpn-webos',installer)
-        self.assertIn('existing_install_use_legacy_upgrade',installer)
-        self.assertIn('VPN_AUTOSTART=NO',installer)
-        self.assertNotIn('curl -k',installer)
-
-if __name__ == '__main__': unittest.main()
