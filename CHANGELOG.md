@@ -2,6 +2,22 @@
 
 [English](CHANGELOG.md) | [Русский](CHANGELOG.ru.md)
 
+## 2.2.6 Stable — Homebrew package verification (2026-10-28)
+
+- Fixed the IPK archive structure for the official Homebrew Channel catalog validator:
+  the package now exposes the expected `control` and `usr/palm/.../appinfo.json` tar members.
+- Added mandatory `Installed-Size` package metadata.
+- Included the CVPN free-use proprietary license and separate third-party
+  notices in the installed application package.
+- Updated the package description in English for the Homebrew catalog,
+  refreshed the official manifest with the matching IPK hash and size.
+- Preserved the supported Xray/VLESS transports TCP, XHTTP and gRPC.
+- No changes to Xray-core, VPN Engine, root installation, networking, stored
+  subscriptions, QR pairing or TV user interface.
+- Automated CI validation covers archive paths, size metadata and bundled licenses.
+  Existing hardware tests were performed on prior builds; the changes here affect
+  packaging and descriptions only.
+
 ## 2.2.5 Stable — precise TV spacing and reliable remote focus (2026-10-28)
 
 - Removed the app icon from both QR and preparation dialogs; centered a matching
